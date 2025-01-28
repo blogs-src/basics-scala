@@ -104,6 +104,7 @@ lazy val root = project
     // https://www.wartremover.org/doc/warts.html
     // Compile / compile / wartremoverErrors ++= Warts.all,
     // Compile / compile / wartremoverWarnings ++= Warts.all,
+    name := "scala-basics",
     scalaVersion := V.scalaLatestVersion,
     // scalafmtOnCompile := true,
     Compile / run / fork := true,
@@ -153,8 +154,8 @@ addCommandAlias("c", "compile")
 addCommandAlias("cc", "clean; compile")
 addCommandAlias("t", "test")
 addCommandAlias("styleCheck", "scalafmtSbtCheck; scalafmtCheckAll")
-addCommandAlias("styleFix", "scalafmtSbt; scalafmtAll")
-addCommandAlias("styleFix", "scalafmtSbt; scalafmtAll; scalafix RemoveUnused; scalafix OrganizeImports")
+addCommandAlias("stf", "scalafmtSbt; scalafmtAll")
+//addCommandAlias("styleFix", "scalafmtSbt; scalafmtAll; scalafix RemoveUnused; scalafix OrganizeImports")
 addCommandAlias("rl", "reload plugins; update; reload return")
 
 selectedScenario match {
