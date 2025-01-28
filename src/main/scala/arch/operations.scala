@@ -36,39 +36,38 @@ object WalletEventSourcing:
       case class AddCredit(id: String, value: Int) extends Command
       // object StartProjections extends Command
 
-      def interactive(config: Config, ws: WalletService): Behavior[Command] =
-        Behaviors.setup[Command]:
-             (ctx: ActorContext[Command]) =>
-                given ec: ExecutionContextExecutor = ctx.system.executionContext
-                val log = Logging(ctx.system.toClassic, classOf[Command])
+      def interactive(config: Config, ws: WalletService): Behavior[Command] = Behaviors.setup[Command]:
+           (ctx: ActorContext[Command]) =>
+              given ec: ExecutionContextExecutor = ctx.system.executionContext
+              val log = Logging(ctx.system.toClassic, classOf[Command])
 
-                Behaviors.receiveMessage[Command] {
-                  case Start            =>
-                    println("Handler started")
-                    Behaviors.same
-                  case GetBalance(id)   =>
-                    val res = ws.getBalance(id)
-                    res.onComplete {
-                      case Success(r) => println(s"The balance is: $r")
-                      case Failure(t) => t.printStackTrace()
-                    }
-                    Behaviors.same
-                  case CreateWallet(id) =>
-                    val res = ws.createWallet(id)
-                    res.onComplete {
-                      case Success(r) => println(s"Wallet created: $r")
-                      case Failure(t) => t.printStackTrace()
-                    }
-                    Behaviors.same
-                  case AddCredit(id, v) =>
-                    val res = ws.addCredit(id, domain.Credit(v))
-                    res.onComplete {
-                      case Success(r) => println(r)
-                      case Failure(t) => t.printStackTrace()
-                    }
-                    Behaviors.same
+              Behaviors.receiveMessage[Command] {
+                case Start            =>
+                  println("Handler started")
+                  Behaviors.same
+                case GetBalance(id)   =>
+                  val res = ws.getBalance(id)
+                  res.onComplete {
+                    case Success(r) => println(s"The balance is: $r")
+                    case Failure(t) => t.printStackTrace()
+                  }
+                  Behaviors.same
+                case CreateWallet(id) =>
+                  val res = ws.createWallet(id)
+                  res.onComplete {
+                    case Success(r) => println(s"Wallet created: $r")
+                    case Failure(t) => t.printStackTrace()
+                  }
+                  Behaviors.same
+                case AddCredit(id, v) =>
+                  val res = ws.addCredit(id, domain.Credit(v))
+                  res.onComplete {
+                    case Success(r) => println(r)
+                    case Failure(t) => t.printStackTrace()
+                  }
+                  Behaviors.same
 
-                }
+              }
 
       def apply(config: Config): Behavior[Command] = Behaviors.setup[Command]:
            (ctx: ActorContext[Command]) =>
@@ -87,10 +86,8 @@ object WalletEventSourcing:
                  cluster.manager ! Join(cluster.selfMember.address)
                  val management = AkkaManagement(typedActorSystem).start()
                  management.onComplete:
-                      case Failure(exception) =>
-                        println(s"Akka Management failed to start: $exception")
-                      case Success(value)     =>
-                        println(s"Akka Management started at: $value")
+                      case Failure(exception) => println(s"Akka Management failed to start: $exception")
+                      case Success(value)     => println(s"Akka Management started at: $value")
 
               // val subscriber = ctx.spawnAnonymous(ClusterStateChanges())
               // cluster.subscriptions ! Subscribe(subscriber, classOf[MemberEvent])
@@ -143,9 +140,7 @@ object WalletOperations:
           """)
         .withFallback(
           ConfigFactory.load(confFile))
-      val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf),
-                                                       actorSystemName,
-                                                       conf)
+      val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf), actorSystemName, conf)
       sys1 = Some(sys)
 
    def start2 =
@@ -160,9 +155,7 @@ object WalletOperations:
         .withFallback(
           ConfigFactory.load(confFile))
 
-      val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf),
-                                                       actorSystemName,
-                                                       conf)
+      val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf), actorSystemName, conf)
       sys2 = Some(sys)
 
    def start3 =
@@ -178,9 +171,7 @@ object WalletOperations:
         .withFallback(
           ConfigFactory.load(
             confFile))
-      val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf),
-                                                       actorSystemName,
-                                                       conf)
+      val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf), actorSystemName, conf)
       sys3 = Some(sys)
 
    def stop =

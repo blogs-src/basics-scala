@@ -39,9 +39,7 @@ object ChimneyTransformers:
      commands.CommandsReadADT,
      WalletCommands.CommandsReadADT] with
 
-      def transform(
-        src: commands.CommandsReadADT,
-      ): WalletCommands.CommandsReadADT =
+      def transform(src: commands.CommandsReadADT): WalletCommands.CommandsReadADT =
         src
           .intoPartial[
             WalletCommands.CommandsReadADT]
@@ -137,8 +135,7 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
         println(
           s"Converting to proto CmdInst: $x")
 
-        var y: WalletCommands.CommandsReadADT =
-          WalletCommands.CommandsReadADT.GetBalanceCmd
+        var y: WalletCommands.CommandsReadADT = WalletCommands.CommandsReadADT.GetBalanceCmd
         y = x.asInstanceOf[
           WalletCommands.CommandsReadADT]
 

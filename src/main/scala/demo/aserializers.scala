@@ -101,10 +101,7 @@ object Serializers:
            TransportError]):
       import TransportError._
 
-      override def deserialize(
-        p:    JsonParser,
-        ctxt: DeserializationContext,
-      ): TransportError =
+      override def deserialize(p: JsonParser, ctxt: DeserializationContext): TransportError =
         p.getText match
           case "NF" => NotFound
           case "BR" => BadRequest
@@ -135,10 +132,7 @@ object Serializers:
          classOf[
            ch.qos.logback.core.status.InfoStatus]):
 
-      override def deserialize(
-        p:    JsonParser,
-        ctxt: DeserializationContext,
-      ): ch.qos.logback.core.status.InfoStatus =
+      override def deserialize(p: JsonParser, ctxt: DeserializationContext): ch.qos.logback.core.status.InfoStatus =
         new ch.qos.logback.core.status.InfoStatus(
           "",
           null)
@@ -164,10 +158,7 @@ object Serializers:
          classOf[
            ch.qos.logback.classic.LoggerContext]):
 
-      override def deserialize(
-        p:    JsonParser,
-        ctxt: DeserializationContext,
-      ): ch.qos.logback.classic.LoggerContext =
+      override def deserialize(p: JsonParser, ctxt: DeserializationContext): ch.qos.logback.classic.LoggerContext =
         new ch.qos.logback.classic.LoggerContext()
 
    // java.util.concurrent.ConcurrentHashMap
@@ -203,10 +194,7 @@ object Serializers:
          classOf[
            akka.Done]):
 
-      override def deserialize(
-        p:    JsonParser,
-        ctxt: DeserializationContext,
-      ): akka.Done = akka.Done
+      override def deserialize(p: JsonParser, ctxt: DeserializationContext): akka.Done = akka.Done
 
    // class ErrorOr_A_Serializer extends StdSerializer[ErrorOr[CborSerializable]](classOf[ErrorOr[CborSerializable]]):
 

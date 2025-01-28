@@ -58,9 +58,7 @@ object infra:
 
       final case class WalletCreated() extends Event
 
-   type ReplyEffect = akka.persistence.typed.scaladsl.ReplyEffect[
-     WalletEvents.Event,
-     Option[State]]
+   type ReplyEffect = akka.persistence.typed.scaladsl.ReplyEffect[WalletEvents.Event, Option[State]]
 
    case class State(balance: Long = 0) extends CborSerializable,
          CommandsHandler, EventsHandler
@@ -79,30 +77,14 @@ object infra:
         logger: Logger,
       ): (WalletEvents.Event | EffectType, ProtoSerializable | ResultError) =
         cmd match {
-          case CommandsADT.StopCmd                 =>
-            (
-              EffectType.Stop,
-              OkResponse())
-          case CommandsADT.CreditCmd(Credit(
-                amount)) =>
-            (
-              CreditAdded(amount),
-              OkResponse())
-          case CommandsADT.DebitCmd(Debit(amount)) =>
-            (DebitAdded(amount), OkResponse())
-          case CommandsReadADT.GetBalanceCmd       =>
+          case CommandsADT.StopCmd                   => (EffectType.Stop, OkResponse())
+          case CommandsADT.CreditCmd(Credit(amount)) => (CreditAdded(amount), OkResponse())
+          case CommandsADT.DebitCmd(Debit(amount))   => (DebitAdded(amount), OkResponse())
+          case CommandsReadADT.GetBalanceCmd         =>
             println(f"Balance response: ${state.balance}")
             logger.error("Getting balance")
-            (
-              EffectType.None,
-              Balance(
-                state.balance))
-          case CommandsADT.CreateWalletCmd         =>
-            (
-              EffectType.None,
-              ResultError(
-                TransportError.BadRequest,
-                "Wallet already exists"))
+            (EffectType.None, Balance(state.balance))
+          case CommandsADT.CreateWalletCmd           => (EffectType.None, ResultError(TransportError.BadRequest, "Wallet already exists"))
         }
 
       def applyCommand(
@@ -119,8 +101,7 @@ object infra:
               case (event: WalletEvents.Event, response) =>
                 Effect.persist(event).thenReply(replyTo)(
                   _ => response)
-              case (EffectType.None, response)           =>
-                Effect.reply(replyTo)(response)
+              case (EffectType.None, response)           => Effect.reply(replyTo)(response)
               case (EffectType.Stop, response)           =>
                 Effect.stop().thenReply(replyTo)(
                   _ => response)
@@ -133,8 +114,7 @@ object infra:
       def applyEvent(event: WalletEvents.Event): State =
         event match
           case CreditAdded(amount) => copy(balance = balance + amount)
-          case DebitAdded(                amount) =>
-            copy(balance = balance - amount)
+          case DebitAdded(amount)  => copy(balance = balance - amount)
           case WalletCreated()     => this
 
    object WalletEntity:
@@ -152,15 +132,14 @@ object infra:
       def onFirstCommand(cmd: Cmd): ReplyEffect =
         cmd match
           case CmdInst(CommandsADT.CreateWalletCmd, _, replyTo) =>
-            Effect.persist(WalletCreated(            )).thenReply(replyTo)(
+            Effect.persist(WalletCreated()).thenReply(replyTo)(
               _ => OkResponse())
           case default                                          =>
             Effect
               .none
               .thenReply(default.replyTo)(
                 _ =>
-                  ResultError(TransportError.NotFound,
-                              "Wallet does not exists"))
+                  ResultError(TransportError.NotFound, "Wallet does not exists"))
 
       def onFirstEvent(event: Event): State =
         event match
@@ -172,9 +151,7 @@ object infra:
       def apply(persistenceId: PersistenceId): Behavior[
         Cmd] = Behaviors.setup[Cmd]:
            context =>
-              EventSourcedBehavior.withEnforcedReplies[Cmd,
-                                                       Event,
-                                                       Option[State]](
+              EventSourcedBehavior.withEnforcedReplies[Cmd, Event, Option[State]](
                 persistenceId,
                 None,
                 (state, cmd) =>
@@ -190,8 +167,7 @@ object infra:
                     case Some(state) => Some(state.applyEvent(event))
                   })
                 .withTaggerForState:
-                   case (state, _: WalletCreated) =>
-                     Set("wallet-created", "UPSERT")
+                   case (state, _: WalletCreated) => Set("wallet-created", "UPSERT")
                    case (state, _: CreditAdded)   => Set("credit-added", "UPSERT")
                    case (state, _: DebitAdded)    => Set("debit-added", "UPSERT")
 
@@ -223,20 +199,15 @@ object infra:
       given ec: ExecutionContextExecutor = sys.executionContext
       given timeout: Timeout = demo.timeout
 
-      def createWallet(id: String): Future[OkResponse | ResultError] =
-        entitySharding
-          .entityRefFor(WalletEntity.typeKey, id)
-          .ask(FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd,
-                                         List(id),
-                                         _))
-          .mapTo[OkResponse | ResultError]
+      def createWallet(id: String): Future[OkResponse | ResultError] = entitySharding
+        .entityRefFor(WalletEntity.typeKey, id)
+        .ask(FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd, List(id), _))
+        .mapTo[OkResponse | ResultError]
 
       def addCredit(id: String, value: domain.Credit): Future[
         OkResponse | ResultError] = entitySharding
         .entityRefFor(WalletEntity.typeKey, id)
-        .ask(FrameWorkCommands.CmdInst(CommandsADT.CreditCmd(value),
-                                       List(id),
-                                       _))
+        .ask(FrameWorkCommands.CmdInst(CommandsADT.CreditCmd(value), List(id), _))
         .mapTo[OkResponse | ResultError]
 
       def addDebit(id: String, value: domain.Debit): Future[
@@ -247,7 +218,5 @@ object infra:
          entitySharding
            .entityRefFor(WalletEntity.typeKey, id)
            .ask(
-             FrameWorkCommands.CmdInst(CommandsReadADT.GetBalanceCmd,
-                                       List(id),
-                                       _))
+             FrameWorkCommands.CmdInst(CommandsReadADT.GetBalanceCmd, List(id), _))
            .mapTo[domain.Balance | ResultError]
