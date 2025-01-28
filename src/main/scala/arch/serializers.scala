@@ -76,16 +76,16 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
     obj match {
       case _: akka.Done  => commands.Done().toByteArray
       case _: OkResponse => commands.Done().toByteArray
-      case d: Balance    =>
-        commands.Balance(d.value).toByteArray
+      case d: Balance    => commands.Balance(d.value).toByteArray
       case d: Credit     =>
         // println(s"Converting to proto Credit: ${d.amount}")
         commands.Credit(d.amount).toByteArray
-      case d: Debit      =>
-        commands.Debit(d.amount).toByteArray
+      case d: Debit      => commands.Debit(d.amount).toByteArray
 
       case FrameWorkCommands.CmdInst(
-            x: WalletCommands.CommandsADT, pmts: List[String], replyTo) =>
+            x: WalletCommands.CommandsADT,
+            pmts: List[String],
+            replyTo) =>
         println(s"Converting to proto CmdInst: $x")
 
         var y: WalletCommands.CommandsADT = WalletCommands.CommandsADT.StopCmd
@@ -144,8 +144,7 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
           if c == classOf[akka.Done] =>
         Done
 
-      case Some(c) if c == classOf[OkResponse] =>
-        OkResponse()
+      case Some(c) if c == classOf[OkResponse] => OkResponse()
 
       case Some(c) if c == classOf[Balance] =>
         val d = commands.Balance.parseFrom(bytes)
@@ -187,7 +186,9 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
 
              res
           else
-             println(s"Unknown type: ${cmdInst.typeUrl} =========================================================================================================")
+             println(s"Unknown type: ${
+                                        cmdInst.typeUrl
+                                      } =========================================================================================================")
              null
 
         val who = actorRefResolver.resolveActorRef(cmdInst.replyTo)
