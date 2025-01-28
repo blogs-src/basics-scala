@@ -1,0 +1,24 @@
+/home/z/src/cv/blogs/scala/basics/src/main/scala/arch/operations.scala:4:0
+
+4 |t
+  |^
+  |Illegal start of toplevel definition
+  |-----------------------------------------------------------------------------
+  | Explanation (enabled by `-explain`)
+  |- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  | A statement is an import or export, a definition or an expression.
+  | Some statements are only allowed in certain contexts
+   -----------------------------------------------------------------------------
+one error found
+/home/z/src/cv/blogs/scala/basics/src/main/scala/arch/operations.scala:4:0
+
+4 |t
+  |^
+  |Illegal start of toplevel definition
+  |-----------------------------------------------------------------------------
+  | Explanation (enabled by `-explain`)
+  |- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  | A statement is an import or export, a definition or an expression.
+  | Some statements are only allowed in certain contexts
+   -----------------------------------------------------------------------------
+one error found

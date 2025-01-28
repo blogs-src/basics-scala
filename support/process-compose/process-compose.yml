@@ -1,0 +1,15 @@
+version: "0.5"
+is_strict: true
+processes:
+  loki:
+    command: |
+      loki -config.file=loki-local-config.yaml
+    working_dir: "wdir/loki"
+  vector:
+#    depends_on:
+#      loki:
+#        condition: service_started
+    command: |
+      vector -c vector-console.toml
+#      --require-healthy true
+    working_dir: "wdir/vector"

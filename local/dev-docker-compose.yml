@@ -1,0 +1,70 @@
+services:
+  node-1:
+    image: eclipse-temurin:17
+    hostname: "node-1"
+    command: ["/app/loya-campaigns-engine/bin/loya-campaigns-engine"]
+    ports:
+      - "8080:8080"
+      - "9081:9081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - path: .env
+        required: true
+      - path: .1.env
+        required: true
+      - path: .1a.env
+        required: true
+    volumes:
+      - "${pwd-.}/../target/universal:/app"
+    stdin_open: true
+    tty: true
+    networks:
+      - cassandra_network
+
+  node-2:
+    image: eclipse-temurin:17
+    hostname: "node-2"
+    command: sh -c "
+      sleep 5 &&
+      /app/loya-campaigns-engine/bin/loya-campaigns-engine
+      "
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - path: .env
+        required: true
+      - path: .2.env
+        required: true
+      - path: .2a.env
+        required: true
+    volumes:
+      - "${pwd-.}/../target/universal:/app"
+    networks:
+      - cassandra_network
+
+  node-3:
+    image: eclipse-temurin:17
+    hostname: "node-3"
+    command: sh -c "
+      sleep 7 &&
+      /app/loya-campaigns-engine/bin/loya-campaigns-engine
+      "
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - path: .env
+        required: true
+      - path: .3.env
+        required: true
+      - path: .3a.env
+        required: true
+    volumes:
+      - "${pwd-.}/../target/universal:/app"
+    networks:
+      - cassandra_network
+
+networks:
+  cassandra_network:
+    driver: overlay
+    external: true

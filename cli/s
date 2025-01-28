@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+while true; do
+  echo $AKKA_CLUSTER_APP_PORT "== "$1
+  sleep 2
+done
+

@@ -1,0 +1,14 @@
+...@models.console
+...@actor-wallet.model
+
+shape: sequence_diagram
+Credit operation: {
+    console -> wallet: Wallet.Credit(amount)
+}
+Debit operation: {
+    console -> wallet: Wallet.Debit(amount)
+}
+Print balance: {
+    console -> wallet.data: GetBalance
+    console <- wallet.data: BalanceResponse(balance)
+}

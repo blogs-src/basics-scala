@@ -1,0 +1,14 @@
+id: get_commands
+language: scala
+rule:
+  pattern: |
+    $A
+  kind: enum_definition
+  inside:
+    pattern: |
+      object $C:
+          $$$
+          $A
+    stopBy: end
+constraints:
+  C: {regex: "Commands$"}

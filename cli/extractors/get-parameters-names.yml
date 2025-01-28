@@ -1,0 +1,18 @@
+id: get-parameters-names
+language: scala
+rule:
+  kind: identifier
+  inside:
+    kind: class_parameter
+    inside:
+      pattern: |
+        $$$ARGS
+      kind: class_parameters
+      inside:
+        any:
+          - pattern: |
+              final case class $$N($$$ARGS)
+          - pattern: |
+              case class $$N($$$ARGS)
+          - pattern: |
+              class $$N($$$ARGS)

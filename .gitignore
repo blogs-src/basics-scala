@@ -1,0 +1,72 @@
+# macOS
+.DS_Store
+
+# sbt specific
+dist/*
+target/
+lib_managed/
+src_managed/
+
+project/boot/
+project/plugins/project/
+project/.bloop/
+project/target/
+project/local-plugins.sbt
+
+project/project/boot/
+project/project/plugins/project/
+project/project/.bloop/
+project/project/project/
+project/project/target/
+project/project/local-plugins.sbt
+
+.history
+.ensime
+.ensime_cache/
+.sbt-scripted/
+local.sbt
+
+.env.local
+.envrc.local
+
+# Bloop
+.bsp
+
+# VS Code
+.vscode/
+
+# Metals
+.bloop/
+.metals/
+metals.sbt
+
+# IDEA
+.idea
+.idea_modules
+/.worksheet/
+
+support/.data/
+docker/.data
+support/observability/data/grafana/alerting/
+support/observability/data/grafana/grafana.db
+
+notes.txt
+notes.adoc
+logs/
+
+# src/main/scala/components/
+*.scalax
+modules/grpc-api/src/main/scala/
+modules/rest-api/src/main/scala/
+out/
+node_modules/
+dist/
+!temp/
+
+docs-support/
+protobuf-docs/
+.bookmarks/
+.venv/
+wsbt
+.scalafmt.conf
+.git__

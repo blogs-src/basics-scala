@@ -1,0 +1,12 @@
+id: get-events-names
+language: scala
+rule:
+  pattern: |
+    $N
+  kind: identifier
+  inside:
+    any:
+      - pattern: |
+          final case class $N($$$)
+      - pattern: |
+          case class $N($$$)

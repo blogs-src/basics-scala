@@ -1,0 +1,273 @@
+/// This file has messages for describing a customer.
+syntax = "proto3";
+
+package com.wallet.demo.clustering.grpc.admin;
+
+import "google/protobuf/wrappers.proto";
+import "scalapb/scalapb.proto";
+
+option (scalapb.options) = {
+  scope: FILE
+  package_name: "com.wallet.demo.clustering.grpc.admin"
+  flat_package: true
+  single_file: true
+  java_conversions: false
+  lenses: true
+  getters: true
+  retain_source_code_info: false
+  no_default_values_in_constructor: false
+  preserve_unknown_fields: false
+  enum_value_naming: CAMEL_CASE
+  enum_strip_prefix: false
+  scala3_sources: true
+};
+
+
+
+message OtherMessage{
+  Case2 value = 1;
+}
+
+message Case1 {
+  google.protobuf.StringValue msg = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message Case2 {
+  google.protobuf.Int32Value value = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message AdSetupOptional {
+  AdSetup value = 1;
+}
+
+message AdSetup {
+  oneof sealed_value {
+    Case1 c1 = 1;
+    Case2 c2 = 2;
+  }
+}
+
+message rpcOperationRequest {
+  AdSetup in = 1;
+}
+
+message rpcOperationResponse {
+  google.protobuf.Int64Value balance = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message CreditRequest {
+  google.protobuf.StringValue id = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.Int32Value amount = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message DebitRequest {
+  google.protobuf.StringValue id = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.Int32Value amount = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message Request {}
+
+/**
+ * Represents a RequestId.
+ */
+message RequestId {
+  google.protobuf.StringValue id = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];/** Account Id. */
+}
+
+/**
+ * Represents a response.
+ */
+message Response {
+  google.protobuf.StringValue message = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];/// Message value.
+}
+
+message BalanceResponse {
+  google.protobuf.Int64Value balance = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message BadRequestError {
+  google.protobuf.StringValue code = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue title = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue description = 3 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message UnauthorizedError {
+  google.protobuf.StringValue code = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue title = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue description = 3 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message ForbiddenError {
+  google.protobuf.StringValue code = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue title = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue description = 3 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message NotFoundError {
+  google.protobuf.StringValue code = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue title = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue description = 3 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message TooManyRequestsError {
+  google.protobuf.StringValue code = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue title = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue description = 3 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message ServiceUnavailableError {
+  google.protobuf.StringValue code = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue title = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue description = 3 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message GatewayTimeoutError {
+  google.protobuf.StringValue code = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue title = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue description = 3 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message InternalServerError {
+  google.protobuf.StringValue code = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue title = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  google.protobuf.StringValue description = 3 
+  [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+
+
+
+message TargetCriteria {
+  ListLocationRuleOptional locationRules = 1;
+  ListLocationRuleOptional locationRules2 = 2
+  [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  
+  repeated LocationRule locationRules3 = 3;
+  // repeated LocationRule locationRules3 = 3
+  // [
+  //   (scalapb.field).no_box = true,
+  //   (scalapb.field).required = true
+  // ]; // error
+
+  ListStringOptional bins = 10;
+}
+
+message ListLocationRuleOptional {
+  repeated LocationRule value = 1;
+}
+
+message LocationRule {
+  google.protobuf.BoolValue included = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  repeated google.protobuf.StringValue values = 3;
+}
+message ListStringOptional {
+  repeated google.protobuf.StringValue value = 1;
+}

@@ -1,0 +1,14 @@
+id: get-events
+language: scala
+rule:
+  pattern: |
+    $A
+  kind: class_definition
+  inside:
+    pattern: |
+      object $C:
+          $$$
+          $A
+    stopBy: end
+constraints:
+  C: {regex: "Events$"}
