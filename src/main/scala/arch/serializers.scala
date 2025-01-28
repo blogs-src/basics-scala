@@ -15,62 +15,43 @@ import infra.*
 object ChimneyTransformers:
 
    transparent inline given TransformerConfiguration[
-     ?,
-   ] = TransformerConfiguration.default.enableDefaultValues
+     ?] = TransformerConfiguration.default.enableDefaultValues
 
    given fromProtoTo: Transformer[
      commands.CommandsADT,
-     WalletCommands.CommandsADT,
-   ] with
+     WalletCommands.CommandsADT] with
 
-      def transform
-        (
-          src: commands.CommandsADT,
-        ): WalletCommands.CommandsADT =
+      def transform(src: commands.CommandsADT): WalletCommands.CommandsADT =
         src
           .intoPartial[
-            WalletCommands.CommandsADT,
-          ]
+            WalletCommands.CommandsADT]
           .withSealedSubtypeHandledPartial[
-            commands.CommandsADT.Empty.type,
-          ](
-            _ => partial.Result.fromEmpty,
-          )
+            commands.CommandsADT.Empty.type](
+            _ => partial.Result.fromEmpty)
           .withSealedSubtypeHandled[
-            commands.CommandsADT.NonEmpty,
-          ](
+            commands.CommandsADT.NonEmpty](
             _.transformInto[
-              WalletCommands.CommandsADT,
-            ],
-          )
+              WalletCommands.CommandsADT])
           .transform
           .asOption.get
 
    given fromProtoTo2: Transformer[
      commands.CommandsReadADT,
-     WalletCommands.CommandsReadADT,
-   ] with
+     WalletCommands.CommandsReadADT] with
 
-      def transform
-        (
-          src: commands.CommandsReadADT,
-        ): WalletCommands.CommandsReadADT =
+      def transform(
+        src: commands.CommandsReadADT,
+      ): WalletCommands.CommandsReadADT =
         src
           .intoPartial[
-            WalletCommands.CommandsReadADT,
-          ]
+            WalletCommands.CommandsReadADT]
           .withSealedSubtypeHandledPartial[
-            commands.CommandsReadADT.Empty.type,
-          ](
-            _ => partial.Result.fromEmpty,
-          )
+            commands.CommandsReadADT.Empty.type](
+            _ => partial.Result.fromEmpty)
           .withSealedSubtypeHandled[
-            commands.CommandsReadADT.NonEmpty,
-          ](
+            commands.CommandsReadADT.NonEmpty](
             _.transformInto[
-              WalletCommands.CommandsReadADT,
-            ],
-          )
+              WalletCommands.CommandsReadADT])
           .transform
           .asOption.get
 
@@ -78,14 +59,10 @@ import ChimneyTransformers.given
 
 import akka.actor.typed.scaladsl.adapter._
 
-class MyOwnSerializer
-  (
-    system: ExtendedActorSystem,
-  ) extends Serializer {
+class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
 
   private val actorRefResolver = ActorRefResolver(
-    system.toTyped,
-  )
+    system.toTyped)
 
   // If you need logging here, introduce a constructor that takes an ExtendedActorSystem.
   // class MyOwnSerializer(actorSystem: ExtendedActorSystem) extends Serializer
@@ -103,12 +80,8 @@ class MyOwnSerializer
   // val id_ = "WalletCommands2.CommandsADT"
 
   // "toBinary" serializes the given object to an Array of Bytes
-  def toBinary
-    (
-      obj: AnyRef,
-    ): Array[
-    Byte,
-  ] = {
+  def toBinary(obj: AnyRef): Array[
+    Byte] = {
     // Put the code that serializes the object here
     // #...
 
@@ -117,40 +90,32 @@ class MyOwnSerializer
       case _: OkResponse => commands.Done().toByteArray
       case d: Balance    =>
         commands.Balance(
-          d.value,
-        ).toByteArray
+          d.value).toByteArray
       case d: Credit     =>
         // println(s"Converting to proto Credit: ${d.amount}")
         commands.Credit(
-          d.amount,
-        ).toByteArray
+          d.amount).toByteArray
       case d: Debit      =>
         commands.Debit(
-          d.amount,
-        ).toByteArray
+          d.amount).toByteArray
 
       case FrameWorkCommands.CmdInst(
             x: WalletCommands.CommandsADT,
             pmts: List[
-              String,
-            ],
-            replyTo,
-          ) =>
+              String],
+            replyTo) =>
         println(
-          s"Converting to proto CmdInst: $x",
-        )
+          s"Converting to proto CmdInst: $x")
 
         var y: WalletCommands.CommandsADT = WalletCommands.CommandsADT.StopCmd
         y = x.asInstanceOf[
-          WalletCommands.CommandsADT,
-        ]
+          WalletCommands.CommandsADT]
 
         // println(s"CmdInst converted: $y")
 
         val adt =
           y.transformInto[
-            commands.CommandsADT,
-          ].asMessage.toByteString
+            commands.CommandsADT].asMessage.toByteString
         val who = actorRefResolver.toSerializationFormat(
           replyTo,
         ) // .getBytes(StandardCharsets.UTF_8)
@@ -160,33 +125,28 @@ class MyOwnSerializer
           pmts,
           who,
           classOf[
-            WalletCommands.CommandsADT,
-          ].getCanonicalName,
+            WalletCommands.CommandsADT].getCanonicalName,
           // id_
         ).toByteArray
 
       case FrameWorkCommands.CmdInst(
             x: WalletCommands.CommandsReadADT,
             pmts: List[
-              String,
-            ],
-            replyTo,
-          ) =>
+              String],
+            replyTo) =>
         println(
-          s"Converting to proto CmdInst: $x",
-        )
+          s"Converting to proto CmdInst: $x")
 
-        var y: WalletCommands.CommandsReadADT = WalletCommands.CommandsReadADT.GetBalanceCmd
+        var y: WalletCommands.CommandsReadADT =
+          WalletCommands.CommandsReadADT.GetBalanceCmd
         y = x.asInstanceOf[
-          WalletCommands.CommandsReadADT,
-        ]
+          WalletCommands.CommandsReadADT]
 
         // println(s"CmdInst converted: $y")
 
         val adt =
           y.transformInto[
-            commands.CommandsReadADT,
-          ].asMessage.toByteString
+            commands.CommandsReadADT].asMessage.toByteString
         val who = actorRefResolver.toSerializationFormat(
           replyTo,
         ) // .getBytes(StandardCharsets.UTF_8)
@@ -196,8 +156,7 @@ class MyOwnSerializer
           pmts,
           who,
           classOf[
-            WalletCommands.CommandsReadADT,
-          ].getCanonicalName,
+            WalletCommands.CommandsReadADT].getCanonicalName,
           // id_
         ).toByteArray
 
@@ -210,99 +169,74 @@ class MyOwnSerializer
 
   // "fromBinary" deserializes the given array,
   // using the type hint (if any, see "includeManifest" above)
-  def fromBinary
-    (
-      bytes: Array[
-        Byte,
-      ],
-      clazz: Option[
-        Class[
-          ?,
-        ],
-      ],
-    ): AnyRef = {
+  def fromBinary(
+    bytes: Array[
+      Byte],
+    clazz: Option[
+      Class[
+        ?]],
+  ): AnyRef = {
     // Put your code that deserializes here
     // #...
 
     clazz match {
       case Some(
-            c,
-          )
+            c)
           if c == classOf[
-            akka.Done,
-          ] =>
+            akka.Done] =>
         Done
 
       case Some(
-            c,
-          )
+            c)
           if c == classOf[
-            OkResponse,
-          ] =>
+            OkResponse] =>
         OkResponse()
 
       case Some(
-            c,
-          )
+            c)
           if c == classOf[
-            Balance,
-          ] =>
+            Balance] =>
         val d = commands.Balance.parseFrom(
-          bytes,
-        )
+          bytes)
         Balance(
-          d.value,
-        )
+          d.value)
 
       case Some(
-            c,
-          )
+            c)
           if c == classOf[
-            Credit,
-          ] =>
+            Credit] =>
         val d = commands.Credit.parseFrom(
-          bytes,
-        )
+          bytes)
 
         // println(s"Converting from proto Credit: ${d.amount}")
 
         Credit(
-          d.amount,
-        )
+          d.amount)
 
       case Some(
-            c,
-          )
+            c)
           if c == classOf[
-            Debit,
-          ] =>
+            Debit] =>
         val d = commands.Debit.parseFrom(
-          bytes,
-        )
+          bytes)
         Debit(
-          d.amount,
-        )
+          d.amount)
 
       // case Some(c) if c == classOf[infrastructure.persistence.WalletCommands2.CmdInst[?, ?]] =>
       case Some(
-            c,
-          )
+            c)
           if c == classOf[
-            FrameWorkCommands.CmdInst,
-          ] =>
+            FrameWorkCommands.CmdInst] =>
         val cmdInst = commands.CmdInst.parseFrom(
-          bytes,
-        )
+          bytes)
         val payload =
           if cmdInst.typeUrl == classOf[
-              WalletCommands.CommandsADT,
-            ].getCanonicalName then
+              WalletCommands.CommandsADT].getCanonicalName
+          then
 
              val res = commands.CommandsADTMessage.parseFrom(
-               cmdInst.payload.toByteArray,
-             ).toCommandsADT.transformInto[
-               WalletCommands.CommandsADT,
-             ]
+               cmdInst.payload.toByteArray).toCommandsADT.transformInto[
+               WalletCommands.CommandsADT]
 
              // println(s"Converting from proto CmdInst: ${res}")
 
@@ -310,37 +244,35 @@ class MyOwnSerializer
              // cmdInst.payload.transformInto[WalletCommands2.CommandsADT]
              // null
           else if cmdInst.typeUrl == classOf[
-              WalletCommands.CommandsReadADT,
-            ].getCanonicalName then
+              WalletCommands.CommandsReadADT].getCanonicalName
+          then
 
              val res = commands.CommandsReadADTMessage.parseFrom(
-               cmdInst.payload.toByteArray,
-             ).toCommandsReadADT.transformInto[
-               WalletCommands.CommandsReadADT,
-             ]
+               cmdInst.payload.toByteArray).toCommandsReadADT.transformInto[
+               WalletCommands.CommandsReadADT]
 
              // println(s"Converting from proto CmdInst: ${res}")
 
              res
           else
              println(
-               s"Unknown type: ${cmdInst.typeUrl} =========================================================================================================",
-             )
+               s"Unknown type: ${
+                                  cmdInst.typeUrl
+                                } =========================================================================================================")
              null
 
         val who = actorRefResolver.resolveActorRef(
-          cmdInst.replyTo,
-        )
+          cmdInst.replyTo)
         FrameWorkCommands.CmdInst(
           payload,
           cmdInst.params.toList,
-          who,
-        )
+          who)
 
       case x =>
         println(
-          s"${x} null =========================================================================================================",
-        )
+          s"${
+               x
+             } null =========================================================================================================")
         null
     }
 

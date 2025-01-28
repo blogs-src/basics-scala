@@ -36,56 +36,52 @@ object WalletEventSourcing:
       case class AddCredit(id: String, value: Int) extends Command
       // object StartProjections extends Command
 
-      def interactive(config: Config, ws: WalletService): Behavior[Command ] = Behaviors.setup[Command ]:
-           (ctx: ActorContext[Command ]) =>
-              given ec: ExecutionContextExecutor = ctx.system.executionContext
-              val log = Logging(ctx.system.toClassic, classOf[Command ])
+      def interactive(config: Config, ws: WalletService): Behavior[Command] =
+        Behaviors.setup[Command]:
+             (ctx: ActorContext[Command]) =>
+                given ec: ExecutionContextExecutor = ctx.system.executionContext
+                val log = Logging(ctx.system.toClassic, classOf[Command])
 
-              Behaviors.receiveMessage[Command ] {
-                case Start =>
-                  println("Handler started")
-                  Behaviors.same
-                case GetBalance(id) =>
-                  val res = ws.getBalance(id)
-                  res.onComplete {
-                    case Success(r) =>
-                      println(s"The balance is: $r")
-                    case Failure(t) =>
-                      t.printStackTrace()
-                  }
-                  Behaviors.same
-                case CreateWallet(id) =>
-                  val res = ws.createWallet(id)
-                  res.onComplete {
-                    case Success(r) =>
-                      println(s"Wallet created: $r")
-                    case Failure(t) =>
-                      t.printStackTrace()
-                  }
-                  Behaviors.same
-                case AddCredit(id, v) =>
-                  val res = ws.addCredit(id, domain.Credit(v))
-                  res.onComplete {
-                    case Success(r) =>
-                      println(r)
-                    case Failure(t) =>
-                      t.printStackTrace()
-                  }
-                  Behaviors.same
+                Behaviors.receiveMessage[Command] {
+                  case Start            =>
+                    println("Handler started")
+                    Behaviors.same
+                  case GetBalance(id)   =>
+                    val res = ws.getBalance(id)
+                    res.onComplete {
+                      case Success(r) => println(s"The balance is: $r")
+                      case Failure(t) => t.printStackTrace()
+                    }
+                    Behaviors.same
+                  case CreateWallet(id) =>
+                    val res = ws.createWallet(id)
+                    res.onComplete {
+                      case Success(r) => println(s"Wallet created: $r")
+                      case Failure(t) => t.printStackTrace()
+                    }
+                    Behaviors.same
+                  case AddCredit(id, v) =>
+                    val res = ws.addCredit(id, domain.Credit(v))
+                    res.onComplete {
+                      case Success(r) => println(r)
+                      case Failure(t) => t.printStackTrace()
+                    }
+                    Behaviors.same
 
-              }
+                }
 
-      def apply(config: Config): Behavior[Command ] = Behaviors.setup[Command ]:
-           (ctx: ActorContext[Command ]) =>
+      def apply(config: Config): Behavior[Command] = Behaviors.setup[Command]:
+           (ctx: ActorContext[Command]) =>
               ctx.log.info("Starting Wallet Operations")
-              given typedActorSystem: ActorSystem[Nothing ] = ctx.system
+              given typedActorSystem: ActorSystem[Nothing] = ctx.system
               given UntypedActorSystem = typedActorSystem.toClassic
               given ExecutionContextExecutor = ctx.system.executionContext
 
               infrastructure.Serializers.register(typedActorSystem)
 
               val cluster = Cluster(typedActorSystem)
-              ctx.log.info("Started [" + ctx.system + "], cluster.selfAddress = " + cluster.selfMember.address + ")")
+              ctx.log.info(
+                "Started [" + ctx.system + "], cluster.selfAddress = " + cluster.selfMember.address + ")")
 
               if config.getBoolean("application.local.config.first") then
                  cluster.manager ! Join(cluster.selfMember.address)
@@ -93,7 +89,7 @@ object WalletEventSourcing:
                  management.onComplete:
                       case Failure(exception) =>
                         println(s"Akka Management failed to start: $exception")
-                      case Success(value) =>
+                      case Success(value)     =>
                         println(s"Akka Management started at: $value")
 
               // val subscriber = ctx.spawnAnonymous(ClusterStateChanges())
@@ -107,14 +103,9 @@ object WalletEventSourcing:
                     WalletEntity(
                       PersistenceId(
                         WalletEntity.typeKey.name,
-                        entityContext.entityId,
-                      ),
-                    ),
-                ),
-              )
+                        entityContext.entityId))))
 
-              val w: WalletService =
-                new WalletServiceImpl(walletSharding)
+              val w: WalletService = new WalletServiceImpl(walletSharding)
               ctx.delegate(interactive(config, w), Root.Start)
 
 object WalletOperations:
@@ -125,11 +116,11 @@ object WalletOperations:
    val confFile = "application-clustering.conf"
    val actorSystemName = "system"
 
-   var sys1: Option[ActorSystem[Root.Command ] ] = None
+   var sys1: Option[ActorSystem[Root.Command]] = None
 
-   var sys2: Option[ActorSystem[Root.Command ] ] = None
+   var sys2: Option[ActorSystem[Root.Command]] = None
 
-   var sys3: Option[ActorSystem[Root.Command ] ] = None
+   var sys3: Option[ActorSystem[Root.Command]] = None
 
    def getBalance(id: String) = sys1.foreach:
         sys =>
@@ -149,11 +140,12 @@ object WalletOperations:
         """
              application.local.config.first = true
              akka.remote.artery.canonical.port = 2551
-          """,
-      )
+          """)
         .withFallback(
           ConfigFactory.load(confFile))
-      val sys: ActorSystem[Root.Command ] = ActorSystem(Root(conf), actorSystemName, conf)
+      val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf),
+                                                       actorSystemName,
+                                                       conf)
       sys1 = Some(sys)
 
    def start2 =
@@ -164,13 +156,13 @@ object WalletOperations:
             akka.cluster.seed-nodes = [
                 "akka://${actorSystemName}@0.0.0.0:2551"
             ]
-            """,
-      )
+            """)
         .withFallback(
-          ConfigFactory.load(confFile),
-        )
+          ConfigFactory.load(confFile))
 
-      val sys: ActorSystem[Root.Command ] = ActorSystem(Root(conf), actorSystemName, conf)
+      val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf),
+                                                       actorSystemName,
+                                                       conf)
       sys2 = Some(sys)
 
    def start3 =
@@ -182,14 +174,13 @@ object WalletOperations:
             akka.cluster.seed-nodes = [
                 "akka://${actorSystemName}@0.0.0.0:2551"
             ]
-            """,
-      )
+            """)
         .withFallback(
           ConfigFactory.load(
-            confFile,
-          ),
-        )
-      val sys: ActorSystem[Root.Command ] = ActorSystem(Root(conf), actorSystemName, conf)
+            confFile))
+      val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf),
+                                                       actorSystemName,
+                                                       conf)
       sys3 = Some(sys)
 
    def stop =
@@ -200,30 +191,24 @@ object WalletOperations:
           aSys.terminate()
           aSys.whenTerminated.onComplete(
             _ =>
-              println("Actor system 1 was stopped")
-          )
-        },
-      )
+              println("Actor system 1 was stopped"))
+        })
       sys2.foreach(
         aSys => {
           aSys.terminate()
           given ec: ExecutionContextExecutor = aSys.executionContext
           aSys.whenTerminated.onComplete(
             _ =>
-              println("Actor system 2 was stopped")
-          )
-        },
-      )
+              println("Actor system 2 was stopped"))
+        })
       sys3.foreach(
         aSys => {
           aSys.terminate()
           given ec: ExecutionContextExecutor = aSys.executionContext
           aSys.whenTerminated.onComplete(
             _ =>
-              println("Actor system 3 was stopped")
-          )
-        },
-      )
+              println("Actor system 3 was stopped"))
+        })
       sys1 = None
       sys2 = None
       sys3 = None

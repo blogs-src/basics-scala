@@ -207,7 +207,6 @@ object Dependencies {
     Deps.kafkaAvroSerializer,
     Deps.munit,
     Deps.catsMunit,
-    Deps.helenus,
-  )
+    Deps.helenus)
 
 }
