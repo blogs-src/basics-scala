@@ -36,6 +36,7 @@ message DebitCmd{
     (scalapb.field).required = true
   ];
 }
+
 message GetBalanceCmd {}
 message StopCmd{}
 
@@ -44,18 +45,11 @@ message CommandsADT {
    CreateWalletCmd createWalletCmd = 1;
    CreditCmd creditCmd = 2;
    DebitCmd debitCmd = 3;
-   StopCmd stopCmd = 5;
+   StopCmd stopCmd = 4;
+   GetBalanceCmd getBalanceCmd = 5;
   }
 }
 
-message CommandsReadADT {
-  oneof sealed_value {
-   GetBalanceCmd getBalanceCmd = 4;
-  }
-}
-message CommandsReadADTOptional {
-  CommandsReadADT value = 1;
-}
 message CommandsADTOptional {
   CommandsADT value = 1;
 }

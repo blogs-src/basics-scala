@@ -32,5 +32,5 @@ object ServicesWalletImpl:
          entitySharding
            .entityRefFor(TypeKeys.wallet, id)
            .ask(
-             FrameWorkCommands.CmdInst(CommandsReadADT.GetBalanceCmd, List(id), _))
+             FrameWorkCommands.CmdInst(CommandsADT.GetBalanceCmd, List(id), _))
            .mapTo[Domain.Balance | ResultError]

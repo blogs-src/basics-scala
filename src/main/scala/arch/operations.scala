@@ -121,6 +121,10 @@ object WalletOperations:
 
    var sys3: Option[ActorSystem[Root.Command]] = None
 
+   def g = sys1.foreach:
+    sys =>
+      sys ! Root.GetBalance("a")
+
    def getBalance(id: String) = sys1.foreach:
         sys =>
            sys ! Root.GetBalance(id)
@@ -176,7 +180,7 @@ object WalletOperations:
       val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf), actorSystemName, conf)
       sys3 = Some(sys)
 
-   def stop =
+   def s =
 
       sys1.foreach(
         aSys => {
