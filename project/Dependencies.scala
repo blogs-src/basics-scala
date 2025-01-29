@@ -41,7 +41,7 @@ object Dependencies {
     val grpc                 = "1.64.0"
     val scalapbCommonProtos  = "2.9.6-0"
     val avroCompiler         = "1.12.0"
-    val chimney              = "1.6.0"
+    val chimney              = "1.7.0"
     val doobie               = "1.0.0-RC6"
     val skunk                = "1.1.0-M3"
     val postgress            = "42.7.3"

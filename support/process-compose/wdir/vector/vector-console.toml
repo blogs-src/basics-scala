@@ -1,4 +1,8 @@
 
+timezone = "local"
+#timezone = "Europe/Madrid"
+#timezone = "America/Havana"
+
 [api]
 enabled = true
 
@@ -22,40 +26,20 @@ drop_on_abort = true
 metric_tag_values = "single"
 source = """
 . = parse_json!(string!(.message))
+timestamp_str = from_unix_timestamp!(.timestamp, unit: "milliseconds")
+.format = format_timestamp!(timestamp_str, format: "%d/%m/%Y %H:%M:%S")
+.timestamp_str = parse_timestamp!(.format, format: "%d/%m/%Y %H:%M:%S", timezone: "Etc/GMT+1")
+
 """
-timezone = "local"
-# .level = get!(., ["level"])
 
 [transforms.my_transform_id2]
 type = "filter"
 inputs = [ "my_transform_id" ]
-condition = { type = "vrl", source = """.level == "ERROR" && contains( string!(.mdc.akkaAddress), "2551", case_sensitive: false) """ }
+condition = { type = "vrl", source = """.level == "ERROR" """ }
 
-[transforms.my_transform_id3]
-type = "filter"
-inputs = [ "my_transform_id" ]
-condition = { type = "vrl", source = """.level == "ERROR" && contains( string!(.mdc.akkaAddress), "2552", case_sensitive: false) """ }
-
-[transforms.my_transform_id4]
-type = "filter"
-inputs = [ "my_transform_id" ]
-condition = { type = "vrl", source = """.level == "ERROR" && contains( string!(.mdc.akkaAddress), "2553", case_sensitive: false) """ }
-
-[sinks.loki_sink_id_1]
+[sinks.sink_id_1]
 type = "console"
 inputs = [ "my_transform_id2" ]
-encoding.only_fields = ["mdc", "message"]
-encoding.codec = "json"
-
-[sinks.loki_sink_id_2]
-type = "console"
-inputs = [ "my_transform_id3" ]
-encoding.only_fields = ["mdc", "message"]
-encoding.codec = "json"
-
-[sinks.loki_sink_id_3]
-type = "console"
-inputs = [ "my_transform_id3" ]
-encoding.only_fields = ["mdc", "message"]
+encoding.only_fields = ["timestamp_str", "mdc", "message"]
 encoding.codec = "json"
 

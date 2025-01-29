@@ -127,6 +127,7 @@ clean-kafka-data: infrastructure-down
 [confirm]
 clean-logs-data:
     rm -rf logs
+    mkdir -p logs/var/vector
 
 #lstart:
 #    #!/usr/bin/env bash

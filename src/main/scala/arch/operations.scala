@@ -1,6 +1,12 @@
 package arch
 
+import akka.cluster.sharding.typed.scaladsl.EntityContext
+import arch.ClusterWallet.WalletSharding
+import arch.FrameWorkCommands.*
+import arch.ServicesWallet.Service
+import arch.ServicesWalletImpl.WalletServiceImpl
 import com.typesafe.config.Config
+import arch.TypeKeys
 
 object WalletEventSourcing:
 
@@ -9,6 +15,7 @@ object WalletEventSourcing:
    import akka.actor.typed.ActorRef
    import akka.actor.typed.scaladsl.adapter.TypedActorSystemOps
 
+   import arch.EntityWallet.Entity as WalletEntity
    import akka.cluster.typed.*
    import akka.actor.ActorSystem as UntypedActorSystem
    import akka.cluster.ClusterEvent.*
@@ -17,13 +24,7 @@ object WalletEventSourcing:
 
    import akka.cluster.sharding.typed.scaladsl.Entity
 
-   import infra.WalletEntity
-
    import akka.event.Logging
-
-   import infra.WalletService
-   import infra.WalletServiceImpl
-   import infra.WalletSharding
 
    object Root:
       trait Command extends CborSerializable
@@ -36,7 +37,7 @@ object WalletEventSourcing:
       case class AddCredit(id: String, value: Int) extends Command
       // object StartProjections extends Command
 
-      def interactive(config: Config, ws: WalletService): Behavior[Command] = Behaviors.setup[Command]:
+      def interactive(config: Config, ws: Service): Behavior[Command] = Behaviors.setup[Command]:
            (ctx: ActorContext[Command]) =>
               given ec: ExecutionContextExecutor = ctx.system.executionContext
               val log = Logging(ctx.system.toClassic, classOf[Command])
@@ -60,7 +61,7 @@ object WalletEventSourcing:
                   }
                   Behaviors.same
                 case AddCredit(id, v) =>
-                  val res = ws.addCredit(id, domain.Credit(v))
+                  val res = ws.addCredit(id, Domain.Credit(v))
                   res.onComplete {
                     case Success(r) => println(r)
                     case Failure(t) => t.printStackTrace()
@@ -79,8 +80,7 @@ object WalletEventSourcing:
               infrastructure.Serializers.register(typedActorSystem)
 
               val cluster = Cluster(typedActorSystem)
-              ctx.log.info(
-                "Started [" + ctx.system + "], cluster.selfAddress = " + cluster.selfMember.address + ")")
+              ctx.log.info("Started [" + ctx.system + "], cluster.selfAddress = " + cluster.selfMember.address + ")")
 
               if config.getBoolean("application.local.config.first") then
                  cluster.manager ! Join(cluster.selfMember.address)
@@ -94,15 +94,17 @@ object WalletEventSourcing:
 
               val walletSharding = WalletSharding()
 
-              walletSharding.init(
-                Entity(WalletEntity.typeKey)(createBehavior =
-                  entityContext =>
-                    WalletEntity(
-                      PersistenceId(
-                        WalletEntity.typeKey.name,
-                        entityContext.entityId))))
+              def mkEntity(entityContext: EntityContext[CmdInst]): Behavior[CmdInst] = WalletEntity(
+                PersistenceId(
+                  TypeKeys.wallet.name,
+                  entityContext.entityId))
 
-              val w: WalletService = new WalletServiceImpl(walletSharding)
+              walletSharding.init(
+                Entity(TypeKeys.wallet)(createBehavior =
+                  (entityContext: EntityContext[CmdInst]) =>
+                    di.mkEntity(entityContext)))
+
+              val w: ServicesWallet.Service = new WalletServiceImpl(walletSharding)
               ctx.delegate(interactive(config, w), Root.Start)
 
 object WalletOperations:
