@@ -148,41 +148,11 @@ lazy val scenarios = Map(
 
 ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger
 
-addCommandAlias("ll", "projects")
-addCommandAlias("cd", "project")
-addCommandAlias("c", "compile")
-addCommandAlias("cc", "clean; compile")
-addCommandAlias("t", "test")
-addCommandAlias("styleCheck", "scalafmtSbtCheck; scalafmtCheckAll")
-addCommandAlias("stf", "scalafmtSbt; scalafmtAll")
-//addCommandAlias("styleFix", "scalafmtSbt; scalafmtAll; scalafix RemoveUnused; scalafix OrganizeImports")
-addCommandAlias("rl", "reload plugins; update; reload return")
-
 selectedScenario match {
 
   case "scenario4" =>
     TaskKey[Unit]("r") := (root / Compile / runMain)
       .toTask(" components.examples.run")
-      .value
-
-  case "scenario5" =>
-    TaskKey[Unit]("r") := (root / Compile / runMain)
-      .toTask(" components.examples.plugins.run")
-      .value
-
-  case "scenario6" =>
-    TaskKey[Unit]("r") := (root / Compile / runMain)
-      .toTask(" components.main.run")
-      .value
-
-  case "scenario7" =>
-    TaskKey[Unit]("r") := (root / Compile / runMain)
-      .toTask(" infrastructure.components.persistence.run")
-      .value
-
-  case "scenario8" =>
-    TaskKey[Unit]("r") := (root / Compile / runMain)
-      .toTask(" components.infrastructure.cluster.run")
       .value
 
   case _ =>
