@@ -3,7 +3,6 @@ package arch
 object FrameWorkCommands:
 
    sealed trait Cmd extends ProtoSerializable:
-
       def replyTo: ActorRef[ResultError]
 
    case class CmdInst(

@@ -9,7 +9,7 @@ import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl.*
 import io.scalaland.chimney.partial
 
-import domain.*
+import Domain.*
 //import infra.*
 
 object ChimneyTransformers:

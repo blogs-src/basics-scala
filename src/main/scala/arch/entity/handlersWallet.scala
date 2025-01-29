@@ -12,7 +12,7 @@ object HandlersWallet:
    trait CommandsHandler:
 
       import WalletCommands.*
-      import domain.*
+      import Domain.*
       import WalletEvents.*
       import FrameWorkCommands.*
 

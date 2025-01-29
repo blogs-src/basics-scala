@@ -1,39 +1,33 @@
 package arch
 
 import arch.ClusterWallet.WalletSharding
-import arch.TypeKeyWallet
+import arch.TypeKeys
 
 object ServicesWalletImpl:
 
-   class WalletServiceImpl(
-     entitySharding: WalletSharding,
-   )(
-     using sys: ActorSystem[Nothing]) extends ServicesWallet.Service:
-
+   class WalletServiceImpl(entitySharding: WalletSharding)(using sys: ActorSystem[Nothing]) extends ServicesWallet.Service:
       import WalletCommands.*
-
       given ec: ExecutionContextExecutor = sys.executionContext
-
       given timeout: Timeout = demo.timeout
 
       def createWallet(id: String): Future[OkResponse | ResultError] = entitySharding
-        .entityRefFor(TypeKeyWallet.key, id)
+        .entityRefFor(TypeKeys.wallet, id)
         .ask(FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd, List(id), _))
         .mapTo[OkResponse | ResultError]
 
-      def addCredit(id: String, value: domain.Credit): Future[
+      def addCredit(id: String, value: Domain.Credit): Future[
         OkResponse | ResultError] = entitySharding
-        .entityRefFor(TypeKeyWallet.key, id)
+        .entityRefFor(TypeKeys.wallet, id)
         .ask(FrameWorkCommands.CmdInst(CommandsADT.CreditCmd(value), List(id), _))
         .mapTo[OkResponse | ResultError]
 
-      def addDebit(id: String, value: domain.Debit): Future[
+      def addDebit(id: String, value: Domain.Debit): Future[
         OkResponse | ResultError] = ???
 
-      def getBalance(id: String): Future[domain.Balance | ResultError] =
+      def getBalance(id: String): Future[Domain.Balance | ResultError] =
          println(f"Asking the balance: ${id}")
          entitySharding
-           .entityRefFor(TypeKeyWallet.key, id)
+           .entityRefFor(TypeKeys.wallet, id)
            .ask(
              FrameWorkCommands.CmdInst(CommandsReadADT.GetBalanceCmd, List(id), _))
-           .mapTo[domain.Balance | ResultError]
+           .mapTo[Domain.Balance | ResultError]

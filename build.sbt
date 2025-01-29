@@ -138,7 +138,7 @@ val scenario2 = Seq(
 //   "init",
 // )
 
-lazy val selectedScenario = sys.env.get("SCENARIO").getOrElse("scenario1")
+lazy val selectedScenario = sys.env.getOrElse("SCENARIO", "scenario1")
 lazy val scenarioInititalCommands = scenarios(selectedScenario)
 
 lazy val scenarios = Map(

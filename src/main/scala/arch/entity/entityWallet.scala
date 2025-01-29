@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory
 
 import akka.persistence.typed.scaladsl.Effect
 
-object TypeKeyWallet:
+object TypeKeys:
 
    import FrameWorkCommands.*
 
-   val key: EntityTypeKey[Cmd] = EntityTypeKey[Cmd]("wallet")
+   val wallet: EntityTypeKey[Cmd] = EntityTypeKey[Cmd]("wallet")
 
 object EntityWallet:
 
@@ -22,10 +22,9 @@ object EntityWallet:
 
    object Entity extends HandlersWallet.CommandsHandler, HandlersWallet.EventsHandler:
 
-      given logger: Logger = LoggerFactory.getLogger(
-        getClass)
+      given logger: Logger = LoggerFactory.getLogger(getClass)
 
-      export domain.*
+      export Domain.*
       export WalletCommands.*
       export WalletEvents.*
       import FrameWorkCommands.*
@@ -49,18 +48,15 @@ object EntityWallet:
             throw new IllegalStateException(
               s"unexpected event [$event] in empty state")
 
-      def apply(persistenceId: PersistenceId): Behavior[
-        Cmd] = Behaviors.setup[Cmd]:
+      def apply(persistenceId: PersistenceId): Behavior[Cmd] = Behaviors.setup[Cmd]:
            context =>
               EventSourcedBehavior.withEnforcedReplies[Cmd, Event, Option[State]](
                 persistenceId,
                 None,
                 (state, cmd) =>
                   state match {
-                    case None => onFirstCommand(cmd)
-                    case Some(
-                          state) =>
-                      applyCommand(state, cmd)
+                    case None        => onFirstCommand(cmd)
+                    case Some(state) => applyCommand(state, cmd)
                   },
                 (state, event) =>
                   state match {
