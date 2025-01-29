@@ -49,7 +49,10 @@ object Serializers:
    class TransportErrorSerializer extends StdSerializer[TransportError](classOf[TransportError]):
       import TransportError._
 
-      override def serialize(value:    TransportError, gen:      JsonGenerator, provider: SerializerProvider,
+      override def serialize(
+        value:    TransportError,
+        gen:      JsonGenerator,
+        provider: SerializerProvider,
       ): Unit =
          val strValue =
            value match
@@ -77,7 +80,9 @@ object Serializers:
 
    class LogbackInfoStatusSerializer extends StdSerializer[ch.qos.logback.core.status.InfoStatus](classOf[ch.qos.logback.core.status.InfoStatus]):
 
-      override def serialize(value:    ch.qos.logback.core.status.InfoStatus, gen:      JsonGenerator,
+      override def serialize(
+        value:    ch.qos.logback.core.status.InfoStatus,
+        gen:      JsonGenerator,
         provider: SerializerProvider,
       ): Unit =
          val strValue = ""
@@ -90,13 +95,16 @@ object Serializers:
 
    class LogbackLoggerContextSerializer extends StdSerializer[ch.qos.logback.classic.LoggerContext](classOf[ch.qos.logback.classic.LoggerContext]):
 
-      override def serialize(value:    ch.qos.logback.classic.LoggerContext, gen:      JsonGenerator,
+      override def serialize(
+        value:    ch.qos.logback.classic.LoggerContext,
+        gen:      JsonGenerator,
         provider: SerializerProvider,
       ): Unit =
          val strValue = ""
          gen.writeString(strValue)
 
-   class LogbackLoggerContextDeserializer extends StdDeserializer[ch.qos.logback.classic.LoggerContext](classOf[ch.qos.logback.classic.LoggerContext]):
+   class LogbackLoggerContextDeserializer
+       extends StdDeserializer[ch.qos.logback.classic.LoggerContext](classOf[ch.qos.logback.classic.LoggerContext]):
 
       override def deserialize(p: JsonParser, ctxt: DeserializationContext): ch.qos.logback.classic.LoggerContext =
         new ch.qos.logback.classic.LoggerContext()
@@ -115,7 +123,9 @@ object Serializers:
 
    class AkkaDoneSerializer extends StdSerializer[akka.Done](classOf[akka.Done]):
 
-      override def serialize(value:    akka.Done, gen:      JsonGenerator,
+      override def serialize(
+        value:    akka.Done,
+        gen:      JsonGenerator,
         provider: SerializerProvider,
       ): Unit =
          val strValue = "Done"

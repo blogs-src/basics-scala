@@ -5,7 +5,10 @@ import arch.TypeKeys
 
 object ServicesWalletImpl:
 
-   class WalletServiceImpl(entitySharding: WalletSharding)(using sys: ActorSystem[Nothing]) extends ServicesWallet.Service:
+   class WalletServiceImpl(
+     entitySharding: WalletSharding,
+   )(
+     using sys: ActorSystem[Nothing]) extends ServicesWallet.Service:
       import WalletCommands.*
       given ec: ExecutionContextExecutor = sys.executionContext
       given timeout: Timeout = demo.timeout
