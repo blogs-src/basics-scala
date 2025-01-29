@@ -2,7 +2,7 @@ package arch
 
 import akka.cluster.sharding.typed.scaladsl.EntityContext
 import arch.ClusterWallet.WalletSharding
-import arch.FrameWorkCommands.Cmd
+import arch.FrameWorkCommands.*
 import arch.ServicesWallet.Service
 import arch.ServicesWalletImpl.WalletServiceImpl
 import com.typesafe.config.Config
@@ -94,13 +94,15 @@ object WalletEventSourcing:
 
               val walletSharding = WalletSharding()
 
-              def mkEntity(entityContext: EntityContext[Cmd]): Behavior[Cmd] = WalletEntity(
+              def mkEntity(entityContext: EntityContext[CmdInst]): Behavior[CmdInst] = WalletEntity(
                 PersistenceId(
                   TypeKeys.wallet.name,
                   entityContext.entityId))
 
               walletSharding.init(
-                Entity(TypeKeys.wallet)(createBehavior = (entityContext: EntityContext[Cmd]) => mkEntity(entityContext)))
+                Entity(TypeKeys.wallet)(createBehavior =
+                  (entityContext: EntityContext[CmdInst]) =>
+                    di.mkEntity(entityContext)))
 
               val w: ServicesWallet.Service = new WalletServiceImpl(walletSharding)
               ctx.delegate(interactive(config, w), Root.Start)

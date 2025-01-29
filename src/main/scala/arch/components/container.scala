@@ -146,10 +146,10 @@ trait Container[C >: FC <: ProtoSerializable, FC <: ProtoSerializable, E, S, FCR
     }
 
     def onFirstEvent(event: E): S =
-       println(s"onFirstEvent")
-       firstEventHandler(event) match
-         case Some(state) => state
-         case _           => throw new IllegalStateException(s"Unexpected event [$event] in empty state")
+//       println(s"onFirstEvent: ${event}")
+      firstEventHandler(event) match
+        case Some(state) => state
+        case _           => throw new IllegalStateException(s"Unexpected event [$event] in empty state")
 
     def apply(
       persistenceId:   PersistenceId,
@@ -165,12 +165,11 @@ trait Container[C >: FC <: ProtoSerializable, FC <: ProtoSerializable, E, S, FCR
             (state: Option[S], cmd: CmdInst) =>
               state match {
                 case None =>
-                  println(s"onFirstCommand")
-
+//                  println(s"onFirstCommand")
                   onFirstCommand(cmd)
 
                 case Some[S](state: S) =>
-                  println(s"state:  $state")
+//                  println(s"state:  $state, cmd: $cmd")
                   cApp.applyCommand(state, cmd)
               },
             (state: Option[S], event: E) =>

@@ -29,7 +29,7 @@ object EntityWallet:
       export WalletEvents.*
       import FrameWorkCommands.*
 
-      def onFirstCommand(cmd: Cmd): ReplyEffect =
+      def onFirstCommand(cmd: CmdInst): ReplyEffect =
         cmd match
           case CmdInst(CommandsADT.CreateWalletCmd, _, replyTo) =>
             Effect.persist(WalletCreated()).thenReply(replyTo)(
@@ -48,9 +48,9 @@ object EntityWallet:
             throw new IllegalStateException(
               s"unexpected event [$event] in empty state")
 
-      def apply(persistenceId: PersistenceId): Behavior[Cmd] = Behaviors.setup[Cmd]:
+      def apply(persistenceId: PersistenceId): Behavior[CmdInst] = Behaviors.setup[CmdInst]:
            context =>
-              EventSourcedBehavior.withEnforcedReplies[Cmd, Event, Option[State]](
+              EventSourcedBehavior.withEnforcedReplies[CmdInst, Event, Option[State]](
                 persistenceId,
                 None,
                 (state, cmd) =>
