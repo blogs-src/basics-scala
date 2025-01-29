@@ -122,8 +122,8 @@ object WalletOperations:
    var sys3: Option[ActorSystem[Root.Command]] = None
 
    def g = sys1.foreach:
-    sys =>
-      sys ! Root.GetBalance("a")
+        sys =>
+           sys ! Root.GetBalance("a")
 
    def getBalance(id: String) = sys1.foreach:
         sys =>

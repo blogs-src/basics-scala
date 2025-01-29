@@ -25,7 +25,7 @@ object HandlersWallet:
           case CommandsADT.StopCmd                   => (EffectType.Stop, OkResponse())
           case CommandsADT.CreditCmd(Credit(amount)) => (CreditAdded(amount), OkResponse())
           case CommandsADT.DebitCmd(Debit(amount))   => (DebitAdded(amount), OkResponse())
-          case CommandsADT.GetBalanceCmd         =>
+          case CommandsADT.GetBalanceCmd             =>
             println(f"Balance response: ${state.balance}")
             logger.error("Getting balance")
             (EffectType.None, Balance(state.balance))

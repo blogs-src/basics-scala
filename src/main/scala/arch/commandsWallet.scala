@@ -10,4 +10,3 @@ object WalletCommands:
       case DebitCmd(value: Debit)
       case GetBalanceCmd
       case StopCmd
-
