@@ -30,7 +30,6 @@ import akka.event.Logging
 import arch.components.wallet.WalletContainer as obj
 
 def mkEntity(entityContext: EntityContext[CmdInst]): Behavior[CmdInst] =
-   println()
    def ctxModule =
      new ModuleDef {
        make[obj.EntityConfig].from {
@@ -43,21 +42,18 @@ def mkEntity(entityContext: EntityContext[CmdInst]): Behavior[CmdInst] =
      }
 
    val res: Try[Behavior[CmdInst]] = Try {
-     given logger: Logger = LoggerFactory.getLogger(getClass)
-     val t: Behavior[CmdInst] =
-       Injector().produceRun(ctxModule) {
-         (
-           entity: obj.EntityConfig
-         ) =>
-           entity.apply(
-             PersistenceId(
-               TypeKeys.wallet.name,
-               entityContext.entityId))
-       }
-     t
-
-//    Behaviors.empty
+     given logger: Logger = LoggerFactory.getLogger("di")
+     Injector().produceRun(ctxModule) {
+       (
+         entity: obj.EntityConfig
+       ) =>
+         entity.apply(
+           PersistenceId(
+             TypeKeys.wallet.name,
+             entityContext.entityId))
+     }
    }
+
    res match {
      case Success(value)     => value
      case Failure(exception) =>

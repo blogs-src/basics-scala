@@ -1,27 +1,28 @@
 package arch
 
 import arch.ClusterWallet.WalletSharding
-import arch.TypeKeys
+import arch.FrameWorkCommands.CmdInst
 
 object ServicesWalletImpl:
 
-   class WalletServiceImpl(
-     entitySharding: WalletSharding,
-   )(
-     using sys: ActorSystem[Nothing]) extends ServicesWallet.Service:
-      import WalletCommands.*
-      given ec: ExecutionContextExecutor = sys.executionContext
-      given timeout: Timeout = demo.timeout
+   class WalletServiceImpl(entitySharding: WalletSharding, timeout: Timeout) extends ServicesWallet.Service:
+//      import WalletCommands.*
 
-      def createWallet(id: String): Future[OkResponse | ResultError] = entitySharding
-        .entityRefFor(TypeKeys.wallet, id)
-        .ask(FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd, List(id), _))
-        .mapTo[OkResponse | ResultError]
+      def createWallet(id: String): Future[OkResponse | ResultError] =
+         // val command: ActorRef[ProtoSerializable | ResultError] => CmdInst = FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd, List(id), _)
+         // val command: ActorRef[ProtoSerializable | ResultError] => CmdInst = (arg: ActorRef[ProtoSerializable | ResultError]) => FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd, List(id), arg)
+         def command(arg: ActorRef[ProtoSerializable | ResultError]): CmdInst = {
+           FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.CreateWalletCmd, List(id), arg)
+         }
+         entitySharding
+           .entityRefFor(TypeKeys.wallet, id)
+           .ask(command)(timeout)
+           .mapTo[OkResponse | ResultError]
 
       def addCredit(id: String, value: Domain.Credit): Future[
         OkResponse | ResultError] = entitySharding
         .entityRefFor(TypeKeys.wallet, id)
-        .ask(FrameWorkCommands.CmdInst(CommandsADT.CreditCmd(value), List(id), _))
+        .ask(FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.CreditCmd(value), List(id), _))(timeout)
         .mapTo[OkResponse | ResultError]
 
       def addDebit(id: String, value: Domain.Debit): Future[
@@ -32,5 +33,5 @@ object ServicesWalletImpl:
          entitySharding
            .entityRefFor(TypeKeys.wallet, id)
            .ask(
-             FrameWorkCommands.CmdInst(CommandsADT.GetBalanceCmd, List(id), _))
+             FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.GetBalanceCmd, List(id), _))(timeout)
            .mapTo[Domain.Balance | ResultError]

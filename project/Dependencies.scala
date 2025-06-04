@@ -146,6 +146,7 @@ object Dependencies {
     // https://github.com/nMoncho/helenus3
     val helenus                    = "net.nmoncho"        %% "helenus-core"                   % V.helenus
 
+    val scala3Compiler             = "org.scala-lang"     %% "scala3-compiler"                % V.scalaLatestVersion
   }
 
 // format: on

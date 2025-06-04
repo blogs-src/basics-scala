@@ -34,9 +34,12 @@ lazy val commonSettings = Seq(
   ThisBuild / evictionErrorLevel := Level.Info,
   dependencyOverrides ++= Seq(
   ),
-  ThisBuild / resolvers += Resolver.mavenLocal,
-  ThisBuild / resolvers += "Akka library repository".at("https://repo.akka.io/maven"),
-  ThisBuild / resolvers += "Confluent Maven Repository".at("https://packages.confluent.io/maven/"),
+//  ThisBuild / resolvers += Resolver.mavenLocal,
+
+//  ThisBuild / resolvers += "Akka library repository".at("https://repo.akka.io/maven"),
+//  ThisBuild / resolvers += "Confluent Maven Repository".at("https://packages.confluent.io/maven/"),
+  ThisBuild / resolvers += "local-reposilite".at("http://localhost:8080/releases"),
+
 )
 
 lazy val appSettings = Seq(

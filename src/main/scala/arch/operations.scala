@@ -104,7 +104,8 @@ object WalletEventSourcing:
                   (entityContext: EntityContext[CmdInst]) =>
                     di.mkEntity(entityContext)))
 
-              val w: ServicesWallet.Service = new WalletServiceImpl(walletSharding)
+              val w: ServicesWallet.Service = new WalletServiceImpl(walletSharding, demo.timeout)
+//                , summon[ExecutionContextExecutor]
               ctx.delegate(interactive(config, w), Root.Start)
 
 object WalletOperations:
