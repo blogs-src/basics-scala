@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.wallet.demo.grpc.admin;
+package com.wallet.demo.rpc.admin;
 
 import "google/protobuf/wrappers.proto";
 import "opts/my_opts.proto";

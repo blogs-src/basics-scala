@@ -61,7 +61,7 @@ object WalletEventSourcing:
                   }
                   Behaviors.same
                 case AddCredit(id, v) =>
-                  val res = ws.addCredit(id, Domain.Credit(v))
+                  val res = ws.credit(id, Domain.Credit(v))
                   res.onComplete {
                     case Success(r) => println(r)
                     case Failure(t) => t.printStackTrace()
@@ -117,9 +117,7 @@ object WalletOperations:
    val actorSystemName = "system"
 
    var sys1: Option[ActorSystem[Root.Command]] = None
-
    var sys2: Option[ActorSystem[Root.Command]] = None
-
    var sys3: Option[ActorSystem[Root.Command]] = None
 
    def g = sys1.foreach:

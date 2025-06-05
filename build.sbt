@@ -60,7 +60,7 @@ lazy val appSettings = Seq(
     )
   // ) ++ Seq("-new-syntax", "-rewrite")
   // ) ++ Seq("-rewrite", "-indent")
-  // ) ++ Seq("-rewrite", "-source", "3.4-migration")
+//   ) ++ Seq("-rewrite", "-source", "3.7-migration")
 )
 
 def mapGen(name: String) = {
@@ -80,7 +80,7 @@ def mapGen(name: String) = {
 
 lazy val grpcApi = project
   .in(file("modules/grpc-api"))
-  // .enablePlugins(Fs2Grpc)
+   .enablePlugins(Fs2Grpc)
   .disablePlugins(ScalafixPlugin)
   .settings(commonSettings)
   .settings(

@@ -4,10 +4,10 @@ object Dependencies {
 
 // format: off
   object V {
-    val scalaLTSVersion      = "3.3.4"
+    val scalaLTSVersion      = "3.3.6"
     val distage              = "1.2.16"
 
-    val scalaLatestVersion   = "3.6.3"
+    val scalaLatestVersion   = "3.7.1"
     val logstage             = distage
     val scalatest            = "3.2.18"
     val scalacheck           = "1.17.0"

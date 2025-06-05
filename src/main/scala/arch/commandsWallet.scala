@@ -6,6 +6,7 @@ object WalletCommands:
 
    // this generates the trait Service  and the implementation for access the entity
    // @entityService("wallet") // "wallet" is the EntityTypeKey in use
+   // modules/grpc-api/src/main/protobuf/commands.proto
    enum CommandsADT extends ProtoSerializable:
       case CreateWalletCmd
       case CreditCmd(value: Credit)

@@ -1,9 +1,10 @@
 /// This file has messages for describing a customer.
 syntax = "proto3";
 
-package com.wallet.demo.clustering.grpc.admin;
+package com.wallet.demo.clustering.rpc.admin;
 
 import "google/protobuf/wrappers.proto";
+import "commands.proto";
 import "scalapb/scalapb.proto";
 
 option (scalapb.options) = {
@@ -23,6 +24,67 @@ option (scalapb.options) = {
 };
 
 
+service CommandGrpcService {
+  rpc CreateWallet(CreateWalletRequest) returns (SimpleResponse);
+  rpc Credit(CreditRequest) returns (SimpleResponse);
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+}
+
+/**
+ * Represents a response.
+ */
+message Response {
+  google.protobuf.StringValue message = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];/// Message value.
+}
+
+message GetBalanceResponse {
+  oneof values {
+    com.wallet.proto.messages.commands.Balance value = 1;/// Message value.
+    ErrorResponse error = 2;
+  }
+}
+
+message CreditRequest {
+  google.protobuf.StringValue id = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+  com.wallet.proto.messages.commands.Credit value = 2 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message SimpleResponse {
+  oneof values {
+    Response message = 1;/// Message value.
+    ErrorResponse error = 2;
+  }
+}
+
+message ErrorResponse {
+  oneof sealed_value {
+      BadRequestError badRequest = 1;
+      UnauthorizedError unauthorized = 2;
+  }
+}
+
+message CreateWalletRequest{
+  google.protobuf.StringValue id = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
+
+message GetBalanceRequest{
+  google.protobuf.StringValue id = 1 [
+    (scalapb.field).no_box = true,
+    (scalapb.field).required = true
+  ];
+}
 
 message OtherMessage{
   Case2 value = 1;
@@ -64,17 +126,6 @@ message rpcOperationResponse {
   ];
 }
 
-message CreditRequest {
-  google.protobuf.StringValue id = 1 [
-    (scalapb.field).no_box = true,
-    (scalapb.field).required = true
-  ];
-  google.protobuf.Int32Value amount = 2 [
-    (scalapb.field).no_box = true,
-    (scalapb.field).required = true
-  ];
-}
-
 message DebitRequest {
   google.protobuf.StringValue id = 1 [
     (scalapb.field).no_box = true,
@@ -96,16 +147,6 @@ message RequestId {
     (scalapb.field).no_box = true,
     (scalapb.field).required = true
   ];/** Account Id. */
-}
-
-/**
- * Represents a response.
- */
-message Response {
-  google.protobuf.StringValue message = 1 [
-    (scalapb.field).no_box = true,
-    (scalapb.field).required = true
-  ];/// Message value.
 }
 
 message BalanceResponse {
@@ -229,7 +270,7 @@ message InternalServerError {
     (scalapb.field).no_box = true,
     (scalapb.field).required = true
   ];
-  google.protobuf.StringValue description = 3 
+  google.protobuf.StringValue description = 3
   [
     (scalapb.field).no_box = true,
     (scalapb.field).required = true
@@ -246,7 +287,7 @@ message TargetCriteria {
     (scalapb.field).no_box = true,
     (scalapb.field).required = true
   ];
-  
+
   repeated LocationRule locationRules3 = 3;
   // repeated LocationRule locationRules3 = 3
   // [
