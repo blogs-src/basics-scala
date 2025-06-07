@@ -80,7 +80,7 @@ def mapGen(name: String) = {
 
 lazy val grpcApi = project
   .in(file("modules/grpc-api"))
-   .enablePlugins(Fs2Grpc)
+  .enablePlugins(Fs2Grpc)
   .disablePlugins(ScalafixPlugin)
   .settings(commonSettings)
   .settings(
@@ -88,12 +88,25 @@ lazy val grpcApi = project
       Deps.grpc,
       Deps.scalapbCommonProtos,
       Deps.scalapbProtobufu,
+      "com.thesamet.scalapb" %% "scalapb-validate-core" % scalapb.validate.compiler.BuildInfo.version % "protobuf",
+//      "com.thesamet.scalapb" %% "compilerplugin"           % "0.11.18",
+//      "com.thesamet.scalapb" %% "scalapb-validate-codegen" % "0.3.6",
     ),
-    Compile / PB.targets := Seq(
-      scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"
-    ),
+
+//    Compile / PB.targets := Seq(
+//      scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"
+//    ),
+
+    // https://github.com/typelevel/fs2-grpc/issues/489
+//    scalapbCodeGeneratorOptions += CodeGeneratorOption.Fs2Grpc,
+//    scalapbCodeGeneratorOptions += CodeGeneratorOption.FlatPackage,
+//    Compile / PB.targets := scalapbCodeGenerators.value
+//      .map(_.copy(outputPath = (Compile / sourceManaged).value / "scala")) //intellij specific
+//      .:+(scalapb.validate.gen(GeneratorOption.FlatPackage) -> (Compile / sourceManaged).value / "scala": protocbridge.Target),
+
     // PB.protocVersion := "3.25.2",
-    PB.protocVersion := "4.29.2",
+    // https://protobuf.dev/support/version-support/
+    PB.protocVersion := "4.30.0",
     // fs2GrpcOutputPath := (Compile / baseDirectory).value / "src/main/scala/fs2-grpc",
     // scalapbProtobufDirectory := (Compile / baseDirectory).value / "src/main/scala/scalapb",
   )

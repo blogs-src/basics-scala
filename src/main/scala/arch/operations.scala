@@ -30,6 +30,12 @@ object WalletEventSourcing:
       trait Command extends CborSerializable
       object Start  extends Command
 
+      object StartGrpcServer extends Command
+
+      object StopGrpcServer extends Command
+
+      var grpcServerControl: Option[cats.effect.Deferred[cats.effect.IO, Boolean]] = None
+
       case class CreateWallet(id: String) extends Command
 
       case class GetBalance(id: String) extends Command
@@ -37,7 +43,11 @@ object WalletEventSourcing:
       case class AddCredit(id: String, value: Int) extends Command
       // object StartProjections extends Command
 
-      def interactive(config: Config, ws: Service): Behavior[Command] = Behaviors.setup[Command]:
+      def interactive(
+                       config: Config,
+                       ws: Service,
+                       grpcApi: GrpcServerResource,
+                     ): Behavior[Command] = Behaviors.setup[Command]:
            (ctx: ActorContext[Command]) =>
               given ec: ExecutionContextExecutor = ctx.system.executionContext
               val log = Logging(ctx.system.toClassic, classOf[Command])
@@ -68,6 +78,75 @@ object WalletEventSourcing:
                   }
                   Behaviors.same
 
+                case StopGrpcServer =>
+                  import cats.effect.unsafe.implicits.global
+                  println("Stoping servers")
+                  grpcServerControl.foreach(
+                    ser => {
+                      Future {
+                        val r = Try { ser.complete(true).unsafeRunSync() }
+                        println(s"Grpc Server Control completed: $r")
+                      }
+                    }
+                  ) // shutdown the server
+                  grpcServerControl = None
+                  Behaviors.same
+
+                case StartGrpcServer =>
+                  println("Starting Grpc Server")
+                  log.info("Starting Grpc Server in logs")
+                  ctx.log.info("Starting Grpc Server in ctx")
+                  import cats.effect.unsafe.implicits.global
+
+                  import org.typelevel.log4cats.slf4j.Slf4jLogger
+                  import org.typelevel.log4cats.Logger
+                  import com.google.rpc.Code
+                  import cats.effect.*
+                  import cats.implicits.*
+
+                  given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+
+                  val grpcIO = cats.effect.Deferred[cats.effect.IO, Boolean].flatMap {
+                    shutdown =>
+                      grpcServerControl = Some(shutdown)
+
+                      import akka.grpc.GrpcServiceException
+                      import com.wallet.demo.clustering.rpc.admin.BadRequestError
+
+                      given generator: ExceptionGenerator[GrpcServiceException] with
+                        def generateException(msg: String): Throwable =
+                          val e = ErrorsBuilder.badRequestError(msg)
+                          val error = BadRequestError(e.code, e.title, e.message)
+                          GrpcServiceException(Code.INVALID_ARGUMENT, msg, Seq(error))
+
+                      val wServiceIO = WalletServiceIOImpl2[Result](ws)
+
+                      val resource: Resource[IO, (io.grpc.Server, Option[Boolean])] =
+                        for {
+
+                          serverDefinition <- grpcApi.helloService[GrpcServiceException](wServiceIO)
+
+                          server <- grpcApi.run[IO](serverDefinition)
+
+                        } yield (server, None)
+                      // val resource2: Resource[IO, KafkaConsumer[IO, String, org.apache.avro.specific.SpecificRecord] =
+
+                      val x =
+                        resource.evalMap(
+                          res => {
+                            (IO.pure(res._1.start()), IO.pure{()}).mapN(
+                              (a, c) => ()
+                            )
+                          }
+                        ).useForever
+
+                      IO.race(shutdown.get, x)
+                  }
+
+                  Future {
+                    grpcIO.evalOn(ctx.system.executionContext).unsafeRunSync()
+                  }
+                  Behaviors.same
               }
 
       def apply(config: Config): Behavior[Command] = Behaviors.setup[Command]:
@@ -105,8 +184,9 @@ object WalletEventSourcing:
                     di.mkEntity(entityContext)))
 
               val w: ServicesWallet.Service = new WalletServiceImpl(walletSharding, demo.timeout)
+              val grpcApi: GrpcServerResource = GrpcServerResource()
 //                , summon[ExecutionContextExecutor]
-              ctx.delegate(interactive(config, w), Root.Start)
+              ctx.delegate(interactive(config, w, grpcApi), Root.Start)
 
 object WalletOperations:
 
@@ -123,6 +203,10 @@ object WalletOperations:
    def g = sys1.foreach:
         sys =>
            sys ! Root.GetBalance("a")
+
+//   def grpc = sys1.foreach:
+//      sys =>
+//        sys ! Root.StartGrpcServer
 
    def getBalance(id: String) = sys1.foreach:
         sys =>
@@ -146,6 +230,7 @@ object WalletOperations:
         .withFallback(
           ConfigFactory.load(confFile))
       val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf), actorSystemName, conf)
+      sys ! Root.StartGrpcServer
       sys1 = Some(sys)
 
    def start2 =
@@ -180,9 +265,9 @@ object WalletOperations:
       sys3 = Some(sys)
 
    def s =
-
       sys1.foreach(
         aSys => {
+          aSys ! Root.StopGrpcServer
           given ec: ExecutionContextExecutor = aSys.executionContext
           aSys.terminate()
           aSys.whenTerminated.onComplete(

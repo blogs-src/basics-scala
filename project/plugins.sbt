@@ -19,6 +19,13 @@ addSbtPlugin(
 
 libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % V.scalapbCompiler
 
+// https://scalapb.github.io/docs/validation
+// https://scalapb.github.io/docs/validation#unboxing-required-fields
+libraryDependencies ++= Seq(
+  "com.thesamet.scalapb" %% "compilerplugin"           % V.scalapbCompiler,
+  "com.thesamet.scalapb" %% "scalapb-validate-codegen" % "0.3.6",
+)
+
 addSbtPlugin(
   "com.disneystreaming.smithy4s" % "smithy4s-sbt-codegen" % V.smithy4s_sbt_codegen)
 
@@ -34,3 +41,9 @@ libraryDependencies += "org.apache.avro" % "avro-compiler" % V.avro_compiler
 // addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.1.8")
 
 addDependencyTreePlugin
+
+// project/plugins.sbt
+addSbtPlugin("ch.epfl.scala" % "sbt-debug-adapter" % "1.0.0")
+// project/project/plugins.sbt
+addSbtPlugin("com.github.sbt" % "sbt-jdi-tools" % "1.2.0")
+

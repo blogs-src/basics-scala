@@ -8,7 +8,7 @@ import "scalapb/scalapb.proto";
 
 option (scalapb.options) = {
   scope: FILE
-  package_name: "com.wallet.demo.grpc.admin"
+  package_name: "com.wallet.demo.rpc.admin"
   flat_package: true
   single_file: true
   java_conversions: false
