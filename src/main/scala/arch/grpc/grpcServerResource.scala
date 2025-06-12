@@ -6,6 +6,7 @@ import com.wallet.demo.clustering.rpc.admin.*
 import fs2.grpc.syntax.all.*
 import io.grpc.*
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
+//import io.grpc.okhttp.OkHttpServerBuilder
 import io.grpc.protobuf.services.ProtoReflectionService
 // import io.scalaland.chimney.*
 
@@ -15,7 +16,6 @@ class GrpcServerResource:
       (
         wService: WalletServiceIO2[Result],
       ): Resource[IO, ServerServiceDefinition] = {
-
       val transformers = new MyTransformers
       val sImpl = new ClusteringWalletGrpcServiceImpl[Result, G](wService)(using transformers)
       WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
@@ -23,8 +23,16 @@ class GrpcServerResource:
       )
     }
 
-    def run[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] = NettyServerBuilder
-      .forPort(8090)
+//    def run[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] =
+    def run[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] = {
+//      val creds = TlsServerCredentials.create(certChainFile, privateKeyFile)
+      val creds = InsecureServerCredentials.create()
+
+          NettyServerBuilder
+            .forPort(8090)
+//      OkHttpServerBuilder
+//      .forPort(8090, creds)
       .addService(service)
       .addService(ProtoReflectionService.newInstance())
       .resource[F]
+    }

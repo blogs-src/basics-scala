@@ -1,4 +1,3 @@
-/// This file has messages for describing a customer.
 syntax = "proto3";
 
 package com.wallet.demo.clustering.rpc.admin;
@@ -16,11 +15,12 @@ option (scalapb.options) = {
   lenses: true
   getters: true
   retain_source_code_info: false
-  no_default_values_in_constructor: false
+//  no_default_values_in_constructor: false
   preserve_unknown_fields: false
   enum_value_naming: CAMEL_CASE
   enum_strip_prefix: false
   scala3_sources: true
+//  public_constructor_parameters: true
 };
 
 
@@ -28,6 +28,14 @@ service WalletCommandRpcService {
 //  rpc CreateWallet(CreateWalletRequest) returns (SimpleResponse);
 //  rpc Credit(CreditRequest) returns (SimpleResponse);
   rpc GetBalance(GetBalanceRequest) returns (com.wallet.proto.messages.commands.Balance);
+}
+
+message GetBalanceRequest{
+  RequestId id = 1 ;
+//  [
+//    (scalapb.field).no_box = false,
+//    (scalapb.field).required = false
+//  ];
 }
 
 message RequestId {
@@ -68,10 +76,6 @@ message ErrorResponse {
 }
 
 message CreateWalletRequest{}
-
-message GetBalanceRequest{
-  RequestId id = 1;
-}
 
 message OtherMessage{
   Case2 value = 1;

@@ -5,7 +5,8 @@ import Dependencies.HybridDeps
 // format: off
 
 lazy val autoImportSettings = Seq(
-  scalacOptions += Seq(
+  scalacOptions ++= Seq(
+    Seq(
     "java.lang",
     "scala",
     "scala.Predef",
@@ -23,6 +24,8 @@ lazy val autoImportSettings = Seq(
     // "cats.effect",
   )
     .mkString(start = "-Yimports:", sep = ",", end = ""),
+  )
+
 )
 
 lazy val commonSettings = Seq(
@@ -34,6 +37,10 @@ lazy val commonSettings = Seq(
   ThisBuild / evictionErrorLevel := Level.Info,
   dependencyOverrides ++= Seq(
   ),
+  scalacOptions ++=
+    Seq(
+      "-Yretain-trees",
+    ),
 //  ThisBuild / resolvers += Resolver.mavenLocal,
 
 //  ThisBuild / resolvers += "Akka library repository".at("https://repo.akka.io/maven"),
@@ -52,7 +59,7 @@ lazy val appSettings = Seq(
       "-Wsafe-init",
       "-deprecation",
       "-feature",
-      "-Yretain-trees",
+//      "-Yretain-trees",
       "-Xmax-inlines",
       "50",
       // "-Yexplicit-nulls",
@@ -89,8 +96,6 @@ lazy val grpcApi = project
       Deps.scalapbCommonProtos,
       Deps.scalapbProtobufu,
       "com.thesamet.scalapb" %% "scalapb-validate-core" % scalapb.validate.compiler.BuildInfo.version % "protobuf",
-//      "com.thesamet.scalapb" %% "compilerplugin"           % "0.11.18",
-//      "com.thesamet.scalapb" %% "scalapb-validate-codegen" % "0.3.6",
     ),
 
 //    Compile / PB.targets := Seq(
@@ -104,9 +109,10 @@ lazy val grpcApi = project
 //      .map(_.copy(outputPath = (Compile / sourceManaged).value / "scala")) //intellij specific
 //      .:+(scalapb.validate.gen(GeneratorOption.FlatPackage) -> (Compile / sourceManaged).value / "scala": protocbridge.Target),
 
-    // PB.protocVersion := "3.25.2",
+//     PB.protocVersion := "3.25.2",
     // https://protobuf.dev/support/version-support/
-    PB.protocVersion := "4.30.0",
+//    PB.protocVersion := "4.30.0",
+      PB.protocVersion := "4.29.2",
     // fs2GrpcOutputPath := (Compile / baseDirectory).value / "src/main/scala/fs2-grpc",
     // scalapbProtobufDirectory := (Compile / baseDirectory).value / "src/main/scala/scalapb",
   )
@@ -177,3 +183,6 @@ selectedScenario match {
       .value
 
 }
+
+// https://www.scala-sbt.org/1.x/docs/Howto-Logging.html
+// sbt --debug

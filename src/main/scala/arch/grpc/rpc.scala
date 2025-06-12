@@ -10,6 +10,7 @@ import com.wallet.proto.messages.commands as commands
 //import fs2.concurrent.Channel
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl.*
+import io.scalaland.chimney.partial.syntax.*
 
 import akka.grpc.GrpcServiceException
 
@@ -24,7 +25,12 @@ class MyTransformers[G: ExceptionGenerator]:
   import scala.reflect.*
 
   transparent inline given TransformerConfiguration[?] =
-    TransformerConfiguration.default.enableDefaultValues.enableInheritedAccessors//.enablePartialUnwrapsOption
+    TransformerConfiguration.default
+      .enableDefaultValues
+      //      .enableMacrosLogging
+      .enableImplicitConversions
+      //      .disablePartialUnwrapsOption
+      .enableInheritedAccessors //.enablePartialUnwrapsOption
 
   implicit def eitherToResultTransformers[A: ClassTag]: Transformer[IO[Either[Throwable, A]], Result[A]] =
     new Transformer[IO[Either[Throwable, A]], Result[A]]:
@@ -84,18 +90,6 @@ class MyTransformers[G: ExceptionGenerator]:
         )
       }
 
-  given optionTransformers[A: ClassTag]: Transformer[Option[A], A] =
-      new Transformer[Option[A], A]:
-        def transform(self: Option[A]): A =
-          self match
-            case Some(aValue) => aValue
-            case None         =>
-              val tName = summon[ClassTag[A]].runtimeClass.getSimpleName
-              val thread = Thread.currentThread()
-              val tt = thread.getStackTrace
-              println(tt)
-              throw ExceptionGenerator[G].generateException(s"$tName value cannot be empty")
-
 trait WalletServiceIO2[F[_]]:
   def getBalance(id: String): F[Domain.Balance]
 
@@ -137,9 +131,10 @@ case class BalanceRequest(id: RequestId) //{
 //  require(id.nonEmpty, "id cannot be empty")
 //}
 
-case class RequestId(value: String) {
-  require(value.nonEmpty, "id cannot be empty")
-}
+case class RequestId(value: String)
+//{
+//  require(value.nonEmpty, "id cannot be empty")
+//}
 class ClusteringWalletGrpcServiceImpl[F[_], G: ExceptionGenerator]
 (service: WalletServiceIO2[F])(using transformers: MyTransformers[G])(using F: Async[F], FR: Raise[F, ServiceError], M: Monad[F], MT: MonadThrow[F])
   extends ClusteringWalletGrpcService[F]:
@@ -147,22 +142,14 @@ class ClusteringWalletGrpcServiceImpl[F[_], G: ExceptionGenerator]
     import io.scalaland.chimney.partial
     import io.scalaland.chimney.protobufs.*
     import transformers.given
-//    import transformers.optionTransformers
 
     private def validateRequestId(request: GetBalanceRequest): F[BalanceRequest] =
-//     val res = Try(request.transformInto[BalanceRequest2]).toEither
-//     res match
-//       case Right(r) => r.pure[F]
-//       case Left(e) => FR.raise(ErrorsBuilder.badRequestError(e.getMessage))
-
-      val res = Try(request.intoPartial[BalanceRequest].transform)//.toEither
-      val res1 = res match
-        case Success(r) => r.asOption.toRight(null)
-        case Failure(e) => Left[Throwable, BalanceRequest](e)
-
-      res1 match
+      val res = request.transformIntoPartial[BalanceRequest].asEither.asResult.asEitherErrorPathMessageStrings
+      res match
         case Right(r) => r.pure[F]
-        case Left(e) => FR.raise(ErrorsBuilder.badRequestError(e.getMessage))
+        case Left(e) =>
+              val (key, value) = e.toList.head
+              FR.raise(ErrorsBuilder.badRequestError(s"$key: $value"))
 
     def getBalance(request: GetBalanceRequest, ctx: Metadata): F[commands.Balance] = {
       commands.Balance(100).pure[F]

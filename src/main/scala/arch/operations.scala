@@ -43,6 +43,8 @@ object WalletEventSourcing:
       case class AddCredit(id: String, value: Int) extends Command
       // object StartProjections extends Command
 
+//      val h = org.example.Hello()
+
       def interactive(
                        config: Config,
                        ws: Service,
@@ -57,6 +59,16 @@ object WalletEventSourcing:
                   println("Handler started")
                   Behaviors.same
                 case GetBalance(id)   =>
+
+//                  val h = org.example.Hello()
+//                  h.run()
+
+//                  val c = Class.forName("io.grpc.netty.shaded.io.grpc.netty.NettyServerHandler")
+//                  println(c.getCanonicalName)
+//                  for (field <- c.getDeclaredFields) {
+//                    println(field.getName)
+//                  }
+
                   val res = ws.getBalance(id)
                   res.onComplete {
                     case Success(r) => println(s"The balance is: $r")
@@ -204,9 +216,9 @@ object WalletOperations:
         sys =>
            sys ! Root.GetBalance("a")
 
-//   def grpc = sys1.foreach:
-//      sys =>
-//        sys ! Root.StartGrpcServer
+   def grpc = sys1.foreach:
+      sys =>
+        sys ! Root.StartGrpcServer
 
    def getBalance(id: String) = sys1.foreach:
         sys =>

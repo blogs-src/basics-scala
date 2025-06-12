@@ -164,6 +164,7 @@ object Dependencies {
     Deps.doobieFree,
     Deps.grpc,
     Deps.grpcNettyShaded,
+//    "io.grpc" % "grpc-okhttp" % scalapb.compiler.Version.grpcJavaVersion,
     Deps.scalapbCommonProtos,
     Deps.http4s,
     Deps.chimney,
