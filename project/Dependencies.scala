@@ -5,7 +5,7 @@ object Dependencies {
 // format: off
   object V {
     val scalaLTSVersion      = "3.3.6"
-    val distage              = "1.2.16"
+    val distage              = "1.2.18"
 
     val scalaLatestVersion   = "3.7.1"
     val logstage             = distage
@@ -20,7 +20,7 @@ object Dependencies {
     // val akkaGrpc             = "2.4.4"
     val akkaGrpc             = "2.4.3"
     val kafkaVersion         = "6.0.0"
-    val logbackVersion       = "1.4.14"
+    val logbackVersion       = "1.5.18"
     val jacksonVersion       = "2.11.4"
     val jacksonScalaVersion  = "2.18.0"
     val akkaHttpVersion      = "10.6.3"
@@ -31,31 +31,33 @@ object Dependencies {
 
     val akkaCassandra        = "1.2.1"
     val akkaProjection       = "1.5.5"
-    val cats                 = "2.12.0"
-    val catsEffect           = "3.5.4"
+    val cats                 = "2.13.0"
+    val catsEffect           = "3.6.1"
     val catsMTL              = "1.5.0"
-    val munit                = "1.0.2"
-    val munitCatsEffect      = "2.0.0"
-    val fs2                  = "3.11.0"
-    val iron                 = "2.6.0"
-    val grpc                 = "1.64.0"
+    val munit                = "1.1.1"
+    val munitCatsEffect      = "2.1.0"
+    val fs2                  = "3.12.0"
+    val iron                 = "3.0.1"
+    val grpc                 = "1.73.0"
     val scalapbCommonProtos  = "2.9.6-0"
     val avroCompiler         = "1.12.0"
 //    val chimney              = "1.6.0"
     val chimney              = "1.8.1"
-    val doobie               = "1.0.0-RC6"
+    val doobie               = "1.0.0-RC9"
     val skunk                = "1.1.0-M3"
-    val postgress            = "42.7.3"
-    val commonsCompress      = "1.26.1"
+    val postgress            = "42.7.7"
+    val commonsCompress      = "1.27.1"
     // https://packages.confluent.io/maven/io/confluent/kafka-avro-serializer/
-    val kafkaAvroSerializer  = "7.7.1"
+    val kafkaAvroSerializer  = "8.0.0"
     val smithytranslateTraitsVersion = "0.5.3"
-    val http4s                       = "0.23.28"
-    val scalapb                      = "0.11.17"
+    val http4s                       = "0.23.30"
+    val scalapb                      = "0.11.18"
     val avroCompilerVersion          = "1.12.0"
-    val fs2Kafka                     = "3.5.1"
+    val fs2Kafka                     = "3.8.0"
 
-    val helenus                      = "1.0.0"
+    val helenus                      = "1.1.0"
+    val otel4s                       = "0.12.0"
+    val opentelemetry                = "1.51.0"
 
   }
 
@@ -78,8 +80,8 @@ object Dependencies {
     val skunkCore                  = "org.tpolecat"  %% "skunk-core"            % V.skunk
 
     val logbackClassic             = "ch.qos.logback"  % "logback-classic"                   % V.logbackVersion
-    val requests                   = "com.lihaoyi"    %% "requests"                          % "0.8.0"
-    val json4sNative               = "org.json4s"     %% "json4s-native"                     % "4.0.6"
+    val requests                   = "com.lihaoyi"    %% "requests"                          % "0.9.0"
+    val json4sNative               = "org.json4s"     %% "json4s-native"                     % "4.0.7"
 
     val distageCore                = "io.7mind.izumi" %% "distage-core"                      % V.distage
     val distageConfig              = "io.7mind.izumi" %% "distage-extension-config"          % V.distage
@@ -148,6 +150,12 @@ object Dependencies {
     val helenus                    = "net.nmoncho"        %% "helenus-core"                   % V.helenus
 
     val scala3Compiler             = "org.scala-lang"     %% "scala3-compiler"                % V.scalaLatestVersion
+
+    val otel4s_inst_metrics        = "org.typelevel"      %% "otel4s-instrumentation-metrics" % V.otel4s
+    val otel4s                     = "org.typelevel"      %% "otel4s-oteljava"                % V.otel4s
+    val opentelemetry_expr_otlp    = "io.opentelemetry"    % "opentelemetry-exporter-otlp"    % V.opentelemetry % Runtime
+    val opentelemetry_autoconf     = "io.opentelemetry"    % "opentelemetry-sdk-extension-autoconfigure"    % V.opentelemetry % Runtime
+
   }
 
 // format: on
@@ -211,6 +219,10 @@ object Dependencies {
     Deps.munit,
     Deps.catsMunit,
     Deps.helenus,
+    Deps.otel4s,
+    Deps.otel4s_inst_metrics,
+    Deps.opentelemetry_expr_otlp,
+//    Deps.opentelemetry_autoconf,
     // only scala 2
 //    "ch.epfl.scala" %% "scala-debug-adapter" % "4.2.5",
   )

@@ -131,12 +131,17 @@ case class BalanceRequest(id: RequestId) //{
 //  require(id.nonEmpty, "id cannot be empty")
 //}
 
+import org.typelevel.otel4s.trace.Tracer
+
 case class RequestId(value: String)
 //{
 //  require(value.nonEmpty, "id cannot be empty")
 //}
 class ClusteringWalletGrpcServiceImpl[F[_], G: ExceptionGenerator]
-(service: WalletServiceIO2[F])(using transformers: MyTransformers[G])(using F: Async[F], FR: Raise[F, ServiceError], M: Monad[F], MT: MonadThrow[F])
+(service: WalletServiceIO2[F])
+(using transformers: MyTransformers[G]
+// , MTracer: Tracer[F]
+)(using F: Async[F], FR: Raise[F, ServiceError], M: Monad[F], MT: MonadThrow[F])
   extends ClusteringWalletGrpcService[F]:
 
     import io.scalaland.chimney.partial

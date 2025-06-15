@@ -110,15 +110,17 @@ lazy val grpcApi = project
 //      .:+(scalapb.validate.gen(GeneratorOption.FlatPackage) -> (Compile / sourceManaged).value / "scala": protocbridge.Target),
 
 //     PB.protocVersion := "3.25.2",
-    // https://protobuf.dev/support/version-support/
-//    PB.protocVersion := "4.30.0",
-      PB.protocVersion := "4.29.2",
+    //https://repo1.maven.org/maven2/com/google/protobuf/protoc/4.31.1/protoc-4.31.1-linux-x86_64.exe
+    //  100.0% [##########] 9.7 MiB (16.2 MiB / s)
+    PB.protocVersion := "4.31.1",
+//      PB.protocVersion := "4.29.2",
     // fs2GrpcOutputPath := (Compile / baseDirectory).value / "src/main/scala/fs2-grpc",
     // scalapbProtobufDirectory := (Compile / baseDirectory).value / "src/main/scala/scalapb",
   )
 
 lazy val root = project
   .in(file("."))
+  .enablePlugins(JavaAgent)
   .settings(autoImportSettings)
   .settings(commonSettings)
   .settings(appSettings)
@@ -142,6 +144,8 @@ lazy val root = project
       }
     },
     libraryDependencies ++= HybridDeps,
+    javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "2.16.0" % "runtime;dist",
+//    javaOptions += "-Dotel.java.global-autoconfigure.enabled=true",
   )
   .dependsOn(grpcApi)
   // .aggregate(grpcApi)

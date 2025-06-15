@@ -7,6 +7,8 @@ import arch.ServicesWallet.Service
 import arch.ServicesWalletImpl.WalletServiceImpl
 import com.typesafe.config.Config
 import arch.TypeKeys
+import cats.data.EitherT
+import org.typelevel.otel4s.oteljava.context.LocalContextProvider
 
 object WalletEventSourcing:
 
@@ -133,18 +135,50 @@ object WalletEventSourcing:
 
                       val wServiceIO = WalletServiceIOImpl2[Result](ws)
 
-                      val resource: Resource[IO, (io.grpc.Server, Option[Boolean])] =
+                      // otel4s
+                      import org.typelevel.otel4s.Attribute
+                      import org.typelevel.otel4s.oteljava.OtelJava
+                      import org.typelevel.otel4s.trace.Tracer
+
+                      import _root_.io.opentelemetry.sdk.OpenTelemetrySdk
+                      import _root_.io.opentelemetry.api.OpenTelemetry
+                      import _root_.io.opentelemetry.sdk.trace.SdkTracerProvider
+                      import _root_.io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
+                      import _root_.io.opentelemetry.context.propagation.ContextPropagators
+                      import _root_.io.opentelemetry.sdk.trace.`export`.SimpleSpanProcessor
+
+                      def tracerR: Resource[IO, Tracer[IO]] =
+                        OtelJava.autoConfigured[IO]().evalMap(_.tracerProvider.get("Example"))
+
+//                      def makeOtel: Resource[Result, OtelJava[Result]] = {
+                      def makeOtel[F[_]: {Async, LocalContextProvider}]: F[OtelJava[F]] = {
+                        val sdkTracerProvider = SdkTracerProvider.builder()
+//                          .addSpanProcessor(SimpleSpanProcessor.create(LoggingSpanExporter.create()))
+                          .build()
+                        val sdk: OpenTelemetrySdk =
+                          OpenTelemetrySdk.builder()
+                            .setTracerProvider(sdkTracerProvider)
+                            .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+                            .build()
+//                        val z: Result[OpenTelemetrySdk] =  EitherT.right(IO.pure(sdk))
+//                        OtelJava.resource(z)
+
+                        OtelJava.fromJOpenTelemetry(sdk)
+                      }
+                      // otel4s-END
+
+                      def resource/*(otel: OtelJava[Result])*/: Resource[IO, (io.grpc.Server, Option[Boolean])] =
                         for {
-
+//                          tracer <- makeOtel()
                           serverDefinition <- grpcApi.helloService[GrpcServiceException](wServiceIO)
-
                           server <- grpcApi.run[IO](serverDefinition)
-
                         } yield (server, None)
-                      // val resource2: Resource[IO, KafkaConsumer[IO, String, org.apache.avro.specific.SpecificRecord] =
 
-                      val x =
-                        resource.evalMap(
+//                      val xx = makeOtel.flatMap(otel =>{
+//                        resource.map(r => (r, otel))
+//                      })
+
+                      val x = resource.evalMap(
                           res => {
                             (IO.pure(res._1.start()), IO.pure{()}).mapN(
                               (a, c) => ()

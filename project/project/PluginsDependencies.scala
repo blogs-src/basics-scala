@@ -5,7 +5,7 @@ object PluginsDependencies {
 // format: off
   object V {
     val sbt_akka_grpc        = "2.4.3"
-    val sbt_fs2_grpc         = "2.8.0"
+    val sbt_fs2_grpc         = "2.8.1"
     // val sbt_fs2_grpc         = "2.7.15-2-85e1b7f-20240620T140322Z-SNAPSHOT"
     val sbt_scalafmt         = "2.5.4"
     val sbt_scalafix         = "0.14.0"
