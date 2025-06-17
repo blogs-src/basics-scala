@@ -7,6 +7,7 @@
 -Dcats.effect.stackTracingMode=full
 -Dcats.effect.traceBufferSize=1024
 -Dcats.effect.enhancedExceptions=true
+-Dcats.effect.trackFiberContext=true
 ${JJAVA_AGENT}
 #-Dactive.app="commands-app"
 # -Dactive.app="ports-app"

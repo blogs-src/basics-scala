@@ -9,6 +9,17 @@ import com.typesafe.config.Config
 import arch.TypeKeys
 import cats.data.EitherT
 import org.typelevel.otel4s.oteljava.context.LocalContextProvider
+import cats.effect.kernel.Resource
+import cats.~>
+import cats.arrow.FunctionK
+import cats.syntax.all.*
+
+import cats.data.EitherT
+import cats.effect.*
+import fs2.grpc.syntax.all.*
+import io.grpc.*
+import cats.mtl.*
+
 
 object WalletEventSourcing:
 
@@ -133,58 +144,24 @@ object WalletEventSourcing:
                           val error = BadRequestError(e.code, e.title, e.message)
                           GrpcServiceException(Code.INVALID_ARGUMENT, msg, Seq(error))
 
-                      val wServiceIO = WalletServiceIOImpl2[Result](ws)
+//                      val wServiceIO = WalletServiceIOImpl2[Result](ws)
 
-                      // otel4s
-                      import org.typelevel.otel4s.Attribute
-                      import org.typelevel.otel4s.oteljava.OtelJava
-                      import org.typelevel.otel4s.trace.Tracer
-
-                      import _root_.io.opentelemetry.sdk.OpenTelemetrySdk
-                      import _root_.io.opentelemetry.api.OpenTelemetry
-                      import _root_.io.opentelemetry.sdk.trace.SdkTracerProvider
-                      import _root_.io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
-                      import _root_.io.opentelemetry.context.propagation.ContextPropagators
-                      import _root_.io.opentelemetry.sdk.trace.`export`.SimpleSpanProcessor
-
-                      def tracerR: Resource[IO, Tracer[IO]] =
-                        OtelJava.autoConfigured[IO]().evalMap(_.tracerProvider.get("Example"))
-
-//                      def makeOtel: Resource[Result, OtelJava[Result]] = {
-                      def makeOtel[F[_]: {Async, LocalContextProvider}]: F[OtelJava[F]] = {
-                        val sdkTracerProvider = SdkTracerProvider.builder()
-//                          .addSpanProcessor(SimpleSpanProcessor.create(LoggingSpanExporter.create()))
-                          .build()
-                        val sdk: OpenTelemetrySdk =
-                          OpenTelemetrySdk.builder()
-                            .setTracerProvider(sdkTracerProvider)
-                            .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
-                            .build()
-//                        val z: Result[OpenTelemetrySdk] =  EitherT.right(IO.pure(sdk))
-//                        OtelJava.resource(z)
-
-                        OtelJava.fromJOpenTelemetry(sdk)
-                      }
-                      // otel4s-END
-
-                      def resource/*(otel: OtelJava[Result])*/: Resource[IO, (io.grpc.Server, Option[Boolean])] =
+                      def resource: Resource[IO, (io.grpc.Server, Option[Boolean])] =
                         for {
-//                          tracer <- makeOtel()
-                          serverDefinition <- grpcApi.helloService[GrpcServiceException](wServiceIO)
-                          server <- grpcApi.run[IO](serverDefinition)
+                          serverDefinition <- grpcApi.helloService[GrpcServiceException](WalletServiceIOImpl2[Result](ws))
+                          server <- grpcApi.run[IO](serverDefinition._1)
                         } yield (server, None)
-
-//                      val xx = makeOtel.flatMap(otel =>{
-//                        resource.map(r => (r, otel))
-//                      })
-
+                        
                       val x = resource.evalMap(
                           res => {
                             (IO.pure(res._1.start()), IO.pure{()}).mapN(
                               (a, c) => ()
                             )
                           }
-                        ).useForever
+                        ).useForever.handleErrorWith{error =>
+                          println(s"===> ${error.getMessage}")
+                          IO.raiseError(error)
+                         }
 
                       IO.race(shutdown.get, x)
                   }

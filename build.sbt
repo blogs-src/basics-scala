@@ -144,8 +144,6 @@ lazy val root = project
       }
     },
     libraryDependencies ++= HybridDeps,
-    javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "2.16.0" % "runtime;dist",
-//    javaOptions += "-Dotel.java.global-autoconfigure.enabled=true",
   )
   .dependsOn(grpcApi)
   // .aggregate(grpcApi)

@@ -5,8 +5,9 @@ import cats.effect.*
 import cats.implicits.*
 import com.google.rpc.Code
 import com.wallet.demo.clustering.rpc.admin.*
-import com.wallet.proto.messages.commands as commands
-
+import com.wallet.proto.messages.commands
+import cats.mtl.*
+import org.typelevel.otel4s.Attribute
 //import fs2.concurrent.Channel
 import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl.*
@@ -93,7 +94,6 @@ class MyTransformers[G: ExceptionGenerator]:
 trait WalletServiceIO2[F[_]]:
   def getBalance(id: String): F[Domain.Balance]
 
-import cats.mtl.*
 import cats.*
 
 object UtilsRPC:
@@ -133,12 +133,13 @@ case class BalanceRequest(id: RequestId) //{
 
 import org.typelevel.otel4s.trace.Tracer
 
+import scala.jdk.CollectionConverters.*
 case class RequestId(value: String)
 //{
 //  require(value.nonEmpty, "id cannot be empty")
 //}
 class ClusteringWalletGrpcServiceImpl[F[_], G: ExceptionGenerator]
-(service: WalletServiceIO2[F])
+(service: WalletServiceIO2[F], tracer: Tracer[F])
 (using transformers: MyTransformers[G]
 // , MTracer: Tracer[F]
 )(using F: Async[F], FR: Raise[F, ServiceError], M: Monad[F], MT: MonadThrow[F])
@@ -156,17 +157,60 @@ class ClusteringWalletGrpcServiceImpl[F[_], G: ExceptionGenerator]
               val (key, value) = e.toList.head
               FR.raise(ErrorsBuilder.badRequestError(s"$key: $value"))
 
+    import org.typelevel.otel4s.context.propagation.*
+
+    given TextMapGetter[Metadata] =
+      new TextMapGetter[Metadata] {
+        def get(headers: Metadata, key: String): Option[String] =
+            println(s"key: ${key}")
+            val akeys = keys(headers).toSet
+            println(akeys)
+            if (akeys.contains(key)) {
+              val key_ = Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)
+              val kys = headers.getAll(key_).asScala.toList
+              kys.headOption
+            }else{
+              None
+            }
+
+        def keys(headers: Metadata): Iterable[String] =
+          println(s"keys")
+          val keys = headers.keys().asScala.toList
+          println(s"keys: ${keys}")
+          keys
+      }
+
     def getBalance(request: GetBalanceRequest, ctx: Metadata): F[commands.Balance] = {
       commands.Balance(100).pure[F]
       // MT.raiseError(ErrorsBuilder.notFoundError("Not found"))
       // FR.raise(ErrorsBuilder.badRequestError("bad request"))
-      for {
-        r <- validateRequestId(request)
-        //res <- service.getBalance(r.id.get.value.get)
-//        _ <- F.pure{println(s"yeeeee ${Try{r.id.get.value.get}}")}
-        res <- service.getBalance(r.id.value)
-//        res <- service.getBalance("r.id.value")
-      } yield commands.Balance(res.value)
+      given Tracer[F] = tracer
+
+//      val key = Metadata.Key.of("tracestate", Metadata.ASCII_STRING_MARSHALLER)
+//      val kys = ctx.getAll(key).asScala.toList
+//      println(kys.head)
+//      println(ctx.keys().asScala.toList)
+//      println("---------------------------------------------------------")
+
+      import io.opentelemetry.api.trace.{Span => JSpan}
+
+      Tracer[F].joinOrRoot(ctx) {
+        Tracer[F].span("Work.DoWork", Attribute("custom_tag", "aa")).use { span =>
+
+          println(s"jctx: ${JSpan.current().getSpanContext}") // get a span from a ThreadLocal
+          println(s"otel4s: ${span.context}")
+//          println(s"traceid: ${span.context.traceId}")
+
+          for {
+            r <- validateRequestId(request)
+            //res <- service.getBalance(r.id.get.value.get)
+            //        _ <- F.pure{println(s"yeeeee ${Try{r.id.get.value.get}}")}
+            res <- service.getBalance(r.id.value)
+            //        res <- service.getBalance("r.id.value")
+          } yield commands.Balance(res.value)
+
+        }
+      }
 
     }
 //    serviceP match {

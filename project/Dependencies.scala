@@ -151,10 +151,12 @@ object Dependencies {
 
     val scala3Compiler             = "org.scala-lang"     %% "scala3-compiler"                % V.scalaLatestVersion
 
-    val otel4s_inst_metrics        = "org.typelevel"      %% "otel4s-instrumentation-metrics" % V.otel4s
-    val otel4s                     = "org.typelevel"      %% "otel4s-oteljava"                % V.otel4s
-    val opentelemetry_expr_otlp    = "io.opentelemetry"    % "opentelemetry-exporter-otlp"    % V.opentelemetry % Runtime
-    val opentelemetry_autoconf     = "io.opentelemetry"    % "opentelemetry-sdk-extension-autoconfigure"    % V.opentelemetry % Runtime
+    val otel4s_inst_metrics        = "org.typelevel"      %% "otel4s-instrumentation-metrics"             % V.otel4s
+    val otel4s                     = "org.typelevel"      %% "otel4s-oteljava"                            % V.otel4s
+    val otel4s_otelj_ctx_storage   = "org.typelevel"      %% "otel4s-oteljava-context-storage"            % V.otel4s
+    val opentelemetry_expr_otlp    = "io.opentelemetry"    % "opentelemetry-exporter-otlp"                % V.opentelemetry // % Runtime
+    val opentelemetry_autoconf     = "io.opentelemetry"    % "opentelemetry-sdk-extension-autoconfigure"  % V.opentelemetry // % Runtime
+    val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.32.0" // % "runtime"
 
   }
 
@@ -220,8 +222,10 @@ object Dependencies {
     Deps.catsMunit,
     Deps.helenus,
     Deps.otel4s,
+    Deps.otel4s_otelj_ctx_storage,
     Deps.otel4s_inst_metrics,
     Deps.opentelemetry_expr_otlp,
+    Deps.opentelemetry_semconv,
 //    Deps.opentelemetry_autoconf,
     // only scala 2
 //    "ch.epfl.scala" %% "scala-debug-adapter" % "4.2.5",
