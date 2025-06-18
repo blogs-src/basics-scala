@@ -46,6 +46,6 @@ addSbtPlugin("ch.epfl.scala"  % "sbt-debug-adapter" % "1.0.0")
 // project/project/plugins.sbt
 addSbtPlugin("com.github.sbt" % "sbt-jdi-tools"     % "1.2.0")
 
-addSbtPlugin("com.github.sbt" % "sbt-javaagent" % "0.1.8")
+//addSbtPlugin("com.github.sbt" % "sbt-javaagent" % "0.1.8")
 
 addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "2.0.10")

@@ -45,7 +45,18 @@ lazy val commonSettings = Seq(
 
 //  ThisBuild / resolvers += "Akka library repository".at("https://repo.akka.io/maven"),
 //  ThisBuild / resolvers += "Confluent Maven Repository".at("https://packages.confluent.io/maven/"),
+
   ThisBuild / resolvers += "local-reposilite".at("http://localhost:8080/releases"),
+
+//  ThisBuild / resolvers += "default".at("http://localhost:8080/releases"),
+//  ThisBuild / resolvers += "public".at("http://localhost:8080/releases"),
+//  ThisBuild / resolvers -= "public".at("https://repo1.maven.org/maven2/"),
+//  ThisBuild / externalResolvers := Resolver.combineDefaultResolvers(resolvers.value.toVector, mavenCentral = false, jcenter = false),
+
+  ThisBuild / externalResolvers := Seq(
+//    "default".at("http://localhost:8080/releases"),
+//    "public".at("http://localhost:8080/releases"),
+  ),
 
 )
 
@@ -120,7 +131,7 @@ lazy val grpcApi = project
 
 lazy val root = project
   .in(file("."))
-  .enablePlugins(JavaAgent)
+  //.enablePlugins(JavaAgent)
   .settings(autoImportSettings)
   .settings(commonSettings)
   .settings(appSettings)
