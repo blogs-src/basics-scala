@@ -64,11 +64,11 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
         commands.Credit(d.amount).toByteArray
       case d: Debit      => commands.Debit(d.amount).toByteArray
 
-      case FrameWorkCommands.CmdInst(
+      case msg@FrameWorkCommands.CmdInst(
             x: WalletCommands.CommandsADT,
-            pmts: List[String],
+            pmts: Map[String, String],
             replyTo) =>
-        println(s"Converting to proto CmdInst: $x")
+//        println(s"Converting to proto CmdInst: $msg")
 
         var y: WalletCommands.CommandsADT = WalletCommands.CommandsADT.StopCmd
         y = x.asInstanceOf[WalletCommands.CommandsADT]
@@ -99,7 +99,7 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
     // Put your code that deserializes here
     // #...
 
-    println(s"Converting from binary")
+//    println(s"Converting from binary")
 
     clazz match {
       case Some(c)
@@ -127,12 +127,15 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
       case Some(c) if c == classOf[FrameWorkCommands.CmdInst] =>
         val cmdInst = commands.CmdInst.parseFrom(bytes)
 //        println(s"Deserializando: ${cmdInst.typeUrl}")
+//        println(s"value: ${cmdInst}")
         val payload =
           if cmdInst.typeUrl == "WalletCommands.CommandsADT" then
 
+//             println("aqui....")
+
              val res = commands.CommandsADTMessage.parseFrom(cmdInst.payload.toByteArray).toCommandsADT.transformInto[WalletCommands.CommandsADT]
 
-             // println(s"Converting from proto CmdInst: ${res}")
+//             println(s"Converting from proto CmdInst: ${res}")
 
              res
              // cmdInst.payload.transformInto[WalletCommands2.CommandsADT]
@@ -144,7 +147,10 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
              null
 
         val who = actorRefResolver.resolveActorRef(cmdInst.replyTo)
-        FrameWorkCommands.CmdInst(payload, cmdInst.params.toList, who)
+//        println(s"who: ${who}")
+        val newCmd = FrameWorkCommands.CmdInst(payload, cmdInst.params, who)
+//        println(s"newCmd: ${newCmd}")
+        newCmd
 
       case x =>
         println(s"${x} null =========================================================================================================")

@@ -8,5 +8,5 @@ object FrameWorkCommands:
 
    case class CmdInst(
      payload: ProtoSerializable,
-     params:  List[String],
+     params:  Map[String, String],
      replyTo: ActorRef[ProtoSerializable | ResultError]) extends Cmd

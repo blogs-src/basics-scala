@@ -12,7 +12,7 @@ object WalletServicesImpl:
          // val command: ActorRef[ProtoSerializable | ResultError] => CmdInst = FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd, List(id), _)
          // val command: ActorRef[ProtoSerializable | ResultError] => CmdInst = (arg: ActorRef[ProtoSerializable | ResultError]) => FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd, List(id), arg)
          def command(arg: ActorRef[ProtoSerializable | ResultError]): CmdInst = {
-           FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.CreateWalletCmd, List(id), arg)
+           FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.CreateWalletCmd, metadata, arg)
          }
          entitySharding
            .entityRefFor(TypeKeys.wallet, id)
@@ -22,7 +22,7 @@ object WalletServicesImpl:
       def credit(id: String, value: Domain.Credit)(using metadata: Map[String, String]=Map.empty): Future[
         OkResponse | ResultError] = entitySharding
         .entityRefFor(TypeKeys.wallet, id)
-        .ask(FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.CreditCmd(value), List(id), _))(using timeout)
+        .ask(FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.CreditCmd(value), metadata, _))(using timeout)
         .mapTo[OkResponse | ResultError]
 
       def debit(id: String, value: Domain.Debit)(using metadata: Map[String, String]=Map.empty): Future[
@@ -34,5 +34,5 @@ object WalletServicesImpl:
          entitySharding
            .entityRefFor(TypeKeys.wallet, id)
            .ask(
-             FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.GetBalanceCmd, List(id), _))(using timeout)
+             FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.GetBalanceCmd, metadata, _))(using timeout)
            .mapTo[Domain.Balance | ResultError]

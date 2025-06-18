@@ -56,7 +56,9 @@ object EntityWallet:
                 (state, cmd) =>
                   state match {
                     case None        => onFirstCommand(cmd)
-                    case Some(state) => applyCommand(state, cmd)
+                    case Some(state) =>
+//                      println(s"Existing command: ${cmd}")
+                      applyCommand(state, cmd)
                   },
                 (state, event) =>
                   state match {
