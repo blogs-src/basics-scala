@@ -1,9 +1,9 @@
 package arch
 
-object ServicesWallet:
+object WalletServices:
 
    import Domain.*
-  
+
    // this generates the protobuf and the mapping using chimney
    // the result goes to two string fields in WalletEvents object
    // esto NO ES el EntityService

@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory
 import akka.cluster.sharding.typed.scaladsl.EntityContext
 import arch.ClusterWallet.WalletSharding
 import arch.FrameWorkCommands.{ Cmd, CmdInst }
-import arch.ServicesWallet.Service
-import arch.ServicesWalletImpl.WalletServiceImpl
+import arch.WalletServices.Service
+import arch.WalletServicesImpl.WalletServiceImpl
 import com.typesafe.config.Config
 import arch.TypeKeys
 import akka.persistence.typed.PersistenceId

@@ -3,8 +3,8 @@ package arch
 import akka.cluster.sharding.typed.scaladsl.EntityContext
 import arch.ClusterWallet.WalletSharding
 import arch.FrameWorkCommands.*
-import arch.ServicesWallet.Service
-import arch.ServicesWalletImpl.WalletServiceImpl
+import arch.WalletServices.Service
+import arch.WalletServicesImpl.WalletServiceImpl
 import com.typesafe.config.Config
 import arch.TypeKeys
 import cats.data.EitherT
@@ -146,13 +146,13 @@ object WalletEventSourcing:
 
 //                      val wServiceIO = WalletServiceIOImpl2[Result](ws)
 
-                      def resource: Resource[IO, (io.grpc.Server, Option[Boolean])] =
+                      val rpcResource: Resource[IO, (io.grpc.Server, Option[Boolean])] =
                         for {
-                          serverDefinition <- grpcApi.helloService[GrpcServiceException](WalletServiceIOImpl2[Result](ws))
-                          server <- grpcApi.run[IO](serverDefinition._1)
+                          serverDefinition <- grpcApi.createService[GrpcServiceException](WalletServiceIOImpl[Result](ws))
+                          server <- grpcApi.createIO[IO](serverDefinition._1)
                         } yield (server, None)
-                        
-                      val x = resource.evalMap(
+
+                      val runingRpcIO = rpcResource.evalMap(
                           res => {
                             (IO.pure(res._1.start()), IO.pure{()}).mapN(
                               (a, c) => ()
@@ -163,7 +163,7 @@ object WalletEventSourcing:
                           IO.raiseError(error)
                          }
 
-                      IO.race(shutdown.get, x)
+                      IO.race(shutdown.get, runingRpcIO)
                   }
 
                   Future {
@@ -206,7 +206,7 @@ object WalletEventSourcing:
                   (entityContext: EntityContext[CmdInst]) =>
                     di.mkEntity(entityContext)))
 
-              val w: ServicesWallet.Service = new WalletServiceImpl(walletSharding, demo.timeout)
+              val w: WalletServices.Service = new WalletServiceImpl(walletSharding, demo.timeout)
               val grpcApi: GrpcServerResource = GrpcServerResource()
 //                , summon[ExecutionContextExecutor]
               ctx.delegate(interactive(config, w, grpcApi), Root.Start)

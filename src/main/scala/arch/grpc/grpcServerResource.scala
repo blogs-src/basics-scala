@@ -61,9 +61,9 @@ class GrpcServerResource:
     }
   }
 
-  def helloService[G: ExceptionGenerator]
+  def createService[G: ExceptionGenerator]
   (
-    wService: WalletServiceIO2[Result],
+    wService: WalletServiceIO[Result],
 //    tracer: Tracer[Result],
   )/*: Resource[IO, ServerServiceDefinition]*/ = {
     val transformers = new MyTransformers
@@ -89,7 +89,7 @@ class GrpcServerResource:
   }
 
   //    def run[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] =
-  def run[F[_] : Async](service: ServerServiceDefinition): Resource[F, Server] = {
+  def createIO[F[_] : Async](service: ServerServiceDefinition): Resource[F, Server] = {
     //      val creds = TlsServerCredentials.create(certChainFile, privateKeyFile)
     //      val creds = InsecureServerCredentials.create()
 

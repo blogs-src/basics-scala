@@ -3,9 +3,9 @@ package arch
 import arch.ClusterWallet.WalletSharding
 import arch.FrameWorkCommands.CmdInst
 
-object ServicesWalletImpl:
+object WalletServicesImpl:
 
-   class WalletServiceImpl(entitySharding: WalletSharding, timeout: Timeout) extends ServicesWallet.Service:
+   class WalletServiceImpl(entitySharding: WalletSharding, timeout: Timeout) extends WalletServices.Service:
 //      import WalletCommands.*
 
       def createWallet(id: String): Future[OkResponse | ResultError] =
