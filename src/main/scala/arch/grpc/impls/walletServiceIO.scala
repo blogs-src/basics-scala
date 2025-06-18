@@ -38,7 +38,7 @@ class WalletServiceIOImpl[F[_]]
 
   import UtilsRPC.*
 
-  def getBalance(id: String): F[Domain.Balance] =
+  def getBalance(id: String)(using metadata: Map[String, String]=Map.empty): F[Domain.Balance] =
     for {
       res <- F.fromFuture(wService.getBalance(id).pure[F])
       balance <-

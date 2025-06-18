@@ -74,10 +74,11 @@ class GrpcServerResource:
 //    )
 //    val res2: Resource[Result, ServerServiceDefinition] = convertResource(res, ioToResult)
     val rx : Resource[Result, (ServerServiceDefinition, Tracer[Result])]= resOtel.flatMap{ (tracer: Tracer[Result]) =>
-
-          val sImpl = new ClusteringWalletGrpcServiceImpl[Result, G](wService, tracer)(using transformers)
+          given Tracer[Result] = tracer
+          val sImpl2 = new ClusteringWalletGrpcServiceImpl2[Result, G](wService)(using transformers)
+          val sImpl = new ClusteringWalletGrpcServiceImpl[Result, G](sImpl2)(using transformers)
           val res: Resource[IO, ServerServiceDefinition] = WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
-            new ClusteringWalletFs2GrpcServiceImpl[G](sImpl, transformers, tracer)
+            new ClusteringWalletFs2GrpcServiceImpl[G](sImpl, transformers)
           )
           convertResource(res, ioToResult).map( x => (x, tracer))
         }
