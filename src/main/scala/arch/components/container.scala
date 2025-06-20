@@ -16,15 +16,16 @@ import org.slf4j.Logger
 trait Container[C >: FC <: ProtoSerializable, FC <: ProtoSerializable, E, S, FCR <: ProtoSerializable] {
 
   type ReplyEffect = dsl.ReplyEffect[E, Option[S]]
+  type CmdContext = Map[String, String]
   type CommandsHandlerResponse = (E | EffectType, ProtoSerializable | ResultError)
 
   trait AppCommands:
-     def interpret(input: (S, C)): CommandsHandlerResponse
+     def interpret(input: (S, (C, CmdContext))): CommandsHandlerResponse
 
   trait AppEvents:
      def interpret(input: (S, E)): S
 
-  final case class CommandHandler(handle: PartialFunction[(S, C), CommandsHandlerResponse])
+  final case class CommandHandler(handle: PartialFunction[(S, (C, CmdContext)), CommandsHandlerResponse])
   final case class EventHandler(handle: PartialFunction[(S, E), S])
 
   object AppCommands {
@@ -34,7 +35,7 @@ trait Container[C >: FC <: ProtoSerializable, FC <: ProtoSerializable, E, S, FCR
     )(
       using entityNoun: String) extends AppCommands {
 
-      override def interpret(cmd: (S, C)): CommandsHandlerResponse = {
+      override def interpret(cmd: (S, (C, CmdContext))): CommandsHandlerResponse = {
         handlers.map(_.handle)
           .reduce(_ orElse _).lift(cmd) match {
             case Some(answer: CommandsHandlerResponse) => answer
@@ -93,7 +94,7 @@ trait Container[C >: FC <: ProtoSerializable, FC <: ProtoSerializable, E, S, FCR
             using classTagE: ClassTag[E],
             logger:          Logger,
           ): ReplyEffect =
-            appC.interpret((state, cmd.payload.asInstanceOf[C])) match {
+            appC.interpret((state, (cmd.payload.asInstanceOf[C], cmd.params))) match {
               case (event: E, response: (ProtoSerializable | ResultError)) =>
                 Effect.persist[E, S](event).thenReply(cmd.replyTo)(
                   _ => response).asInstanceOf[ReplyEffect]

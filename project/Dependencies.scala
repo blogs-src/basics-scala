@@ -214,11 +214,13 @@ object Dependencies {
     Deps.distageCore,
     Deps.distageConfig,
     Deps.distagePlugins,
+
+    //    Deps.logstage_adapter_slf4j,
+    //    Deps.logstage_sink_slf4j,
     Deps.logstage,
     Deps.logstage_circe,
-    Deps.logstage_adapter_slf4j,
     Deps.logstage_distage_extension,
-    Deps.logstage_sink_slf4j,
+
     Deps.akkaDiscovery,
     Deps.akkaKubernetes,
     Deps.iron,

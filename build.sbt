@@ -130,6 +130,19 @@ lazy val grpcApi = project
     // scalapbProtobufDirectory := (Compile / baseDirectory).value / "src/main/scala/scalapb",
   )
 
+lazy val restApi = project
+  .in(file("modules/rest-api"))
+  .enablePlugins(Smithy4sCodegenPlugin)
+  .disablePlugins(ScalafixPlugin)
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.disneystreaming.smithy4s" %% "smithy4s-http4s"         % smithy4sVersion.value,
+      "com.disneystreaming.smithy"   %  "smithytranslate-traits"  % V.smithytranslateTraitsVersion,
+    ),
+    // Compile / smithy4sOutputDir := (Compile / baseDirectory).value / "src/main/scala/smithy",
+  )
+
 lazy val root = project
   .in(file("."))
   //.enablePlugins(JavaAgent)
@@ -156,8 +169,10 @@ lazy val root = project
       }
     },
     libraryDependencies ++= HybridDeps,
+    Compile / run / javaOptions += "-Dcats.effect.trackFiberContext=true",
   )
   .dependsOn(grpcApi)
+  .dependsOn(restApi)
   // .aggregate(grpcApi)
 
 
@@ -167,6 +182,8 @@ val scenario1 = Seq(
 )
 
 val scenario2 = Seq(
+//  "import arch.rest.*",
+//  "init",
 )
 
 // val scenario8 = Seq(
@@ -186,9 +203,9 @@ ThisBuild / watchTriggeredMessage := Watch.clearScreenOnTrigger
 
 selectedScenario match {
 
-  case "scenario4" =>
+  case "scenario1" =>
     TaskKey[Unit]("r") := (root / Compile / runMain)
-      .toTask(" components.examples.run")
+      .toTask(" arch.rest.Main")
       .value
 
   case _ =>

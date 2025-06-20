@@ -9,7 +9,7 @@ import StateWallet.*
 import components.wallet.WalletContainer as obj
 
 val ReadHandler = obj.CommandHandler {
-  case (state: State, CommandsADT.GetBalanceCmd) =>
-    println(s"GetBalanceCmd, with state: $state")
+  case (state: State, (CommandsADT.GetBalanceCmd, ctx)) =>
+    println(s"GetBalanceCmd, with state: $state, and context => $ctx")
     (EffectType.None, Domain.Balance(state.balance))
 }

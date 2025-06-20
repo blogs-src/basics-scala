@@ -90,7 +90,7 @@ class ClusteringWalletGrpcServiceImpl[F[_]: Tracer, G: ExceptionGenerator](servi
           println(s"otel4s: ${span.context}")
 //          println(s"traceid: ${span.context.traceId}")
 
-          val log = auditing.logger.getLogger().withCustomContext(
+          val log = auditing.Logger.getLogger("logs-grpc").withCustomContext(
               "traceId" -> span.context.traceIdHex,
             )
           for{

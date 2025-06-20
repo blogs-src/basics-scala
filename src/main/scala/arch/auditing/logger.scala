@@ -1,10 +1,8 @@
 package arch
 package auditing
 
-
-import logstage.{IzLogger, LogIO}
-import izumi.logstage.api.routing.StaticLogRouter
-import logstage.{ConsoleSink, IzLogger, Trace}
+//import izumi.logstage.api.routing.StaticLogRouter
+import logstage.{LogIO,ConsoleSink, IzLogger, Trace}
 import izumi.logstage.sink.file.{FileSink, FileServiceImpl}
 import logstage.circe.LogstageCirceRenderingPolicy
 import izumi.logstage.sink.file.models.LogFile
@@ -14,15 +12,11 @@ import izumi.logstage.sink.file.FileServiceImpl.RealFile
 import izumi.logstage.api.rendering.RenderingPolicy
 import izumi.logstage.sink.file.FileService
 import scala.collection.mutable.ListBuffer
-import scala.util.{Random, Try}
 
-import cats.mtl.*
 import cats.effect.*
-import cats.implicits.*
-import cats.*
 
 
-object logger:
+object Logger:
   class FileSinkBrokenImpl[F2 <: LogFile](
                                            override val renderingPolicy: RenderingPolicy,
                                            override val fileService: FileService[F2],
@@ -37,17 +31,17 @@ object logger:
     }
   }
 
-  def getLogger[F[_]]()(using F: Async[F]) = {
+  def getLogger[F[_]](path: String)(using F: Async[F]) = {
     val textSink = ConsoleSink.text(colored = true)
-    val fileService: FileService[RealFile] = new FileServiceImpl("logs")
+    val fileService: FileService[RealFile] = new FileServiceImpl(path)
     //    val lf: LogFile = fileService.createFileWithName("log2.log")
-    val fsc: FileSinkConfig = FileSinkConfig.soft(500)
-    val fr: FileRotation = FileRotation.DisabledRotation
+    val config: FileSinkConfig = FileSinkConfig.soft(500)
+    val rotation: FileRotation = FileRotation.DisabledRotation
     val renderingPolicy: RenderingPolicy = LogstageCirceRenderingPolicy(prettyPrint = true)
 
-    val fs/*: FileSink*/ = new FileSinkBrokenImpl(renderingPolicy, fileService, fr, fsc)
+    val fs: FileSink[RealFile] = new FileSinkBrokenImpl(renderingPolicy, fileService, rotation, config)
     val jsonSink = ConsoleSink(LogstageCirceRenderingPolicy(prettyPrint = true))
     val sinks = List(jsonSink, textSink, fs)
-    val logger2: IzLogger = IzLogger(Trace, sinks)
-    LogIO.fromLogger[F](logger2)
+    val logger: IzLogger = IzLogger(Trace, sinks)
+    LogIO.fromLogger[F](logger)
   }

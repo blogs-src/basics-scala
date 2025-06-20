@@ -158,7 +158,8 @@ object WalletEventSourcing:
                               (a, c) => ()
                             )
                           }
-                        ).useForever.handleErrorWith{error =>
+                        ).useForever
+                        .handleErrorWith{error =>
                           println(s"===> ${error.getMessage}")
                           IO.raiseError(error)
                          }
