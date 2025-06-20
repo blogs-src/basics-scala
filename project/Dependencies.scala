@@ -37,7 +37,7 @@ object Dependencies {
     val munit                = "1.1.1"
     val munitCatsEffect      = "2.1.0"
     val fs2                  = "3.12.0"
-    val iron                 = "3.0.1"
+    val iron                 = "3.0.2"
     val grpc                 = "1.73.0"
     val scalapbCommonProtos  = "2.9.6-0"
     val avroCompiler         = "1.12.0"
@@ -63,100 +63,105 @@ object Dependencies {
 
   object Deps {
     // val doobieRefined     = "org.tpolecat" %% "doobie-refined" % V.doobie
-    val commonsCompress            = "org.apache.commons" % "commons-compress"  % V.commonsCompress
-    val postgresql                 = "org.postgresql" %  "postgresql"           % V.postgress
-    val doobieCore                 = "org.tpolecat"  %% "doobie-core"           % V.doobie
-    val doobieHikari               = "org.tpolecat"  %% "doobie-hikari"         % V.doobie
-    val doobiePostgres             = "org.tpolecat"  %% "doobie-postgres"       % V.doobie
-    val doobiePostgresCirce        = "org.tpolecat"  %% "doobie-postgres-circe" % V.doobie
-    val doobieScalatest            = "org.tpolecat"  %% "doobie-scalatest"      % V.doobie % Test
-    val doobieMunit                = "org.tpolecat"  %% "doobie-munit"          % V.doobie % Test
-    val doobieFree                 = "org.tpolecat"  %% "doobie-free"           % V.doobie
+    val commonsCompress            = "org.apache.commons" % "commons-compress"  % V.commonsCompress withSources()
+    val postgresql                 = "org.postgresql" %  "postgresql"           % V.postgress withSources()
+    val doobieCore                 = "org.tpolecat"  %% "doobie-core"           % V.doobie withSources()
+    val doobieHikari               = "org.tpolecat"  %% "doobie-hikari"         % V.doobie withSources()
+    val doobiePostgres             = "org.tpolecat"  %% "doobie-postgres"       % V.doobie withSources()
+    val doobiePostgresCirce        = "org.tpolecat"  %% "doobie-postgres-circe" % V.doobie withSources()
+    val doobieScalatest            = "org.tpolecat"  %% "doobie-scalatest"      % V.doobie % Test withSources()
+    val doobieMunit                = "org.tpolecat"  %% "doobie-munit"          % V.doobie % Test withSources()
+    val doobieFree                 = "org.tpolecat"  %% "doobie-free"           % V.doobie withSources()
 
-    val skunkRefined               = "org.tpolecat"  %% "skunk-refined"         % V.skunk
-    val skunkPostgis               = "org.tpolecat"  %% "skunk-postgis"         % V.skunk
-    val skunkDocs                  = "org.tpolecat"  %% "skunk-docs"            % V.skunk
-    val skunkCirce                 = "org.tpolecat"  %% "skunk-circe"           % V.skunk
-    val skunkCore                  = "org.tpolecat"  %% "skunk-core"            % V.skunk
+    val skunkRefined               = "org.tpolecat"  %% "skunk-refined"         % V.skunk withSources()
+    val skunkPostgis               = "org.tpolecat"  %% "skunk-postgis"         % V.skunk withSources()
+    val skunkDocs                  = "org.tpolecat"  %% "skunk-docs"            % V.skunk withSources()
+    val skunkCirce                 = "org.tpolecat"  %% "skunk-circe"           % V.skunk withSources()
+    val skunkCore                  = "org.tpolecat"  %% "skunk-core"            % V.skunk withSources()
 
-    val logbackClassic             = "ch.qos.logback"  % "logback-classic"                   % V.logbackVersion
-    val requests                   = "com.lihaoyi"    %% "requests"                          % "0.9.0"
-    val json4sNative               = "org.json4s"     %% "json4s-native"                     % "4.0.7"
+    val logbackClassic             = "ch.qos.logback"  % "logback-classic"                   % V.logbackVersion withSources()
+    val requests                   = "com.lihaoyi"    %% "requests"                          % "0.9.0" withSources()
+    val json4sNative               = "org.json4s"     %% "json4s-native"                     % "4.0.7" withSources()
 
-    val distageCore                = "io.7mind.izumi" %% "distage-core"                      % V.distage
-    val distageConfig              = "io.7mind.izumi" %% "distage-extension-config"          % V.distage
-    val distagePlugins             = "io.7mind.izumi" %% "distage-extension-plugins"         % V.distage
+    val distageCore                = "io.7mind.izumi" %% "distage-core"                      % V.distage withSources()
+    val distageConfig              = "io.7mind.izumi" %% "distage-extension-config"          % V.distage withSources()
+    val distagePlugins             = "io.7mind.izumi" %% "distage-extension-plugins"         % V.distage withSources()
+    val logstage                   = "io.7mind.izumi" %% "logstage-core"                     % V.distage withSources()
+    val logstage_circe             = "io.7mind.izumi" %% "logstage-rendering-circe"          % V.distage withSources()
+    val logstage_adapter_slf4j     = "io.7mind.izumi" %% "logstage-adapter-slf4j"            % V.distage withSources()
+    val logstage_distage_extension = "io.7mind.izumi" %% "distage-extension-logstage"        % V.distage withSources()
+    val logstage_sink_slf4j        = "io.7mind.izumi" %% "logstage-sink-slf4j"               % V.distage withSources()
 
-    val kafkaAvroSerializer        = "io.confluent"    % "kafka-avro-serializer"             % V.kafkaAvroSerializer
+    val kafkaAvroSerializer        = "io.confluent"    % "kafka-avro-serializer"             % V.kafkaAvroSerializer withSources()
 
-    val akkaSlf4j                  = "com.typesafe.akka"             %% "akka-slf4j"                        % V.akkaVersion
+    val akkaSlf4j                  = "com.typesafe.akka"             %% "akka-slf4j"                        % V.akkaVersion withSources()
     // "ch.qos.logback" % "logback-classic" % "1.2.3"
 
-    val akkaActorTyped             = "com.typesafe.akka"             %% "akka-actor-typed"                  % V.akkaVersion
-    val akkaDiscovery              = "com.typesafe.akka"             %% "akka-discovery"                    % V.akkaVersion
-    val akkaKubernetes             = "com.lightbend.akka.discovery"  %% "akka-discovery-kubernetes-api"     % V.akkaManagement
-    val akkaTestkitTyped           = "com.typesafe.akka"             %% "akka-actor-testkit-typed"          % V.akkaVersion % Test
-    val akkaStream                 = "com.typesafe.akka"             %% "akka-stream"                       % V.akkaVersion
-    val akkaStreamKafka            = "com.typesafe.akka"             %% "akka-stream-kafka"                 % V.kafkaVersion
-    val jacksonDatabind            = "com.fasterxml.jackson.core"     % "jackson-databind"                  % V.jacksonVersion
-    val jacksonScalaModule         = "com.fasterxml.jackson.module"  %% "jackson-module-scala"              % V.jacksonScalaVersion
-    val akkaSerializationJackson   = "com.typesafe.akka"             %% "akka-serialization-jackson"        % V.akkaVersion
-    val akkaHttp                   = "com.typesafe.akka"             %% "akka-http"                         % V.akkaHttpVersion
-    val akkaClusterTyped           = "com.typesafe.akka"             %% "akka-cluster-typed"                % V.akkaVersion
-    val akkaClusterSharding        = "com.typesafe.akka"             %% "akka-cluster-sharding-typed"       % V.akkaVersion
-    val akkaClusterBootstrap       = "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % V.akkaManagement
-    val akkaClusterHttp            = "com.lightbend.akka.management" %% "akka-management-cluster-http"      % V.akkaManagement
-    val akkaPersistence            = "com.typesafe.akka"             %% "akka-persistence-typed"            % V.akkaVersion
-    val akkaPersistenceCassandra   = "com.typesafe.akka"             %% "akka-persistence-cassandra"        % V.akkaCassandra
-    val akkaPersistenceR2dbc       = "com.lightbend.akka"            %% "akka-persistence-r2dbc"            % V.akkaPersistenceR2dbc
-    val akkaProjectionR2dbc        = "com.lightbend.akka"            %% "akka-projection-r2dbc"             % V.akkaProjection
-    val akkaProjectionCore         = "com.lightbend.akka"            %% "akka-projection-core"              % V.akkaProjection
-    val akkaProjectionEventsourced = "com.lightbend.akka"            %% "akka-projection-eventsourced"      % V.akkaProjection
-    val akkaGrpc                   = "com.lightbend.akka.grpc"       %% "akka-grpc-runtime"                 % V.akkaGrpc
+    val akkaActorTyped             = "com.typesafe.akka"             %% "akka-actor-typed"                  % V.akkaVersion withSources()
+    val akkaDiscovery              = "com.typesafe.akka"             %% "akka-discovery"                    % V.akkaVersion withSources()
+    val akkaKubernetes             = "com.lightbend.akka.discovery"  %% "akka-discovery-kubernetes-api"     % V.akkaManagement withSources()
+    val akkaTestkitTyped           = "com.typesafe.akka"             %% "akka-actor-testkit-typed"          % V.akkaVersion % Test withSources()
+    val akkaStream                 = "com.typesafe.akka"             %% "akka-stream"                       % V.akkaVersion withSources()
+    val akkaStreamKafka            = "com.typesafe.akka"             %% "akka-stream-kafka"                 % V.kafkaVersion withSources()
+    val jacksonDatabind            = "com.fasterxml.jackson.core"     % "jackson-databind"                  % V.jacksonVersion withSources()
+    val jacksonScalaModule         = "com.fasterxml.jackson.module"  %% "jackson-module-scala"              % V.jacksonScalaVersion withSources()
+    val akkaSerializationJackson   = "com.typesafe.akka"             %% "akka-serialization-jackson"        % V.akkaVersion withSources()
+    val akkaHttp                   = "com.typesafe.akka"             %% "akka-http"                         % V.akkaHttpVersion withSources()
+    val akkaClusterTyped           = "com.typesafe.akka"             %% "akka-cluster-typed"                % V.akkaVersion withSources()
+    val akkaClusterSharding        = "com.typesafe.akka"             %% "akka-cluster-sharding-typed"       % V.akkaVersion withSources()
+    val akkaClusterBootstrap       = "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % V.akkaManagement withSources()
+    val akkaClusterHttp            = "com.lightbend.akka.management" %% "akka-management-cluster-http"      % V.akkaManagement withSources()
+    val akkaPersistence            = "com.typesafe.akka"             %% "akka-persistence-typed"            % V.akkaVersion withSources()
+    val akkaPersistenceCassandra   = "com.typesafe.akka"             %% "akka-persistence-cassandra"        % V.akkaCassandra withSources()
+    val akkaPersistenceR2dbc       = "com.lightbend.akka"            %% "akka-persistence-r2dbc"            % V.akkaPersistenceR2dbc withSources()
+    val akkaProjectionR2dbc        = "com.lightbend.akka"            %% "akka-projection-r2dbc"             % V.akkaProjection withSources()
+    val akkaProjectionCore         = "com.lightbend.akka"            %% "akka-projection-core"              % V.akkaProjection withSources()
+    val akkaProjectionEventsourced = "com.lightbend.akka"            %% "akka-projection-eventsourced"      % V.akkaProjection withSources()
+    val akkaGrpc                   = "com.lightbend.akka.grpc"       %% "akka-grpc-runtime"                 % V.akkaGrpc withSources()
 
-    val cats                       = "org.typelevel"                 %% "cats-core"                         % V.cats
-    val catsEffect                 = "org.typelevel"                 %% "cats-effect"                       % V.catsEffect
-    val catsMtl                    = "org.typelevel"                 %% "cats-mtl"                          % V.catsMTL
+    val cats                       = "org.typelevel"                 %% "cats-core"                         % V.cats withSources()
+    val catsEffect                 = "org.typelevel"                 %% "cats-effect"                       % V.catsEffect withSources()
+    val catsMtl                    = "org.typelevel"                 %% "cats-mtl"                          % V.catsMTL withSources()
 
-    val fs2                        = "co.fs2"                        %% "fs2-core"                          % V.fs2
-    val fs2Io                      = "co.fs2"                        %% "fs2-io"                            % V.fs2
+    val fs2                        = "co.fs2"                        %% "fs2-core"                          % V.fs2 withSources()
+    val fs2Io                      = "co.fs2"                        %% "fs2-io"                            % V.fs2 withSources()
 
-    val iron                       = "io.github.iltotore"            %% "iron"                              % V.iron
-    val ironCirce                  = "io.github.iltotore"            %% "iron-circe"                        % V.iron
-    val ironCats                   = "io.github.iltotore"            %% "iron-cats"                         % V.iron
-    val ironDecline                = "io.github.iltotore"            %% "iron-decline"                      % V.iron
+    val iron                       = "io.github.iltotore"            %% "iron"                              % V.iron withSources()
+    val ironCirce                  = "io.github.iltotore"            %% "iron-circe"                        % V.iron withSources()
+    val ironCats                   = "io.github.iltotore"            %% "iron-cats"                         % V.iron withSources()
+    val ironDecline                = "io.github.iltotore"            %% "iron-decline"                      % V.iron withSources()
 
-    val grpcNettyShaded            = "io.grpc"                             %  "grpc-netty-shaded"                      % scalapb.compiler.Version.grpcJavaVersion
-    val grpc                       = "io.grpc"                             %  "grpc-services"                          % V.grpc
-    val scalapbCommonProtos        = "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % V.scalapbCommonProtos % "protobuf"
+    val grpcNettyShaded            = "io.grpc"                             %  "grpc-netty-shaded"                      % scalapb.compiler.Version.grpcJavaVersion withSources()
+    val grpc                       = "io.grpc"                             %  "grpc-services"                          % V.grpc withSources()
+    val scalapbCommonProtos        = "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % V.scalapbCommonProtos % "protobuf" withSources()
 
-    val scalapbRuntime               = "com.thesamet.scalapb" %% "scalapb-runtime"                            % V.scalapb
-    val scalapbProtobufu             = "com.thesamet.scalapb" %% "scalapb-runtime"                            % V.scalapb % "protobuf"
+    val scalapbRuntime               = "com.thesamet.scalapb" %% "scalapb-runtime"                            % V.scalapb withSources()
+    val scalapbProtobufu             = "com.thesamet.scalapb" %% "scalapb-runtime"                            % V.scalapb % "protobuf" withSources()
 
-    val chimney                    = "io.scalaland"       %% "chimney"                        % V.chimney
-    val chimneyProtobufs           = "io.scalaland"       %% "chimney-protobufs"              % V.chimney
-    val chimneyJavaCollections     = "io.scalaland"       %% "chimney-java-collections"       % V.chimney
+    val chimney                    = "io.scalaland"       %% "chimney"                        % V.chimney withSources()
+    val chimneyProtobufs           = "io.scalaland"       %% "chimney-protobufs"              % V.chimney withSources()
+    val chimneyJavaCollections     = "io.scalaland"       %% "chimney-java-collections"       % V.chimney withSources()
 
-    val http4s                     = "org.http4s"         %% "http4s-ember-server"            % V.http4s
+    val http4s                     = "org.http4s"         %% "http4s-ember-server"            % V.http4s withSources()
 
-    val avro                       = "org.apache.avro"     % "avro"                           % V.avroCompilerVersion
+    val avro                       = "org.apache.avro"     % "avro"                           % V.avroCompilerVersion withSources()
 
-    val fs2Kafka                   = "com.github.fd4s"    %% "fs2-kafka"                      % V.fs2Kafka
-    val munit                      = "org.scalameta"      %% "munit"                          % V.munit % Test
-    val catsMunit                  = "org.typelevel"      %% "munit-cats-effect"              % V.munitCatsEffect % Test
+    val fs2Kafka                   = "com.github.fd4s"    %% "fs2-kafka"                      % V.fs2Kafka withSources()
+    val munit                      = "org.scalameta"      %% "munit"                          % V.munit % Test withSources()
+    val catsMunit                  = "org.typelevel"      %% "munit-cats-effect"              % V.munitCatsEffect % Test withSources()
 
     // Cassandra
     // https://github.com/nMoncho/helenus3
-    val helenus                    = "net.nmoncho"        %% "helenus-core"                   % V.helenus
+    val helenus                    = "net.nmoncho"        %% "helenus-core"                   % V.helenus withSources()
 
-    val scala3Compiler             = "org.scala-lang"     %% "scala3-compiler"                % V.scalaLatestVersion
+    val scala3Compiler             = "org.scala-lang"     %% "scala3-compiler"                % V.scalaLatestVersion withSources()
 
-    val otel4s_inst_metrics        = "org.typelevel"      %% "otel4s-instrumentation-metrics"             % V.otel4s
-    val otel4s                     = "org.typelevel"      %% "otel4s-oteljava"                            % V.otel4s
-    val otel4s_otelj_ctx_storage   = "org.typelevel"      %% "otel4s-oteljava-context-storage"            % V.otel4s
-    val opentelemetry_expr_otlp    = "io.opentelemetry"    % "opentelemetry-exporter-otlp"                % V.opentelemetry // % Runtime
-    val opentelemetry_autoconf     = "io.opentelemetry"    % "opentelemetry-sdk-extension-autoconfigure"  % V.opentelemetry // % Runtime
-    val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.32.0" // % "runtime"
+    val otel4s_inst_metrics        = "org.typelevel"      %% "otel4s-instrumentation-metrics"             % V.otel4s withSources()
+    val otel4s                     = "org.typelevel"      %% "otel4s-oteljava"                            % V.otel4s withSources()
+    val otel4s_otelj_ctx_storage   = "org.typelevel"      %% "otel4s-oteljava-context-storage"            % V.otel4s withSources()
+    val opentelemetry_expr_otlp    = "io.opentelemetry"    % "opentelemetry-exporter-otlp"                % V.opentelemetry withSources() // % Runtime
+    val opentelemetry_autoconf     = "io.opentelemetry"    % "opentelemetry-sdk-extension-autoconfigure"  % V.opentelemetry withSources() // % Runtime
+    val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.34.0" withSources() // % "runtime"
 
   }
 
@@ -209,6 +214,11 @@ object Dependencies {
     Deps.distageCore,
     Deps.distageConfig,
     Deps.distagePlugins,
+    Deps.logstage,
+    Deps.logstage_circe,
+    Deps.logstage_adapter_slf4j,
+    Deps.logstage_distage_extension,
+    Deps.logstage_sink_slf4j,
     Deps.akkaDiscovery,
     Deps.akkaKubernetes,
     Deps.iron,

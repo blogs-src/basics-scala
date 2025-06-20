@@ -8,6 +8,8 @@ import com.wallet.proto.messages.commands
 import org.typelevel.otel4s.trace.Tracer
 import org.typelevel.otel4s.trace.Span
 
+import logstage.LogIO
+
 trait ExceptionGenerator[F]:
   def generateException(msg: String): Throwable
 
@@ -19,7 +21,7 @@ trait ClusteringWalletGrpcService[F[_]] {
 }
 
 trait ClusteringWalletGrpcService2[F[_]] {
-  def getBalance(request: GetBalanceRequest, ctx: Metadata)(using span: Span[F], tracer: Tracer[F]): F[commands.Balance]
+  def getBalance(request: GetBalanceRequest, ctx: Metadata)(using span: Span[F], log: LogIO[F], tracer: Tracer[F]): F[commands.Balance]
 }
 
 trait WalletServiceIO[F[_]]:

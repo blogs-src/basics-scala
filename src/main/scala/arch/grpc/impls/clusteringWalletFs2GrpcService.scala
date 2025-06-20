@@ -8,7 +8,6 @@ import io.scalaland.chimney.dsl.*
 import cats.mtl.*
 import com.wallet.proto.messages.commands
 import org.typelevel.otel4s.trace.Tracer
-
 import cats.data.EitherT
 import cats.effect.*
 import cats.implicits.*
@@ -32,6 +31,8 @@ import org.typelevel.otel4s.trace.Tracer
 import org.typelevel.otel4s.trace.Span
 
 import scala.jdk.CollectionConverters.*
+
+import logstage.LogIO
 
 class ClusteringWalletFs2GrpcServiceImpl[G: ExceptionGenerator](service: ClusteringWalletGrpcService[Result], transformers: MyTransformers[G])
     extends WalletCommandRpcServiceFs2Grpc[cats.effect.IO, Metadata] {
@@ -89,8 +90,12 @@ class ClusteringWalletGrpcServiceImpl[F[_]: Tracer, G: ExceptionGenerator](servi
           println(s"otel4s: ${span.context}")
 //          println(s"traceid: ${span.context.traceId}")
 
+          val log = auditing.logger.getLogger().withCustomContext(
+              "traceId" -> span.context.traceIdHex,
+            )
           for{
-            res <- service.getBalance(request, ctx)(using span)
+            _ <- log.info("calling service.getBalance")
+            res <- service.getBalance(request, ctx)(using span, log)
             _ <- span.addAttribute(Attribute("traceId", span.context.traceIdHex))
           } yield res
 
@@ -114,7 +119,7 @@ class ClusteringWalletGrpcServiceImpl2[F[_], G: ExceptionGenerator](service: Wal
         val (key, value) = e.toList.head
         FR.raise(ErrorsBuilder.badRequestError(s"$key: $value"))
 
-  def getBalance(request: GetBalanceRequest, ctx: Metadata)(using span: Span[F], tracer: Tracer[F]): F[commands.Balance] = {
+  def getBalance(request: GetBalanceRequest, ctx: Metadata)(using span: Span[F], log: LogIO[F], tracer: Tracer[F]): F[commands.Balance] = {
     commands.Balance(100).pure[F]
     // MT.raiseError(ErrorsBuilder.notFoundError("Not found"))
     // FR.raise(ErrorsBuilder.badRequestError("bad request"))
@@ -136,7 +141,7 @@ class ClusteringWalletGrpcServiceImpl2[F[_], G: ExceptionGenerator](service: Wal
       //res <- service.getBalance(r.id.get.value.get)
       //        _ <- F.pure{println(s"yeeeee ${Try{r.id.get.value.get}}")}
       res <- service.getBalance(r.id.value)(using Map("traceId" -> span.context.traceIdHex))
-      //        res <- service.getBalance("r.id.value")
+      _ <- log.info("Validation done...")
     } yield commands.Balance(res.value)
 
 
