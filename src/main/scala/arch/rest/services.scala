@@ -29,7 +29,6 @@ class WalletServiceImpl[F[_]: Functor](channel: io.grpc.ManagedChannel)(using F:
   extends WalletService[F]:
 
   def getBalance(id: wops.RequestId)(span: Span[F], log: LogIO[F], tracer: Tracer[F]): F[wops.Balance] = {
-    val resX = padmin.WalletCommandRpcServiceGrpc.WalletCommandRpcServiceBlockingStub(channel).getBalance(padmin.GetBalanceRequest(Some(padmin.RequestId(Some("b")))))
     val clientOptions = ClientOptions.default
     def mkMetadata(headers: Map[String, String]): F[io.grpc.Metadata] = {
       val metadata = new io.grpc.Metadata()
@@ -38,17 +37,12 @@ class WalletServiceImpl[F[_]: Functor](channel: io.grpc.ManagedChannel)(using F:
       F.pure{metadata}
     }
 
-    val c = padmin.WalletCommandRpcServiceFs2Grpc.mkClient[F, Map[String, String]](???, channel, mkMetadata)
-    val rr: F[cmds.Balance] = c.getBalance(padmin.GetBalanceRequest(Some(padmin.RequestId(Some("b")))), Map("name" -> "yo"))
-//    ff.map[cmds.Balance, wops.Balance](rr, xr => wops.Balance(3))
-//    .flatMap(res1 => res1.transformInto[wops.Balance])
-//    Dispatcher.parallel[F].use { dispatcher =>
-//      val c = padmin.WalletCommandRpcServiceFs2Grpc.mkClient[F, Map[String, String]](dispatcher, channel, mkMetadata, clientOptions)
-//      c.getBalance(padmin.GetBalanceRequest(Some(padmin.RequestId(Some("b")))), Map("name" -> "yo"))
-//      .flatMap(res1 => res1.transformInto[wops.Balance])
-//    }
-//    ???
-    
+    Dispatcher.parallel[F].use { dispatcher =>
+      val c: com.wallet.demo.clustering.rpc.admin.WalletCommandRpcServiceFs2Grpc[F, Map[String, String]] = padmin.WalletCommandRpcServiceFs2Grpc.mkClient[F, Map[String, String]](dispatcher, channel, mkMetadata)
+      val x = c.getBalance(padmin.GetBalanceRequest(Some(padmin.RequestId(Some("b")))), Map("name" -> "yo"))
+      val mf = summon[Functor[F]]
+      mf.map[cmds.Balance, wops.Balance](x)((x1: cmds.Balance) => x1.transformInto[wops.Balance])
+    }
     }
 
 
