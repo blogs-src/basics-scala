@@ -13,22 +13,42 @@ import smithy4s.http4s.SimpleRestJsonBuilder
 
 import org.typelevel.otel4s.trace.Tracer
 
+import cats.data.EitherT
+import com.wallet.demo.clustering.rpc.admin as padmin
+import cats.mtl.*
+import fs2.grpc.client.ClientOptions
+import cats.effect.std.Dispatcher
+
 object Main extends IOApp.Simple:
   val run = {
     IOLocal(Option.empty[domain.RequestInfo[Result]]).flatMap { local =>
 
       val channel: GrpcClientToWritesideResource = GrpcClientToWritesideResource(9999)
       val t = channel.resource.flatMap{ ch =>
-        auditing.Tracer.makeOtel.flatMap { (tracer: Tracer[Result]) =>
-          val res: Resource[IO, HttpRoutes[IO]] = (new SmithyResource)
-            .all(local, tracer, ch)
-          monadConversions.convertResource(res, monadConversions.ioToResult).map(x => (x, tracer, ch))
+
+        //    val clientOptions = ClientOptions.default
+        def mkMetadata(headers: Map[String, String]): Result[io.grpc.Metadata] = {
+          val metadata = new io.grpc.Metadata()
+          val key = io.grpc.Metadata.Key.of("my-header", io.grpc.Metadata.ASCII_STRING_MARSHALLER)
+          metadata.put(key, "my-value")
+          EitherT.right(IO.pure(metadata))
         }
+
+        val clientResource = padmin.WalletCommandRpcServiceFs2Grpc.mkClientResource[Result, Map[String, String]](ch, mkMetadata)
+        clientResource.flatMap{ client =>
+          auditing.Tracer.makeOtel.flatMap { (tracer: Tracer[Result]) =>
+            val res: Resource[IO, HttpRoutes[IO]] = (new SmithyResource)
+              .all(local, tracer, client)
+            monadConversions.convertResource(res, monadConversions.ioToResult).map(x => (x, tracer, ch, client))
+          }
+
+        }
+
       }
 
       val t1 = monadConversions.convertResource(t, monadConversions.resultToIO)
-      
-      t1.flatMap { (routes, _, _) =>
+
+      t1.flatMap { (routes, _, _, _) =>
         EmberServerBuilder
           .default[IO]
           .withPort(port"9000")

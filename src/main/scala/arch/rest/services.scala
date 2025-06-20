@@ -25,24 +25,12 @@ import cats.effect.std.Dispatcher
 trait WalletService[F[_]: Functor]:
   def getBalance(id: wops.RequestId)(span: Span[F], log: LogIO[F], tracer: Tracer[F]): F[wops.Balance]
 
-class WalletServiceImpl[F[_]: Functor](channel: io.grpc.ManagedChannel)(using F: Async[F], FR: Raise[F, ServiceError], M: Monad[F], MT: MonadThrow[F])
+class WalletServiceImpl[F[_]: Functor](client: com.wallet.demo.clustering.rpc.admin.WalletCommandRpcServiceFs2Grpc[F, Map[String, String]])(using F: Async[F], FR: Raise[F, ServiceError], M: Monad[F], MT: MonadThrow[F])
   extends WalletService[F]:
 
   def getBalance(id: wops.RequestId)(span: Span[F], log: LogIO[F], tracer: Tracer[F]): F[wops.Balance] = {
-    val clientOptions = ClientOptions.default
-    def mkMetadata(headers: Map[String, String]): F[io.grpc.Metadata] = {
-      val metadata = new io.grpc.Metadata()
-      val key = io.grpc.Metadata.Key.of("my-header", io.grpc.Metadata.ASCII_STRING_MARSHALLER)
-      metadata.put(key, "my-value")
-      F.pure{metadata}
-    }
-
-    Dispatcher.parallel[F].use { dispatcher =>
-      val c: com.wallet.demo.clustering.rpc.admin.WalletCommandRpcServiceFs2Grpc[F, Map[String, String]] = padmin.WalletCommandRpcServiceFs2Grpc.mkClient[F, Map[String, String]](dispatcher, channel, mkMetadata)
-      val x = c.getBalance(padmin.GetBalanceRequest(Some(padmin.RequestId(Some("b")))), Map("name" -> "yo"))
-      val mf = summon[Functor[F]]
-      mf.map[cmds.Balance, wops.Balance](x)((x1: cmds.Balance) => x1.transformInto[wops.Balance])
-    }
+      val x = client.getBalance(padmin.GetBalanceRequest(Some(padmin.RequestId(Some("b")))), Map("name" -> "yo"))
+      Functor[F].map[cmds.Balance, wops.Balance](x)((x1: cmds.Balance) => x1.transformInto[wops.Balance])
     }
 
 
