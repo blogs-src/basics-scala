@@ -28,7 +28,7 @@ object WalletEventSourcing:
    import akka.actor.typed.ActorRef
    import akka.actor.typed.scaladsl.adapter.TypedActorSystemOps
 
-   import arch.EntityWallet.Entity as WalletEntity
+//   import arch.EntityWallet.Entity as WalletEntity
    import akka.cluster.typed.*
    import akka.actor.ActorSystem as UntypedActorSystem
    import akka.cluster.ClusterEvent.*
@@ -197,10 +197,10 @@ object WalletEventSourcing:
 
               val walletSharding = WalletSharding()
 
-              def mkEntity(entityContext: EntityContext[CmdInst]): Behavior[CmdInst] = WalletEntity(
-                PersistenceId(
-                  TypeKeys.wallet.name,
-                  entityContext.entityId))
+//              def mkEntity(entityContext: EntityContext[CmdInst]): Behavior[CmdInst] = WalletEntity(
+//                PersistenceId(
+//                  TypeKeys.wallet.name,
+//                  entityContext.entityId))
 
               walletSharding.init(
                 Entity(TypeKeys.wallet)(createBehavior =
