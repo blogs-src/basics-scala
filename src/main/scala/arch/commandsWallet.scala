@@ -13,3 +13,12 @@ object WalletCommands:
       case DebitCmd(value: Debit)
       case GetBalanceCmd
       case StopCmd
+
+   val responseTypes = List(
+     (CommandsADT.CreateWalletCmd, OkResponse),
+     (CommandsADT.CreditCmd, OkResponse),
+     (CommandsADT.DebitCmd, OkResponse),
+     (CommandsADT.DebitCmd, Balance),
+     (CommandsADT.DebitCmd, OkResponse),
+   )
+
