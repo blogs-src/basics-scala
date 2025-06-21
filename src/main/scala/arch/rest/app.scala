@@ -41,7 +41,9 @@ object Main extends IOApp.Simple:
   val run = {
     IOLocal(Option.empty[domain.RequestInfo[Result]]).flatMap { local =>
 
-      val channel: GrpcClientToWritesideResource = GrpcClientToWritesideResource(9999)
+      val grpcTargetPort = 9999
+      val httpServerPort = 9000
+      val channel: GrpcClientToWritesideResource = GrpcClientToWritesideResource(grpcTargetPort)
       val t = for{
         ch <- channel.resource
         client <- padmin.WalletCommandRpcServiceFs2Grpc.mkClientResource[Result, Map[String, String]](ch, mkMetadata)
@@ -55,7 +57,7 @@ object Main extends IOApp.Simple:
       t1.flatMap { (routes, _, _, _) =>
         EmberServerBuilder
           .default[IO]
-          .withPort(port"9000")
+          .withPort(Port.fromInt(httpServerPort).get)
           .withHost(host"0.0.0.0")
           .withHttpApp(routes.orNotFound)
           .build

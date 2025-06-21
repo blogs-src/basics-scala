@@ -20,6 +20,7 @@ import fs2.grpc.syntax.all.*
 import io.grpc.*
 import cats.mtl.*
 
+import com.wallet.demo.clustering.rpc.admin as padmin
 
 object WalletEventSourcing:
 
@@ -146,10 +147,22 @@ object WalletEventSourcing:
 
 //                      val wServiceIO = WalletServiceIOImpl2[Result](ws)
 
+                      val transformers = new MyTransformers
+                      val group = for{
+                        tracer <- auditing.Tracer.makeOtel("otel-akka-app")
+                        sImpl2 = new ClusteringWalletGrpcServiceImpl2(WalletServiceIOImpl[Result](ws))(using transformers)
+                        sImpl = new ClusteringWalletGrpcServiceImpl(sImpl2)(using transformers)(using tracer)
+                        res <- monadConversions.convertResource(padmin.WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
+                          new ClusteringWalletFs2GrpcServiceImpl(sImpl, transformers)
+                        ), monadConversions.ioToResult)
+                      } yield res
+
+                      val rx = monadConversions.convertResource(group, monadConversions.resultToIO)
+                      
                       val rpcResource: Resource[IO, (io.grpc.Server, Option[Boolean])] =
                         for {
-                          serverDefinition <- grpcApi.createService[GrpcServiceException](WalletServiceIOImpl[Result](ws))
-                          server <- grpcApi.createIO[IO](serverDefinition._1)
+                          serverDefinition <-  rx //grpcApi.createService[GrpcServiceException](WalletServiceIOImpl[Result](ws))
+                          server <- grpcApi.createIO[IO](serverDefinition)
                         } yield (server, None)
 
                       val runingRpcIO = rpcResource.evalMap(
@@ -158,11 +171,18 @@ object WalletEventSourcing:
                               (a, c) => ()
                             )
                           }
-                        ).useForever
-                        .handleErrorWith{error =>
+                        )
+                        .use ( _ => IO.never )
+                        .handleErrorWith { error =>
                           println(s"===> ${error.getMessage}")
                           IO.raiseError(error)
-                         }
+                        }
+
+                      //                        .useForever
+//                        .handleErrorWith{error =>
+//                          println(s"===> ${error.getMessage}")
+//                          IO.raiseError(error)
+//                         }
 
                       IO.race(shutdown.get, runingRpcIO)
                   }
