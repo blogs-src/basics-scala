@@ -2,27 +2,12 @@ package arch
 
 import cats.data.EitherT
 import cats.effect.*
-import com.wallet.demo.clustering.rpc.admin.*
 import fs2.grpc.syntax.all.*
 import io.grpc.*
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
-import io.opentelemetry.api.common.Attributes
-import io.opentelemetry.sdk.trace.`export`.BatchSpanProcessor
-import org.typelevel.otel4s.Otel4s
-import org.typelevel.otel4s.oteljava.OtelJava
 //import io.grpc.okhttp.OkHttpServerBuilder
 import io.grpc.protobuf.services.ProtoReflectionServiceV1
 // import io.scalaland.chimney.*
-
-import org.typelevel.otel4s.Attribute
-import org.typelevel.otel4s.trace.Tracer
-
-import _root_.io.opentelemetry.sdk.OpenTelemetrySdk
-import _root_.io.opentelemetry.api.OpenTelemetry
-import _root_.io.opentelemetry.sdk.trace.SdkTracerProvider
-import _root_.io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
-import _root_.io.opentelemetry.context.propagation.ContextPropagators
-import _root_.io.opentelemetry.sdk.trace.`export`.SimpleSpanProcessor
 
 import cats.effect.kernel.Resource
 import cats.~>
@@ -31,6 +16,8 @@ import cats.syntax.all.*
 
 import cats.mtl.*
 import org.typelevel.otel4s.trace.Tracer
+
+import com.wallet.demo.clustering.rpc.admin.*
 
 object monadConversions:
   //  def ioToResult[T](io: IO[T]): Result[T] = ???
@@ -58,22 +45,14 @@ object monadConversions:
       )
     }
   }
-  
+
 class GrpcServerResource:
-
-
   def createService[G: ExceptionGenerator]
   (
     wService: WalletServiceIO[Result],
-//    tracer: Tracer[Result],
   )/*: Resource[IO, ServerServiceDefinition]*/ = {
     val transformers = new MyTransformers
-    //    given t: Tracer[Result] = tracer
     val resOtel = auditing.Tracer.makeOtel("otel-akka-app")
-//    val res: Resource[IO, ServerServiceDefinition] = WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
-//      new ClusteringWalletFs2GrpcServiceImpl[G](sImpl, transformers)
-//    )
-//    val res2: Resource[Result, ServerServiceDefinition] = convertResource(res, ioToResult)
     val rx : Resource[Result, (ServerServiceDefinition, Tracer[Result])]= resOtel.flatMap{ (tracer: Tracer[Result]) =>
           given Tracer[Result] = tracer
           val sImpl2 = new ClusteringWalletGrpcServiceImpl2[Result, G](wService)(using transformers)
@@ -84,17 +63,14 @@ class GrpcServerResource:
           monadConversions.convertResource(res, monadConversions.ioToResult).map( x => (x, tracer))
         }
     val rx2: Resource[IO, (ServerServiceDefinition, Tracer[Result])] = monadConversions.convertResource(rx, monadConversions.resultToIO)
-
 //    res
     rx2
-
   }
 
   //    def run[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] =
   def createIO[F[_] : Async](service: ServerServiceDefinition): Resource[F, Server] = {
     //      val creds = TlsServerCredentials.create(certChainFile, privateKeyFile)
     //      val creds = InsecureServerCredentials.create()
-
     NettyServerBuilder
       .forPort(9999)
       //      OkHttpServerBuilder
@@ -103,8 +79,3 @@ class GrpcServerResource:
       .addService(ProtoReflectionServiceV1.newInstance())
       .resource[F]
   }
-  // otel4s
-
-//  def tracerR: Resource[IO, Tracer[IO]] =
-//    OtelJava.autoConfigured[IO]().evalMap(_.tracerProvider.get("Example"))
-

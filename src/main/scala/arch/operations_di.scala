@@ -18,7 +18,6 @@ import akka.persistence.typed.PersistenceId
 import akka.management.scaladsl.AkkaManagement
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter.TypedActorSystemOps
-import arch.EntityWallet.Entity as WalletEntity
 import akka.cluster.typed.*
 import akka.actor.ActorSystem as UntypedActorSystem
 import akka.cluster.ClusterEvent.*
