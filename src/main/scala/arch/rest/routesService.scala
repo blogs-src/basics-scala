@@ -95,11 +95,10 @@ class WalletOpsImpl[F[_]](using F: Async[F])
 
           for{
             _ <- log.info("calling rest_service.getBalance")
-            res <- ser.getBalance(id)(span, log, rinfo.tracer)
+            res <- ser.getBalance(id)(using span, log, rinfo.tracer)
             _ <- span.addAttribute(Attribute("traceId", span.context.traceIdHex))
           } yield res
-          
-          
+
         }
     }
     }

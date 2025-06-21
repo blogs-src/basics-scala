@@ -120,12 +120,10 @@ lazy val grpcApi = project
 //      .map(_.copy(outputPath = (Compile / sourceManaged).value / "scala")) //intellij specific
 //      .:+(scalapb.validate.gen(GeneratorOption.FlatPackage) -> (Compile / sourceManaged).value / "scala": protocbridge.Target),
 
-//     PB.protocVersion := "3.25.2",
     //https://repo1.maven.org/maven2/com/google/protobuf/protoc/
     //https://repo1.maven.org/maven2/com/google/protobuf/protoc/4.31.1/protoc-4.31.1-linux-x86_64.exe
     //  100.0% [##########] 9.7 MiB (16.2 MiB / s)
     PB.protocVersion := "4.31.1",
-//      PB.protocVersion := "4.29.2",
     // fs2GrpcOutputPath := (Compile / baseDirectory).value / "src/main/scala/fs2-grpc",
     // scalapbProtobufDirectory := (Compile / baseDirectory).value / "src/main/scala/scalapb",
   )
@@ -170,6 +168,7 @@ lazy val root = project
     },
     libraryDependencies ++= HybridDeps,
     Compile / run / javaOptions += "-Dcats.effect.trackFiberContext=true",
+    Compile / run / javaOptions += "-Dotel.java.global-autoconfigure.enabled=false",
   )
   .dependsOn(grpcApi)
   .dependsOn(restApi)

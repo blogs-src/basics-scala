@@ -2,14 +2,6 @@ package arch
 
 import cats.data.EitherT
 import cats.effect.*
-import com.wallet.demo.clustering.rpc.admin.*
-import io.grpc.*
-import io.scalaland.chimney.dsl.*
-import cats.mtl.*
-import com.wallet.proto.messages.commands
-import org.typelevel.otel4s.trace.Tracer
-import cats.data.EitherT
-import cats.effect.*
 import cats.implicits.*
 import com.google.rpc.Code
 import com.wallet.demo.clustering.rpc.admin.*
@@ -32,6 +24,7 @@ import org.typelevel.otel4s.trace.Span
 
 import scala.jdk.CollectionConverters.*
 
+import io.opentelemetry.api.trace.{Span => JSpan}
 import logstage.LogIO
 
 class ClusteringWalletFs2GrpcServiceImpl[G: ExceptionGenerator](service: ClusteringWalletGrpcService[Result], transformers: MyTransformers[G])
@@ -42,7 +35,6 @@ class ClusteringWalletFs2GrpcServiceImpl[G: ExceptionGenerator](service: Cluster
 
 }
 
-import io.opentelemetry.api.trace.{Span => JSpan}
 
 class ClusteringWalletGrpcServiceImpl[F[_]: Tracer, G: ExceptionGenerator](service: ClusteringWalletGrpcService2[F])(using transformers: MyTransformers[G])(using F: Async[F], FR: Raise[F, ServiceError], M: Monad[F], MT: MonadThrow[F])
   extends ClusteringWalletGrpcService[F]:

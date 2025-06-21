@@ -157,11 +157,11 @@ object Dependencies {
     val scala3Compiler             = "org.scala-lang"     %% "scala3-compiler"                % V.scalaLatestVersion withSources()
 
     val otel4s_inst_metrics        = "org.typelevel"      %% "otel4s-instrumentation-metrics"             % V.otel4s withSources()
-    val otel4s                     = "org.typelevel"      %% "otel4s-oteljava"                            % V.otel4s withSources()
+    val otel4s                     = "org.typelevel"      %% "otel4s-oteljava"                            % V.otel4s exclude("io.opentelemetry", "opentelemetry-sdk-extension-autoconfigure") withSources()
     val otel4s_otelj_ctx_storage   = "org.typelevel"      %% "otel4s-oteljava-context-storage"            % V.otel4s withSources()
     val opentelemetry_expr_otlp    = "io.opentelemetry"    % "opentelemetry-exporter-otlp"                % V.opentelemetry withSources() // % Runtime
     val opentelemetry_autoconf     = "io.opentelemetry"    % "opentelemetry-sdk-extension-autoconfigure"  % V.opentelemetry withSources() // % Runtime
-    val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.34.0" withSources() // % "runtime"
+    val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.34.0" withSources() // % Runtime
 
   }
 
