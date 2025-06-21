@@ -35,27 +35,12 @@ object Middleware {
                        local: IOLocal[Option[domain.RequestInfo[Result]]],
                        tracer: Tracer[Result]): HttpRoutes[IO] =
     HttpRoutes[IO] { request =>
-//      val requestInfo = for {
-//        contentType <- request.headers.get[`Content-Type`].map(ct => s"${ct.mediaType.mainType}/${ct.mediaType.subType}")
-//        userAgent <- request.headers.get[`User-Agent`].map(_.product.toString)
-//      } yield RequestInfo(
-//        contentType,
-//        userAgent
-//      )
-
-//      tracer.span("Work.DoWork2").use { span =>
-//        val requestInfo = Some(domain.RequestInfo[Result](Map("a" -> "b"), tracer, span))
-//        OptionT.liftF(local.set(requestInfo)) *> routes(request)
-//      }
-
       val hnames = request.headers.headers.map(_.name.toString)
       val hvals = hnames.map(key => (key, request.headers.get(CIString(key)).map(_.head.value).get))
       val hvals2 = Map.from(hvals)
       val requestInfo = Some(domain.RequestInfo[Result](hvals2, tracer))
       OptionT.liftF(local.set(requestInfo)) *> routes(request)
-
     }
-
 }
 
 object Converter:
@@ -103,7 +88,6 @@ class WalletOpsImpl[F[_]](using F: Async[F])
         rinfo.tracer.span("Work.DoWork2", Attribute("custom_tag", "aa")).use { span =>
           println(s"jctx: ${JSpan.current().getSpanContext}") // get a span from a ThreadLocal
           println(s"otel4s: ${span.context}")
-
 
           val log = auditing.Logger.getLogger("logs-rest").withCustomContext(
             "traceId" -> span.context.traceIdHex,

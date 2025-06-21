@@ -27,7 +27,7 @@ import cats.mtl.*
 import org.typelevel.otel4s.trace.Tracer
 
 object Tracer:
-  def makeOtel: Resource[Result, Tracer[Result]] = {
+  def makeOtel(appName: String): Resource[Result, Tracer[Result]] = {
     val jaegerEndpoint = "http://localhost:4317"
     import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter
     import java.util.concurrent.TimeUnit
@@ -41,7 +41,8 @@ object Tracer:
 
     val serviceNameResource = io.opentelemetry.sdk.resources.Resource.create(
       Attributes.of(io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME,
-        "otel-basic-app"))
+        appName
+      ))
     val jaegerOtlpExporter = OtlpGrpcSpanExporter.builder.setEndpoint(jaegerEndpoint).setTimeout(30, TimeUnit.SECONDS).build
     val sdkTracerProvider = SdkTracerProvider.builder()
       .addSpanProcessor(BatchSpanProcessor.builder(jaegerOtlpExporter).build)

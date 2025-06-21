@@ -53,6 +53,8 @@ support/observability/data/grafana/grafana.db
 notes.txt
 notes.adoc
 logs/
+logs-grpc/
+logs-rest/
 
 # src/main/scala/components/
 *.scalax

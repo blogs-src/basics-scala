@@ -69,7 +69,7 @@ class GrpcServerResource:
   )/*: Resource[IO, ServerServiceDefinition]*/ = {
     val transformers = new MyTransformers
     //    given t: Tracer[Result] = tracer
-    val resOtel = auditing.Tracer.makeOtel
+    val resOtel = auditing.Tracer.makeOtel("otel-akka-app")
 //    val res: Resource[IO, ServerServiceDefinition] = WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
 //      new ClusteringWalletFs2GrpcServiceImpl[G](sImpl, transformers)
 //    )

@@ -29,14 +29,15 @@ object Main extends IOApp.Simple:
         //    val clientOptions = ClientOptions.default
         def mkMetadata(headers: Map[String, String]): Result[io.grpc.Metadata] = {
           val metadata = new io.grpc.Metadata()
-          val key = io.grpc.Metadata.Key.of("my-header", io.grpc.Metadata.ASCII_STRING_MARSHALLER)
-          metadata.put(key, "my-value")
+          for (k, v) <- headers do
+            val key = io.grpc.Metadata.Key.of(k, io.grpc.Metadata.ASCII_STRING_MARSHALLER)
+            metadata.put(key, v)
           EitherT.right(IO.pure(metadata))
         }
 
         val clientResource = padmin.WalletCommandRpcServiceFs2Grpc.mkClientResource[Result, Map[String, String]](ch, mkMetadata)
         clientResource.flatMap{ client =>
-          auditing.Tracer.makeOtel.flatMap { (tracer: Tracer[Result]) =>
+          auditing.Tracer.makeOtel("otel-rest-app").flatMap { (tracer: Tracer[Result]) =>
             val res: Resource[IO, HttpRoutes[IO]] = (new SmithyResource)
               .all(local, tracer, client)
             monadConversions.convertResource(res, monadConversions.ioToResult).map(x => (x, tracer, ch, client))
