@@ -15,7 +15,7 @@ object Serializers:
 
    import arch.TransportError
    // import util.Result
-   import akka.actor.typed.{ ActorSystem => TypedActorSystem }
+   import akka.actor.typed.ActorSystem as TypedActorSystem
 
    def register(
      sys: TypedActorSystem[
@@ -47,7 +47,7 @@ object Serializers:
       mapperJson.registerModule(module)
 
    class TransportErrorSerializer extends StdSerializer[TransportError](classOf[TransportError]):
-      import TransportError._
+      import TransportError.*
 
       override def serialize(
         value:    TransportError,
@@ -66,7 +66,7 @@ object Serializers:
          gen.writeString(strValue)
 
    class TransportErrorDeserializer extends StdDeserializer[TransportError](classOf[TransportError]):
-      import TransportError._
+      import TransportError.*
 
       override def deserialize(p: JsonParser, ctxt: DeserializationContext): TransportError =
         p.getText match

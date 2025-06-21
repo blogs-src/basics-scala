@@ -30,15 +30,14 @@ import arch.components.wallet.WalletContainer as obj
 
 def mkEntity(entityContext: EntityContext[CmdInst]): Behavior[CmdInst] =
    def ctxModule =
-     new ModuleDef {
-       make[obj.EntityConfig].from {
-         val pluginConfig = PluginConfig.cached(packagesEnabled = Seq("arch.components.wallet"))
-         val appModules = PluginLoader().load(pluginConfig)
-         val module = appModules.result.merge
-         val entity = Injector().produceGet[obj.EntityConfig](module).unsafeGet()
-         entity
-       }
-     }
+     new ModuleDef:
+        make[obj.EntityConfig].from {
+          val pluginConfig = PluginConfig.cached(packagesEnabled = Seq("arch.components.wallet"))
+          val appModules = PluginLoader().load(pluginConfig)
+          val module = appModules.result.merge
+          val entity = Injector().produceGet[obj.EntityConfig](module).unsafeGet()
+          entity
+        }
 
    val res: Try[Behavior[CmdInst]] = Try {
      given logger: Logger = LoggerFactory.getLogger("di")
@@ -53,9 +52,8 @@ def mkEntity(entityContext: EntityContext[CmdInst]): Behavior[CmdInst] =
      }
    }
 
-   res match {
+   res match
      case Success(value)     => value
      case Failure(exception) =>
        exception.printStackTrace()
        Behaviors.empty
-   }

@@ -3,10 +3,8 @@ package rest
 
 import smithy_rest.wallet_ops as wops
 
-
 import com.wallet.proto.messages.commands as cmds
 import com.wallet.demo.clustering.rpc.admin as padmin
-
 
 import logstage.LogIO
 
@@ -26,34 +24,50 @@ import cats.mtl.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 
-class WalletServiceImpl[F[_]](client: com.wallet.demo.clustering.rpc.admin.WalletCommandRpcServiceFs2Grpc[F, Map[String, String]])(using F: Async[F], FR: Raise[F, ServiceError], M: Monad[F], MT: MonadThrow[F])
-  extends WalletService[F]:
+class WalletServiceImpl[F[_]](
+  client:  com.wallet.demo.clustering.rpc.admin.WalletCommandRpcServiceFs2Grpc[F, Map[String, String]],
+)(
+  using F: Async[F],
+  FR:      Raise[F, ServiceError],
+  M:       Monad[F],
+  MT:      MonadThrow[F])
+    extends WalletService[F]:
 
-  def getBalance(id: wops.RequestId)(using span: Span[F], log: LogIO[F], tracer: Tracer[F]): F[wops.Balance] = {
-    Tracer[F].span("send-request").surround {
-      val r = id.transformInto[padmin.RequestId]
-      for {
+   def getBalance(
+     id:         wops.RequestId,
+   )(
+     using span: Span[F],
+     log:        LogIO[F],
+     tracer:     Tracer[F],
+   ): F[wops.Balance] = Tracer[F].span("send-request").surround {
+     val r = id.transformInto[padmin.RequestId]
+     for
         traceHeaders <- Tracer[F].propagate(Map.empty[String, String])
         _ <- log.info("Sending getBalance to GRPC server")
         x <- client.getBalance(padmin.GetBalanceRequest(Some(r)), traceHeaders)
-      } yield x.transformInto[wops.Balance]
-    }
-  }
+     yield x.transformInto[wops.Balance]
+   }
 
+class WalletServiceImpl2[F[_]](
+  client:  WalletServiceIO[F],
+)(
+  using F: Async[F],
+  FR:      Raise[F, ServiceError],
+  M:       Monad[F],
+  MT:      MonadThrow[F])
+    extends WalletService[F]:
 
-class WalletServiceImpl2[F[_]](client: WalletServiceIO[F])(using F: Async[F], FR: Raise[F, ServiceError], M: Monad[F], MT: MonadThrow[F])
-  extends WalletService[F]:
-
-  def getBalance(id: wops.RequestId)(using span: Span[F], log: LogIO[F], tracer: Tracer[F]): F[wops.Balance] = {
-    Tracer[F].span("send-request").surround {
-      val r = id.transformInto[padmin.RequestId]
-      for {
+   def getBalance(
+     id:         wops.RequestId,
+   )(
+     using span: Span[F],
+     log:        LogIO[F],
+     tracer:     Tracer[F],
+   ): F[wops.Balance] = Tracer[F].span("send-request").surround {
+     val r = id.transformInto[padmin.RequestId]
+     for
         traceHeaders <- Tracer[F].propagate(Map.empty[String, String])
         _ <- log.info("Sending getBalance to GRPC server")
-        x <- client.getBalance(id.value)
-//          res <- F.pure(wops.Balance(100))//.pure[F]
-      } yield x.transformInto[wops.Balance]
-    }
-  }
-
-
+        x <- client.getBalance(id.value)(using traceHeaders)
+     yield x.transformInto[wops.Balance]
+   }

@@ -10,7 +10,29 @@ object WalletServices:
    // @protoService
    // modules/grpc-api/src/main/protobuf/service-clustering.proto
    trait Service:
-      def createWallet(id: String)(using metadata: Map[String, String]=Map.empty): Future[OkResponse | ResultError]
-      def credit(id: String, value: Credit)(using metadata: Map[String, String]=Map.empty): Future[OkResponse | ResultError]
-      def debit(id: String, value: Debit)(using metadata: Map[String, String]=Map.empty): Future[OkResponse | ResultError]
-      def getBalance(id: String)(using metadata: Map[String, String]=Map.empty): Future[Balance | ResultError]
+
+      def createWallet(
+        id: String,
+      )(
+        using metadata: Map[String, String] = Map.empty,
+      ): Future[OkResponse | ResultError]
+
+      def credit(
+        id: String,
+        value: Credit,
+      )(
+        using metadata: Map[String, String] = Map.empty,
+      ): Future[OkResponse | ResultError]
+
+      def debit(
+        id: String,
+        value: Debit,
+      )(
+        using metadata: Map[String, String] = Map.empty,
+      ): Future[OkResponse | ResultError]
+
+      def getBalance(
+        id: String,
+      )(
+        using metadata: Map[String, String] = Map.empty,
+      ): Future[Balance | ResultError]

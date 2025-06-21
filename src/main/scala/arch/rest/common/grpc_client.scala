@@ -9,9 +9,7 @@ import fs2.grpc.syntax.all.*
 
 class GrpcClientToWritesideResource(port: Int):
 
-  def resource: Resource[Result, ManagedChannel] = {
-    NettyChannelBuilder
-      .forAddress("0.0.0.0", port)
-      .usePlaintext()
-      .resource[Result]
-  }
+   def resource: Resource[Result, ManagedChannel] = NettyChannelBuilder
+     .forAddress("0.0.0.0", port)
+     .usePlaintext()
+     .resource[Result]

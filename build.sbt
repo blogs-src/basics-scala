@@ -74,10 +74,10 @@ lazy val appSettings = Seq(
       "-Xmax-inlines",
       "50",
       // "-Yexplicit-nulls",
-      // "-Wunused:all",
+//       "-Wunused:all",
     )
-  // ) ++ Seq("-new-syntax", "-rewrite")
-  // ) ++ Seq("-rewrite", "-indent")
+//   ) ++ Seq("-new-syntax", "-rewrite")
+//   ) ++ Seq("-indent", "-rewrite")
 //   ) ++ Seq("-rewrite", "-source", "3.7-migration")
 )
 

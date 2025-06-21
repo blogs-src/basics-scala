@@ -3,10 +3,8 @@ package rest
 
 import smithy_rest.wallet_ops as wops
 
-
 import com.wallet.proto.messages.commands as cmds
 import com.wallet.demo.clustering.rpc.admin as padmin
-
 
 import logstage.LogIO
 
@@ -27,5 +25,11 @@ import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 
 trait WalletService[F[_]]:
-  def getBalance(id: wops.RequestId)(using span: Span[F], log: LogIO[F], tracer: Tracer[F]): F[wops.Balance]
 
+   def getBalance(
+     id: wops.RequestId,
+   )(
+     using span: Span[F],
+     log: LogIO[F],
+     tracer: Tracer[F],
+   ): F[wops.Balance]

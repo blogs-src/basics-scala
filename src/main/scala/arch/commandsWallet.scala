@@ -19,6 +19,4 @@ object WalletCommands:
      (CommandsADT.CreditCmd, OkResponse),
      (CommandsADT.DebitCmd, OkResponse),
      (CommandsADT.DebitCmd, Balance),
-     (CommandsADT.DebitCmd, OkResponse),
-   )
-
+     (CommandsADT.DebitCmd, OkResponse))

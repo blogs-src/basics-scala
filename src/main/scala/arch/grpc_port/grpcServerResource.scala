@@ -20,43 +20,39 @@ import org.typelevel.otel4s.trace.Tracer
 import com.wallet.demo.clustering.rpc.admin.*
 
 object monadConversions:
-  //  def ioToResult[T](io: IO[T]): Result[T] = ???
-  def convertResource[F[_] : MonadCancelThrow, G[_] : MonadCancelThrow, A](resource: Resource[F, A], nt: F ~> G): Resource[G, A] = {
-    resource.mapK(nt)
-  }
 
-  //  val optionToList: Option ~> List = [A] => (a: Option[A]) => a.toList
+   //  def ioToResult[T](io: IO[T]): Result[T] = ???
+   def convertResource[F[_]: MonadCancelThrow, G[_]: MonadCancelThrow, A](resource: Resource[F, A], nt: F ~> G): Resource[G, A] = resource.mapK(nt)
 
-  val optionToList: Option ~> List = new FunctionK[Option, List]{
-    def apply[A](fa: Option[A]): List[A] = ???
-  }
+   //  val optionToList: Option ~> List = [A] => (a: Option[A]) => a.toList
 
-  val ioToResult: IO ~> Result = new FunctionK[IO, Result]{
-    def apply[A](fa: IO[A]): Result[A] = EitherT.right(fa)
-  }
+   val optionToList: Option ~> List =
+     new FunctionK[Option, List]:
+        def apply[A](fa: Option[A]): List[A] = ???
 
-  val resultToIO: Result ~> IO = new FunctionK[Result, IO]{
-    def apply[A](fa: Result[A]): IO[A] ={
-      fa.foldF(
-        error => IO.raiseError(error),
-        value => IO {
-          value
-        }
-      )
-    }
-  }
+   val ioToResult: IO ~> Result =
+     new FunctionK[IO, Result]:
+        def apply[A](fa: IO[A]): Result[A] = EitherT.right(fa)
+
+   val resultToIO: Result ~> IO =
+     new FunctionK[Result, IO]:
+        def apply[A](fa: Result[A]): IO[A] = fa.foldF(
+          error => IO.raiseError(error),
+          value =>
+            IO {
+              value
+            })
 
 class GrpcServerResource:
 
-  //    def run[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] =
-  def createIO[F[_] : Async](service: ServerServiceDefinition): Resource[F, Server] = {
-    //      val creds = TlsServerCredentials.create(certChainFile, privateKeyFile)
-    //      val creds = InsecureServerCredentials.create()
-    NettyServerBuilder
-      .forPort(9999)
-      //      OkHttpServerBuilder
-      //      .forPort(8090, creds)
-      .addService(service)
-      .addService(ProtoReflectionServiceV1.newInstance())
-      .resource[F]
-  }
+   //    def run[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] =
+   def createIO[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] =
+     //      val creds = TlsServerCredentials.create(certChainFile, privateKeyFile)
+     //      val creds = InsecureServerCredentials.create()
+     NettyServerBuilder
+       .forPort(9999)
+       //      OkHttpServerBuilder
+       //      .forPort(8090, creds)
+       .addService(service)
+       .addService(ProtoReflectionServiceV1.newInstance())
+       .resource[F]

@@ -1,4 +1,4 @@
-import sbt._
+import sbt.*
 
 object Dependencies {
 
@@ -220,7 +220,6 @@ object Dependencies {
     Deps.logstage,
     Deps.logstage_circe,
     Deps.logstage_distage_extension,
-
     Deps.akkaDiscovery,
     Deps.akkaKubernetes,
     Deps.iron,

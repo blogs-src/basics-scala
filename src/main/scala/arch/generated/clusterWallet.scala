@@ -21,6 +21,6 @@ import akka.persistence.typed.scaladsl.Effect
 
 object TypeKeys:
 
-  import FrameWorkCommands.*
+   import FrameWorkCommands.*
 
-  val wallet: EntityTypeKey[Cmd] = EntityTypeKey[Cmd]("wallet")
+   val wallet: EntityTypeKey[Cmd] = EntityTypeKey[Cmd]("wallet")
