@@ -43,14 +43,13 @@ class SmithyResource {
       message.substring(0, i)
   }
 
-  private def example(local: IOLocal[Option[domain.RequestInfo[Result]]], tracer: Tracer[Result], client: com.wallet.demo.clustering.rpc.admin.WalletCommandRpcServiceFs2Grpc[Result, Map[String, String]]): Resource[IO, HttpRoutes[IO]] =
+  private def example(local: IOLocal[Option[domain.RequestInfo[Result]]], tracer: Tracer[Result], s: WalletService[Result]): Resource[IO, HttpRoutes[IO]] =
 
     val getRequestInfo: Result[domain.RequestInfo[Result]] = EitherT.right(local.get.flatMap {
       case Some(value) => IO.pure(value)
       case None => IO.raiseError(new IllegalAccessException("Tried to access the value outside of the lifecycle of an http request"))
     })
 
-    val s = new WalletServiceImpl[Result](client)
     SimpleRestJsonBuilder.routes(
         new WalletOpsImpl[Result](s, getRequestInfo)
           .transform(
@@ -72,6 +71,6 @@ class SmithyResource {
         Middleware.withRequestInfo(routes, local, tracer)
       }
 
-  def all(local: IOLocal[Option[domain.RequestInfo[Result]]], tracer: Tracer[Result], client: com.wallet.demo.clustering.rpc.admin.WalletCommandRpcServiceFs2Grpc[Result, Map[String, String]]): Resource[IO, HttpRoutes[IO]] = example(local, tracer, client)
+  def all(local: IOLocal[Option[domain.RequestInfo[Result]]], tracer: Tracer[Result], s: WalletService[Result]): Resource[IO, HttpRoutes[IO]] = example(local, tracer, s)
 
 }

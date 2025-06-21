@@ -45,8 +45,9 @@ object Main extends IOApp.Simple:
       val t = for{
         ch <- channel.resource
         client <- padmin.WalletCommandRpcServiceFs2Grpc.mkClientResource[Result, Map[String, String]](ch, mkMetadata)
+        s = new WalletServiceImpl[Result](client)
         tracer <- auditing.Tracer.makeOtel("otel-rest-app")
-        z <- monadConversions.convertResource((new SmithyResource).all(local, tracer, client), monadConversions.ioToResult)
+        z <- monadConversions.convertResource((new SmithyResource).all(local, tracer, s), monadConversions.ioToResult)
       } yield (z, tracer, ch, client)
 
       val t1 = monadConversions.convertResource(t, monadConversions.resultToIO)

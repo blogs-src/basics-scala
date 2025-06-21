@@ -34,8 +34,8 @@ class WalletServiceImpl[F[_]](client: com.wallet.demo.clustering.rpc.admin.Walle
       val r = id.transformInto[padmin.RequestId]
       for {
         traceHeaders <- Tracer[F].propagate(Map.empty[String, String])
-        x <- client.getBalance(padmin.GetBalanceRequest(Some(r)), traceHeaders)
         _ <- log.info("Sending getBalance to GRPC server")
+        x <- client.getBalance(padmin.GetBalanceRequest(Some(r)), traceHeaders)
       } yield x.transformInto[wops.Balance]
     }
   }
