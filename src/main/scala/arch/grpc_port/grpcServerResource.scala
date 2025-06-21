@@ -47,25 +47,6 @@ object monadConversions:
   }
 
 class GrpcServerResource:
-//  def createService[G: ExceptionGenerator]
-//  (
-//    wService: WalletServiceIO[Result],
-//  )/*: Resource[IO, ServerServiceDefinition]*/ = {
-//    val transformers = new MyTransformers
-//    val resOtel = auditing.Tracer.makeOtel("otel-akka-app")
-//    val rx : Resource[Result, (ServerServiceDefinition, Tracer[Result])]= resOtel.flatMap{ (tracer: Tracer[Result]) =>
-//          given Tracer[Result] = tracer
-//          val sImpl2 = new ClusteringWalletGrpcServiceImpl2[Result, G](wService)(using transformers)
-//          val sImpl = new ClusteringWalletGrpcServiceImpl[Result, G](sImpl2)(using transformers)
-//          val res: Resource[IO, ServerServiceDefinition] = WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
-//            new ClusteringWalletFs2GrpcServiceImpl[G](sImpl, transformers)
-//          )
-//          monadConversions.convertResource(res, monadConversions.ioToResult).map( x => (x, tracer))
-//        }
-//    val rx2: Resource[IO, (ServerServiceDefinition, Tracer[Result])] = monadConversions.convertResource(rx, monadConversions.resultToIO)
-////    res
-//    rx2
-//  }
 
   //    def run[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] =
   def createIO[F[_] : Async](service: ServerServiceDefinition): Resource[F, Server] = {

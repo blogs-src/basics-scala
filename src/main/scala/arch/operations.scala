@@ -20,6 +20,9 @@ import fs2.grpc.syntax.all.*
 import io.grpc.*
 import cats.mtl.*
 
+import org.http4s.ember.server.*
+//import org.http4s.*
+import com.comcast.ip4s.*
 import com.wallet.demo.clustering.rpc.admin as padmin
 
 object WalletEventSourcing:
@@ -145,38 +148,67 @@ object WalletEventSourcing:
                           val error = BadRequestError(e.code, e.title, e.message)
                           GrpcServiceException(Code.INVALID_ARGUMENT, msg, Seq(error))
 
-//                      val wServiceIO = WalletServiceIOImpl2[Result](ws)
+                      val runingRpcIO = IOLocal(Option.empty[rest.domain.RequestInfo[Result]]).flatMap { local =>
 
-                      val transformers = new MyTransformers
-                      val group = for{
-                        tracer <- auditing.Tracer.makeOtel("otel-akka-app")
-                        sImpl2 = new ClusteringWalletGrpcServiceImpl2(WalletServiceIOImpl[Result](ws))(using transformers)
-                        sImpl = new ClusteringWalletGrpcServiceImpl(sImpl2)(using transformers)(using tracer)
-                        res <- monadConversions.convertResource(padmin.WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
-                          new ClusteringWalletFs2GrpcServiceImpl(sImpl, transformers)
-                        ), monadConversions.ioToResult)
-                      } yield res
+                        val httpServerPort = 9001
+                        val transformers = new MyTransformers
+                        val group = for {
+                          tracer <- auditing.Tracer.makeOtel("otel-akka-app")
+                          xtxt = WalletServiceIOImpl[Result](ws)
+                          sImpl2 = new ClusteringWalletGrpcServiceImpl2(xtxt)(using transformers)
+                          s = new rest.WalletServiceImpl2[Result](xtxt)
+                          z <- monadConversions.convertResource((new rest.SmithyResource).all(local, tracer, s), monadConversions.ioToResult)
+                          sImpl = new ClusteringWalletGrpcServiceImpl(sImpl2)(using transformers)(using tracer)
+                          res <- monadConversions.convertResource(padmin.WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
+                            new ClusteringWalletFs2GrpcServiceImpl(sImpl, transformers)
+                          ), monadConversions.ioToResult)
+                        } yield (res, z)
 
-                      val rx = monadConversions.convertResource(group, monadConversions.resultToIO)
-                      
-                      val rpcResource: Resource[IO, (io.grpc.Server, Option[Boolean])] =
-                        for {
-                          serverDefinition <-  rx //grpcApi.createService[GrpcServiceException](WalletServiceIOImpl[Result](ws))
-                          server <- grpcApi.createIO[IO](serverDefinition)
-                        } yield (server, None)
+                        val rx = monadConversions.convertResource(group, monadConversions.resultToIO)
 
-                      val runingRpcIO = rpcResource.evalMap(
-                          res => {
-                            (IO.pure(res._1.start()), IO.pure{()}).mapN(
-                              (a, c) => ()
-                            )
+                        val rpcResource: Resource[IO, (io.grpc.Server, Option[Boolean])] =
+                          for {
+                            serverDefinition <-  rx //grpcApi.createService[GrpcServiceException](WalletServiceIOImpl[Result](ws))
+                            server <- grpcApi.createIO[IO](serverDefinition._1)
+                            _ <- {
+                              EmberServerBuilder
+                                .default[IO]
+                                .withPort(Port.fromInt(httpServerPort).get)
+                                .withHost(host"0.0.0.0")
+                                .withHttpApp(serverDefinition._2.orNotFound)
+                                .build
+                            }
+                          } yield (server, None)
+
+                        val runingRpcIO = rpcResource.evalMap(
+                            res => {
+                              (IO.pure(res._1.start()), IO.pure {
+                                ()
+                              }).mapN(
+                                (a, c) => ()
+                              )
+                            }
+                          )
+                          .use(_ => IO.never)
+                          .handleErrorWith { error =>
+                            println(s"===> ${error.getMessage}")
+                            IO.raiseError(error)
                           }
-                        )
-                        .use ( _ => IO.never )
-                        .handleErrorWith { error =>
-                          println(s"===> ${error.getMessage}")
-                          IO.raiseError(error)
-                        }
+                        runingRpcIO
+                      }
+
+//                      val runingRpcIO = rpcResource.evalMap(
+//                          res => {
+//                            (IO.pure(res._1.start()), IO.pure{()}).mapN(
+//                              (a, c) => ()
+//                            )
+//                          }
+//                        )
+//                        .use ( _ => IO.never )
+//                        .handleErrorWith { error =>
+//                          println(s"===> ${error.getMessage}")
+//                          IO.raiseError(error)
+//                        }
 
                       //                        .useForever
 //                        .handleErrorWith{error =>
