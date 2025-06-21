@@ -45,37 +45,21 @@ class ClusteringWalletGrpcServiceImpl[F[_]: Tracer, G: ExceptionGenerator](servi
 
     import org.typelevel.otel4s.context.propagation.*
 
-    given TextMapGetter[Metadata] =
-      new TextMapGetter[Metadata] {
-        def get(headers: Metadata, key: String): Option[String] =
-            println(s"key: ${key}")
-            val akeys = keys(headers).toSet
-            println(akeys)
-            if (akeys.contains(key)) {
-              val key_ = Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)
-              val kys = headers.getAll(key_).asScala.toList
-              kys.headOption
-            }else{
-              None
-            }
-
-        def keys(headers: Metadata): Iterable[String] =
-          println(s"keys")
-          val keys = headers.keys().asScala.toList
-          println(s"keys: ${keys}")
-          keys
-      }
-
     def getBalance(request: GetBalanceRequest, ctx: Metadata): F[commands.Balance] = {
 
 //      val key = Metadata.Key.of("tracestate", Metadata.ASCII_STRING_MARSHALLER)
 //      val kys = ctx.getAll(key).asScala.toList
 //      println(kys.head)
 //      println(ctx.keys().asScala.toList)
+      val ks = ctx.keys().asScala.toList.map{
+        k =>{
+          val key = Metadata.Key.of(k, Metadata.ASCII_STRING_MARSHALLER)
+          (k, ctx.getAll(key).asScala.toList.head)
+        }
+      }
 //      println("---------------------------------------------------------")
 
-
-      Tracer[F].joinOrRoot(ctx) {
+      Tracer[F].joinOrRoot(ks.toMap) {
         Tracer[F].span("Work.DoWork", Attribute("custom_tag", "aa")).use { span =>
 
           println(s"jctx: ${JSpan.current().getSpanContext}") // get a span from a ThreadLocal
