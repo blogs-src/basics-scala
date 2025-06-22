@@ -158,8 +158,8 @@ object WalletEventSourcing:
                                  sImpl2 =
                                    new ClusteringWalletGrpcServiceImpl2(xtxt)(
                                      using transformers)
-                                 s = new rest.WalletServiceImpl2[Result](xtxt)
-                                 z <- monadConversions.convertResource((new rest.SmithyResource).all(local, tracer, s), monadConversions.ioToResult)
+//                                 s = new rest.WalletServiceImpl2[Result](xtxt)
+//                                 z <- monadConversions.convertResource((new rest.SmithyResource).all(local, tracer, s), monadConversions.ioToResult)
                                  sImpl =
                                    new ClusteringWalletGrpcServiceImpl(sImpl2)(
                                      using transformers)(
@@ -168,14 +168,14 @@ object WalletEventSourcing:
                                           padmin.WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
                                             new ClusteringWalletFs2GrpcServiceImpl(sImpl, transformers)),
                                           monadConversions.ioToResult)
-                              yield (res, z)
+                              yield /*(*/res/*, z)*/
 
                             val rx = monadConversions.convertResource(group, monadConversions.resultToIO)
 
                             val rpcResource: Resource[IO, io.grpc.Server/*, org.http4s.server.Server)*/] =
                               for
-                                 serverDefinition <- rx // grpcApi.createService[GrpcServiceException](WalletServiceIOImpl[Result](ws))
-                                 server <- grpcApi.createIO[IO](serverDefinition._1)
+                                 serverDefinition <- rx
+                                 server <- grpcApi.createIO[IO](serverDefinition/*._1*/)
 //                                 restServer <-
 //                                   EmberServerBuilder
 //                                     .default[IO]
