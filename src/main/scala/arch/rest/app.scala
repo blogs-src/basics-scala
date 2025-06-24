@@ -40,7 +40,7 @@ object Main extends IOApp.Simple:
      local =>
 
         val grpcTargetPort = 9999
-        val httpServerPort = 9000
+        val httpServerPort = 9001
         val channel: GrpcClientToWritesideResource = GrpcClientToWritesideResource(grpcTargetPort)
         val t =
           for

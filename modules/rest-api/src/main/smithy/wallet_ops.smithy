@@ -8,13 +8,15 @@ use alloy#simpleRestJson
 
 
 @simpleRestJson
+@httpBearerAuth
 service WalletOpsService {
   version: "1.0.0",
   operations: [GetBalance, HealthCheck],
 }
 
 @http(method: "POST", uri: "/balance", code: 200)
-@authToken(roles: ["admin"])
+@authToken(roles: ["role_a"])
+//@authToken(roles: [])
 operation GetBalance{
   input: BalanceRequest,
   output: Balance

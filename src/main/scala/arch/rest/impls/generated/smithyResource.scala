@@ -3,13 +3,10 @@ package rest
 
 import cats.data.EitherT
 import cats.effect.*
-
 import smithy_rest.wallet_ops.*
 import smithy_rest.utils
-
 import org.http4s.*
-import smithy4s.Hints
-import smithy4s.codecs.*
+import smithy4s.{Endpoint, Hints}
 import smithy4s.http4s.ServerEndpointMiddleware
 import smithy4s.http4s.SimpleRestJsonBuilder
 import smithy4s.kinds.PolyFunction
@@ -18,21 +15,89 @@ import cats.effect.kernel.Resource
 import cats.data.*
 import org.http4s.HttpRoutes
 import cats.syntax.all.*
-import org.http4s.headers.{ `Content-Type`, `User-Agent` }
+import org.http4s.headers.{`Content-Type`, `User-Agent`}
 import org.typelevel.otel4s.trace.Tracer
-
 import org.http4s.*
 import org.http4s.client.Client
 import org.http4s.syntax.literals.*
 import org.typelevel.ci.CIString
-
 import org.typelevel.otel4s.Attribute
-
 import io.opentelemetry.api.trace.Span as JSpan
-
 import ErrorsBuilder.*
-
 import smithy4s.service_control.*
+import smithy4s.http4s.*
+import cats.effect.*
+import cats.implicits.*
+import org.http4s.implicits.*
+import org.http4s.*
+import com.comcast.ip4s.*
+import org.http4s.client.*
+import smithy4s.Hints
+import org.http4s.headers.Authorization
+
+case class ApiToken(value: String)
+
+object AuthMiddleware {
+
+  private def middleware
+  (
+    roles: List[String],
+    // authChecker: AuthChecker
+  ): HttpApp[IO] => HttpApp[IO] = {
+    inputApp =>
+       HttpApp[IO] { request =>
+         val maybeKey = request.headers
+         .get[`Authorization`]
+         .collect {
+           case Authorization(
+                 Credentials.Token(AuthScheme.Bearer, value)
+               ) =>
+             value
+         }
+         .map { ApiToken.apply }
+
+         val isAuthorized = maybeKey
+                                   .map { key =>
+                          //           authChecker.isAuthorized(key)
+                                        IO.pure{true}
+                                        IO.pure {false}
+                                   }
+                                   .getOrElse(IO.pure(false))
+
+         isAuthorized.ifM(
+           ifTrue = inputApp(request),
+           ifFalse = IO.raiseError(unauthorizedError("Not authorized!"))
+         )
+     }
+
+  }
+
+  def apply
+  (
+    // authChecker: AuthChecker
+  ): ServerEndpointMiddleware[IO] =
+    new ServerEndpointMiddleware.Simple[IO] {
+      private def mid(roles: List[String]): HttpApp[IO] => HttpApp[IO] = middleware(roles)
+
+      def prepareWithHints
+      (
+        serviceHints: Hints,
+        endpointHints: Hints,
+      ): HttpApp[IO] => HttpApp[IO] = {
+        serviceHints.get[smithy.api.HttpBearerAuth] match {
+          case Some(_) =>
+            endpointHints.get[utils.AuthToken] match {
+              case Some(auths) if auths.roles.isEmpty => identity
+              case Some(auths) => mid(auths.roles)
+              case None => identity
+            }
+          case None => identity
+        }
+      }
+    }
+
+}
+
 
 class ControlServiceImpl extends ControlService[IO] {
   def reloadJWKS(): IO[Unit] = IO.pure {
@@ -88,6 +153,7 @@ class SmithyResource:
             InternalServerError(e.code, e.title, e.message)
 
         }
+        .middleware(AuthMiddleware())
         .resource.map {
           routes =>
             Middleware.withRequestInfo(routes, local, tracer)
