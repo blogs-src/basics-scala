@@ -142,7 +142,7 @@ object Dependencies {
     val chimneyProtobufs           = "io.scalaland"       %% "chimney-protobufs"              % V.chimney withSources()
     val chimneyJavaCollections     = "io.scalaland"       %% "chimney-java-collections"       % V.chimney withSources()
 
-    val http4s                     = "org.http4s"         %% "http4s-ember-server"            % V.http4s withSources()
+    val http4s_ember_server        = "org.http4s"         %% "http4s-ember-server"            % V.http4s withSources()
 
     val avro                       = "org.apache.avro"     % "avro"                           % V.avroCompilerVersion withSources()
 
@@ -181,7 +181,7 @@ object Dependencies {
     Deps.grpcNettyShaded,
 //    "io.grpc" % "grpc-okhttp" % scalapb.compiler.Version.grpcJavaVersion,
     Deps.scalapbCommonProtos,
-    Deps.http4s,
+    Deps.http4s_ember_server,
     Deps.chimney,
     Deps.chimneyProtobufs,
     Deps.chimneyJavaCollections,

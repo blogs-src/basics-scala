@@ -32,7 +32,28 @@ import io.opentelemetry.api.trace.Span as JSpan
 
 import ErrorsBuilder.*
 
+import smithy4s.service_control.*
+
+class ControlServiceImpl extends ControlService[IO] {
+  def reloadJWKS(): IO[Unit] = IO.pure {
+    ()
+  }
+}
+
 class SmithyResource:
+   private val controlRoutes: Resource[IO, HttpRoutes[IO]] =
+    SimpleRestJsonBuilder.routes(new ControlServiceImpl).resource
+
+   private def routes_combined(
+                     local:  IOLocal[Option[domain.RequestInfo[Result]]],
+                     tracer: Tracer[Result],
+                     s:      WalletService[Result],
+                   ): Resource[IO, HttpRoutes[IO]] = {
+     for{
+       r1 <- serviceRoutes(local, tracer, s)
+       r2 <- controlRoutes
+     } yield r1 <+> r2
+   }
 
    private def translateMessage(message: String): String =
       val i = message.indexOf(", offset:")
@@ -41,7 +62,7 @@ class SmithyResource:
       else
          message.substring(0, i)
 
-   private def example(
+   private def serviceRoutes(
      local:  IOLocal[Option[domain.RequestInfo[Result]]],
      tracer: Tracer[Result],
      s:      WalletService[Result],
@@ -76,4 +97,4 @@ class SmithyResource:
      local:  IOLocal[Option[domain.RequestInfo[Result]]],
      tracer: Tracer[Result],
      s:      WalletService[Result],
-   ): Resource[IO, HttpRoutes[IO]] = example(local, tracer, s)
+   ): Resource[IO, HttpRoutes[IO]] = routes_combined(local, tracer, s)
