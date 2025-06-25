@@ -6,6 +6,16 @@ package rest
 //import cats.effect._
 //import cats.implicits._
 //import org.http4s.implicits.*
+import org.http4s.blaze.client.BlazeClientBuilder
+import scala.jdk.CollectionConverters.*
+//import scala.concurrent.ExecutionContext.global
+import org.http4s.blaze.client.BlazeClientBuilder
+
+import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jwt.SignedJWT
+import com.nimbusds.jose.jwk.JWKSet
+
+import com.nimbusds.jose.Payload
 import org.http4s.ember.server.*
 //import org.http4s.*
 import com.comcast.ip4s.*
@@ -41,6 +51,7 @@ object Main extends IOApp.Simple:
 
         val grpcTargetPort = 9999
         val httpServerPort = 9001
+
         val channel: GrpcClientToWritesideResource = GrpcClientToWritesideResource(grpcTargetPort)
         val t =
           for
@@ -60,14 +71,17 @@ object Main extends IOApp.Simple:
             _,
             _,
           ) =>
-            EmberServerBuilder
-              .default[IO]
-              .withPort(Port.fromInt(httpServerPort).get)
-              .withHost(host"0.0.0.0")
-              .withHttpApp(routes.orNotFound)
-              .build
-        }.use(
-          _ => IO.never)
+              EmberServerBuilder
+                .default[IO]
+                .withPort(Port.fromInt(httpServerPort).get)
+                .withHost(host"0.0.0.0")
+                .withHttpApp(routes.orNotFound)
+                .build
+        }
+          .use(
+            _ =>
+            IO.never,
+          )
           .handleErrorWith {
             error =>
                println(s"===> ${error.getMessage}")

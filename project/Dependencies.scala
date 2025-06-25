@@ -49,8 +49,9 @@ object Dependencies {
     val commonsCompress      = "1.27.1"
     // https://packages.confluent.io/maven/io/confluent/kafka-avro-serializer/
     val kafkaAvroSerializer  = "8.0.0"
-    val smithytranslateTraitsVersion = "0.5.3"
+    val smithytranslateTraitsVersion = "0.5.7"
     val http4s                       = "0.23.30"
+    val http4s_blaze                 = "0.23.17"
     val scalapb                      = "0.11.18"
     val avroCompilerVersion          = "1.12.0"
     val fs2Kafka                     = "3.8.0"
@@ -58,7 +59,8 @@ object Dependencies {
     val helenus                      = "1.1.0"
     val otel4s                       = "0.12.0"
     val opentelemetry                = "1.51.0"
-
+    val jwt_scala                    = "11.0.0"
+    val jose_jwt                     = "10.3"
   }
 
   object Deps {
@@ -143,6 +145,7 @@ object Dependencies {
     val chimneyJavaCollections     = "io.scalaland"       %% "chimney-java-collections"       % V.chimney withSources()
 
     val http4s_ember_server        = "org.http4s"         %% "http4s-ember-server"            % V.http4s withSources()
+    val http4s_blaze_client        = "org.http4s"         %% "http4s-blaze-client"            % V.http4s_blaze withSources()
 
     val avro                       = "org.apache.avro"     % "avro"                           % V.avroCompilerVersion withSources()
 
@@ -163,6 +166,8 @@ object Dependencies {
     val opentelemetry_autoconf     = "io.opentelemetry"    % "opentelemetry-sdk-extension-autoconfigure"  % V.opentelemetry withSources() // % Runtime
     val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.34.0" withSources() // % Runtime
 
+    val jwt_scala                  = "com.github.jwt-scala" %% "jwt-core"                                 % V.jwt_scala withSources()
+    val jose_jwt                   = "com.nimbusds"          % "nimbus-jose-jwt"                          % V.jose_jwt withSources()
   }
 
 // format: on
@@ -182,6 +187,7 @@ object Dependencies {
 //    "io.grpc" % "grpc-okhttp" % scalapb.compiler.Version.grpcJavaVersion,
     Deps.scalapbCommonProtos,
     Deps.http4s_ember_server,
+    Deps.http4s_blaze_client,
     Deps.chimney,
     Deps.chimneyProtobufs,
     Deps.chimneyJavaCollections,
@@ -237,6 +243,8 @@ object Dependencies {
     Deps.otel4s_inst_metrics,
     Deps.opentelemetry_expr_otlp,
     Deps.opentelemetry_semconv,
+    Deps.jwt_scala,
+    Deps.jose_jwt,
 //    Deps.opentelemetry_autoconf,
     // only scala 2
 //    "ch.epfl.scala" %% "scala-debug-adapter" % "4.2.5",

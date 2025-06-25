@@ -42,8 +42,9 @@ class WalletOpsImpl[F[_]](
        rinfo.tracer.joinOrRoot(rinfo.headers) {
          rinfo.tracer.span("Work.DoWork2", Attribute("custom_tag", "aa")).use {
            span =>
-              println(s"jctx: ${JSpan.current().getSpanContext}") // get a span from a ThreadLocal
-              println(s"otel4s: ${span.context}")
+              println(s"jctx (WalletOpsImpl): ${JSpan.current().getSpanContext}") // get a span from a ThreadLocal
+              println(s"otel4s (WalletOpsImpl): ${span.context}")
+              println(s"User id (WalletOpsImpl): ${rinfo.userId}")
 
               val log = auditing.Logger.getLogger("logs-rest").withCustomContext(
                 "traceId" -> span.context.traceIdHex)

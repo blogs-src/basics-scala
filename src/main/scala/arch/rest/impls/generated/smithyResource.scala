@@ -24,6 +24,7 @@ import org.typelevel.ci.CIString
 import org.typelevel.otel4s.Attribute
 import io.opentelemetry.api.trace.Span as JSpan
 import ErrorsBuilder.*
+import arch.security.JWTErrors
 import smithy4s.service_control.*
 import smithy4s.http4s.*
 import cats.effect.*
@@ -31,83 +32,19 @@ import cats.implicits.*
 import org.http4s.implicits.*
 import org.http4s.*
 import com.comcast.ip4s.*
+import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.client.*
 import smithy4s.Hints
 import org.http4s.headers.Authorization
 
-case class ApiToken(value: String)
-
-object AuthMiddleware {
-
-  private def middleware
-  (
-    roles: List[String],
-    // authChecker: AuthChecker
-  ): HttpApp[IO] => HttpApp[IO] = {
-    inputApp =>
-       HttpApp[IO] { request =>
-         val maybeKey = request.headers
-         .get[`Authorization`]
-         .collect {
-           case Authorization(
-                 Credentials.Token(AuthScheme.Bearer, value)
-               ) =>
-             value
-         }
-         .map { ApiToken.apply }
-
-         val isAuthorized = maybeKey
-                                   .map { key =>
-                          //           authChecker.isAuthorized(key)
-                                        IO.pure{true}
-                                        IO.pure {false}
-                                   }
-                                   .getOrElse(IO.pure(false))
-
-         isAuthorized.ifM(
-           ifTrue = inputApp(request),
-           ifFalse = IO.raiseError(unauthorizedError("Not authorized!"))
-         )
-     }
-
-  }
-
-  def apply
-  (
-    // authChecker: AuthChecker
-  ): ServerEndpointMiddleware[IO] =
-    new ServerEndpointMiddleware.Simple[IO] {
-      private def mid(roles: List[String]): HttpApp[IO] => HttpApp[IO] = middleware(roles)
-
-      def prepareWithHints
-      (
-        serviceHints: Hints,
-        endpointHints: Hints,
-      ): HttpApp[IO] => HttpApp[IO] = {
-        serviceHints.get[smithy.api.HttpBearerAuth] match {
-          case Some(_) =>
-            endpointHints.get[utils.AuthToken] match {
-              case Some(auths) if auths.roles.isEmpty => identity
-              case Some(auths) => mid(auths.roles)
-              case None => identity
-            }
-          case None => identity
-        }
-      }
-    }
-
-}
-
-
-class ControlServiceImpl extends ControlService[IO] {
-  def reloadJWKS(): IO[Unit] = IO.pure {
-    ()
-  }
+class ControlServiceImpl(validator: security.SecurityValidator[IO]) extends ControlService[IO] {
+  def reloadJWKS(): IO[Unit] =
+    validator.updateJWKS()
 }
 
 class SmithyResource:
-   private val controlRoutes: Resource[IO, HttpRoutes[IO]] =
-    SimpleRestJsonBuilder.routes(new ControlServiceImpl).resource
+   private def controlRoutes(validator: security.SecurityValidator[IO]): Resource[IO, HttpRoutes[IO]] =
+    SimpleRestJsonBuilder.routes(new ControlServiceImpl(validator)).resource
 
    private def routes_combined(
                      local:  IOLocal[Option[domain.RequestInfo[Result]]],
@@ -115,8 +52,8 @@ class SmithyResource:
                      s:      WalletService[Result],
                    ): Resource[IO, HttpRoutes[IO]] = {
      for{
-       r1 <- serviceRoutes(local, tracer, s)
-       r2 <- controlRoutes
+       (r1, r3) <- serviceRoutes(local, tracer, s)
+       r2 <- controlRoutes(r3)
      } yield r1 <+> r2
    }
 
@@ -131,33 +68,48 @@ class SmithyResource:
      local:  IOLocal[Option[domain.RequestInfo[Result]]],
      tracer: Tracer[Result],
      s:      WalletService[Result],
-   ): Resource[IO, HttpRoutes[IO]] =
+   ): Resource[IO, (HttpRoutes[IO], security.SecurityValidator[IO])] =
 
       val getRequestInfo: Result[domain.RequestInfo[Result]] = EitherT.right(local.get.flatMap {
         case Some(value) => IO.pure(value)
         case None        => IO.raiseError(new IllegalAccessException("Tried to access the value outside of the lifecycle of an http request"))
       })
 
-      SimpleRestJsonBuilder.routes(
-        new WalletOpsImpl[Result](s, getRequestInfo)
-          .transform(
-            Converter.toIO))
-        .mapErrors {
-          case HttpPayloadError(_, expected, message) =>
-            // logger.foreach(_.error(s"${message}"))
-            val e = ErrorsBuilder.badRequestError(s"Related to $expected, comment: ${translateMessage(message)}")
-            BadRequestError(e.code, e.title, e.message)
 
-          case err: Throwable =>
-            val e = internalServerError(err.getMessage)
-            InternalServerError(e.code, e.title, e.message)
+        import security.KrakendConfs.given
 
-        }
-        .middleware(AuthMiddleware())
-        .resource.map {
-          routes =>
-            Middleware.withRequestInfo(routes, local, tracer)
-        }
+        val conf = security.Krakend("http://localhost:9000/store/jwks-pub.json")
+
+        for {
+          restClient <- BlazeClientBuilder[IO].resource
+          validator = new security.ServiceSecurityValidator(conf, restClient)
+          resource <- SimpleRestJsonBuilder.routes(
+              new WalletOpsImpl[Result](s, getRequestInfo)
+                .transform(
+                  Converter.toIO,
+                )
+            )
+            .mapErrors {
+              case HttpPayloadError(_, expected, message) =>
+                val e = ErrorsBuilder.badRequestError(s"Related to $expected, comment: ${translateMessage(message)}")
+                BadRequestError(e.code, e.title, e.message)
+
+              case e: arch.Unauthorized =>
+                UnauthorizedError(e.code, e.title, e.message)
+
+              case err: Throwable =>
+                println(err.getClass.getName)
+                err.printStackTrace()
+                val e = internalServerError(err.getMessage)
+                InternalServerError(e.code, e.title, e.message)
+
+            }
+            .middleware(AuthMiddleware(validator))
+            .resource.map {
+              routes =>
+                Middleware.withRequestInfo(routes, local, tracer)
+            }
+        } yield (resource, validator)
 
    def all(
      local:  IOLocal[Option[domain.RequestInfo[Result]]],
