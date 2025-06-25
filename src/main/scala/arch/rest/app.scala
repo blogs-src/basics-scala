@@ -6,16 +6,8 @@ package rest
 //import cats.effect._
 //import cats.implicits._
 //import org.http4s.implicits.*
-import org.http4s.blaze.client.BlazeClientBuilder
-import scala.jdk.CollectionConverters.*
 //import scala.concurrent.ExecutionContext.global
-import org.http4s.blaze.client.BlazeClientBuilder
 
-import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jwt.SignedJWT
-import com.nimbusds.jose.jwk.JWKSet
-
-import com.nimbusds.jose.Payload
 import org.http4s.ember.server.*
 //import org.http4s.*
 import com.comcast.ip4s.*
@@ -47,42 +39,39 @@ object Main extends IOApp.Simple:
       EitherT.right(IO.pure(metadata))
 
    val run = IOLocal(Option.empty[domain.RequestInfo[Result]]).flatMap:
-    local =>
+        local =>
 
-      val grpcTargetPort = 9999
-      val httpServerPort = 9001
-      val channel: GrpcClientToWritesideResource = GrpcClientToWritesideResource(grpcTargetPort)
-      val t =
-        for
-          ch <- channel.resource
-          client <- padmin.WalletCommandRpcServiceFs2Grpc.mkClientResource[Result, Map[String, String]](ch, mkMetadata)
-          s = new WalletServiceImpl[Result](client)
-          tracer <- auditing.Tracer.makeOtel("otel-rest-app")
-          z <- monadConversions.convertResource((new SmithyResource).all(local, tracer, s), monadConversions.ioToResult)
-        yield (z, tracer, ch, client)
+           val grpcTargetPort = 9999
+           val httpServerPort = 9001
+           val channel: GrpcClientToWritesideResource = GrpcClientToWritesideResource(grpcTargetPort)
+           val t =
+             for
+                ch <- channel.resource
+                client <- padmin.WalletCommandRpcServiceFs2Grpc.mkClientResource[Result, Map[String, String]](ch, mkMetadata)
+                s = new WalletServiceImpl[Result](client)
+                tracer <- auditing.Tracer.makeOtel("otel-rest-app")
+                z <- monadConversions.convertResource((new SmithyResource).all(local, tracer, s), monadConversions.ioToResult)
+             yield (z, tracer, ch, client)
 
-      val t1 = monadConversions.convertResource(t, monadConversions.resultToIO)
+           val t1 = monadConversions.convertResource(t, monadConversions.resultToIO)
 
-      val t2 = t1.flatMap{
-          (
-            routes,
-            _,
-            _,
-            _,
-          ) =>
-            EmberServerBuilder
-              .default[IO]
-              .withPort(Port.fromInt(httpServerPort).get)
-              .withHost(host"0.0.0.0")
-              .withHttpApp(routes.orNotFound)
-              .build
-        }
-      t2.use:
-          _ =>
-            IO.never
-      .handleErrorWith:
-          error =>
-            println(s"===> ${error.getMessage}")
-            IO.raiseError(error)
-
-
+           val t2 = t1.flatMap:
+                (
+                  routes,
+                  _,
+                  _,
+                  _,
+                ) =>
+                   EmberServerBuilder
+                     .default[IO]
+                     .withPort(Port.fromInt(httpServerPort).get)
+                     .withHost(host"0.0.0.0")
+                     .withHttpApp(routes.orNotFound)
+                     .build
+           t2.use:
+                _ =>
+                   IO.never
+             .handleErrorWith:
+                error =>
+                   println(s"===> ${error.getMessage}")
+                   IO.raiseError(error)

@@ -7,27 +7,17 @@ import arch.WalletServices.Service
 import arch.WalletServicesImpl.WalletServiceImpl
 import com.typesafe.config.Config
 import arch.TypeKeys
-import cats.data.EitherT
-import org.typelevel.otel4s.oteljava.context.LocalContextProvider
 import cats.effect.kernel.Resource
-import cats.~>
-import cats.arrow.FunctionK
-import cats.syntax.all.*
 
 import cats.data.EitherT
 import cats.effect.*
-import fs2.grpc.syntax.all.*
-import io.grpc.*
 import cats.mtl.*
 
-import org.http4s.ember.server.*
 //import org.http4s.*
-import com.comcast.ip4s.*
 import com.wallet.demo.clustering.rpc.admin as padmin
 
 object WalletEventSourcing:
 
-   import akka.persistence.typed.PersistenceId
    import akka.management.scaladsl.AkkaManagement
    import akka.actor.typed.ActorRef
    import akka.actor.typed.scaladsl.adapter.TypedActorSystemOps
@@ -35,7 +25,6 @@ object WalletEventSourcing:
 //   import arch.EntityWallet.Entity as WalletEntity
    import akka.cluster.typed.*
    import akka.actor.ActorSystem as UntypedActorSystem
-   import akka.cluster.ClusterEvent.*
 
    import com.typesafe.config.Config
 
@@ -72,10 +61,10 @@ object WalletEventSourcing:
               val log = Logging(ctx.system.toClassic, classOf[Command])
 
               Behaviors.receiveMessage[Command]:
-                case Start          =>
-                  println("Handler started")
-                  Behaviors.same
-                case GetBalance(id) =>
+                   case Start          =>
+                     println("Handler started")
+                     Behaviors.same
+                   case GetBalance(id) =>
 
 //                  val h = org.example.Hello()
 //                  h.run()
@@ -86,93 +75,92 @@ object WalletEventSourcing:
 //                    println(field.getName)
 //                  }
 
-                  val res = ws.getBalance(id)
-                  res.onComplete:
-                    case Success(r) => println(s"The balance is: $r")
-                    case Failure(t) => t.printStackTrace()
-                  Behaviors.same
-                case CreateWallet(id) =>
-                  val res = ws.createWallet(id)
-                  res.onComplete:
-                    case Success(r) => println(s"Wallet created: $r")
-                    case Failure(t) => t.printStackTrace()
-                  Behaviors.same
-                case AddCredit(id, v) =>
-                  val res = ws.credit(id, Domain.Credit(v))
-                  res.onComplete:
-                    case Success(r) => println(r)
-                    case Failure(t) => t.printStackTrace()
-                  Behaviors.same
+                     val res = ws.getBalance(id)
+                     res.onComplete:
+                          case Success(r) => println(s"The balance is: $r")
+                          case Failure(t) => t.printStackTrace()
+                     Behaviors.same
+                   case CreateWallet(id) =>
+                     val res = ws.createWallet(id)
+                     res.onComplete:
+                          case Success(r) => println(s"Wallet created: $r")
+                          case Failure(t) => t.printStackTrace()
+                     Behaviors.same
+                   case AddCredit(id, v) =>
+                     val res = ws.credit(id, Domain.Credit(v))
+                     res.onComplete:
+                          case Success(r) => println(r)
+                          case Failure(t) => t.printStackTrace()
+                     Behaviors.same
 
-                case StopGrpcServer =>
-                  import cats.effect.unsafe.implicits.global
-                  println("Stoping servers")
-                  grpcServerControl.foreach(
-                    ser =>
-                      Future {
-                        val r = Try { ser.complete(true).unsafeRunSync() }
-                        println(s"Grpc Server Control completed: $r")
-                      }) // shutdown the server
-                  grpcServerControl = None
-                  Behaviors.same
+                   case StopGrpcServer =>
+                     import cats.effect.unsafe.implicits.global
+                     println("Stoping servers")
+                     grpcServerControl.foreach(
+                       ser =>
+                         Future {
+                           val r = Try { ser.complete(true).unsafeRunSync() }
+                           println(s"Grpc Server Control completed: $r")
+                         }) // shutdown the server
+                     grpcServerControl = None
+                     Behaviors.same
 
-                case StartGrpcServer =>
-                  println("Starting Grpc Server")
-                  log.info("Starting Grpc Server in logs")
-                  ctx.log.info("Starting Grpc Server in ctx")
-                  import cats.effect.unsafe.implicits.global
+                   case StartGrpcServer =>
+                     println("Starting Grpc Server")
+                     log.info("Starting Grpc Server in logs")
+                     ctx.log.info("Starting Grpc Server in ctx")
+                     import cats.effect.unsafe.implicits.global
 
-                  import org.typelevel.log4cats.slf4j.Slf4jLogger
-                  import org.typelevel.log4cats.Logger
-                  import com.google.rpc.Code
-                  import cats.effect.*
-                  import cats.implicits.*
+                     import org.typelevel.log4cats.slf4j.Slf4jLogger
+                     import org.typelevel.log4cats.Logger
+                     import com.google.rpc.Code
+                     import cats.effect.*
 
-                  given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+                     given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
-                  val grpcIO = cats.effect.Deferred[cats.effect.IO, Boolean].flatMap:
-                    shutdown =>
-                       grpcServerControl = Some(shutdown)
+                     val grpcIO = cats.effect.Deferred[cats.effect.IO, Boolean].flatMap:
+                          shutdown =>
+                             grpcServerControl = Some(shutdown)
 
-                       import akka.grpc.GrpcServiceException
-                       import com.wallet.demo.clustering.rpc.admin.BadRequestError
+                             import akka.grpc.GrpcServiceException
+                             import com.wallet.demo.clustering.rpc.admin.BadRequestError
 
-                       given generator: ExceptionGenerator[GrpcServiceException] with
-                          def generateException(msg: String): Throwable =
-                             val e = ErrorsBuilder.badRequestError(msg)
-                             val error = BadRequestError(e.code, e.title, e.message)
-                             GrpcServiceException(Code.INVALID_ARGUMENT, msg, Seq(error))
+                             given generator: ExceptionGenerator[GrpcServiceException] with
+                                def generateException(msg: String): Throwable =
+                                   val e = ErrorsBuilder.badRequestError(msg)
+                                   val error = BadRequestError(e.code, e.title, e.message)
+                                   GrpcServiceException(Code.INVALID_ARGUMENT, msg, Seq(error))
 
-                       val runingRpcIO = IOLocal(Option.empty[rest.domain.RequestInfo[Result]]).flatMap:
-                         local =>
+                             val runingRpcIO = IOLocal(Option.empty[rest.domain.RequestInfo[Result]]).flatMap:
+                                  local =>
 
-                            val httpServerPort = 9001
-                            val transformers = new MyTransformers
-                            val group =
-                              for
-                                 tracer <- auditing.Tracer.makeOtel("otel-akka-app")
-                                 xtxt = WalletServiceIOImpl[Result](ws)
-                                 sImpl2 =
-                                   new ClusteringWalletGrpcServiceImpl2(xtxt)(
-                                     using transformers)
+                                     val httpServerPort = 9001
+                                     val transformers = new MyTransformers
+                                     val group =
+                                       for
+                                          tracer <- auditing.Tracer.makeOtel("otel-akka-app")
+                                          xtxt = WalletServiceIOImpl[Result](ws)
+                                          sImpl2 =
+                                            new ClusteringWalletGrpcServiceImpl2(xtxt)(
+                                              using transformers)
 //                                 s = new rest.WalletServiceImpl2[Result](xtxt)
 //                                 z <- monadConversions.convertResource((new rest.SmithyResource).all(local, tracer, s), monadConversions.ioToResult)
-                                 sImpl =
-                                   new ClusteringWalletGrpcServiceImpl(sImpl2)(
-                                     using transformers)(
-                                     using tracer)
-                                 res <- monadConversions.convertResource(
-                                          padmin.WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
-                                            new ClusteringWalletFs2GrpcServiceImpl(sImpl, transformers)),
-                                          monadConversions.ioToResult)
-                              yield /*(*/ res /*, z)*/
+                                          sImpl =
+                                            new ClusteringWalletGrpcServiceImpl(sImpl2)(
+                                              using transformers)(
+                                              using tracer)
+                                          res <- monadConversions.convertResource(
+                                                   padmin.WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
+                                                     new ClusteringWalletFs2GrpcServiceImpl(sImpl, transformers)),
+                                                   monadConversions.ioToResult)
+                                       yield /*(*/ res /*, z)*/
 
-                            val rx = monadConversions.convertResource(group, monadConversions.resultToIO)
+                                     val rx = monadConversions.convertResource(group, monadConversions.resultToIO)
 
-                            val rpcResource: Resource[IO, io.grpc.Server /*, org.http4s.server.Server)*/ ] =
-                              for
-                                 serverDefinition <- rx
-                                 server <- grpcApi.createIO[IO](serverDefinition /*._1*/ )
+                                     val rpcResource: Resource[IO, io.grpc.Server /*, org.http4s.server.Server)*/ ] =
+                                       for
+                                          serverDefinition <- rx
+                                          server <- grpcApi.createIO[IO](serverDefinition /*._1*/ )
 //                                 restServer <-
 //                                   EmberServerBuilder
 //                                     .default[IO]
@@ -180,10 +168,10 @@ object WalletEventSourcing:
 //                                     .withHost(host"0.0.0.0")
 //                                     .withHttpApp(serverDefinition._2.orNotFound)
 //                                     .build
-                              yield server.start()
+                                       yield server.start()
 
-                            val runingRpcIO = rpcResource
-                              // .
+                                     val runingRpcIO = rpcResource
+                                       // .
 //                              evalMap(
 //                              res =>
 //                                (
@@ -193,20 +181,20 @@ object WalletEventSourcing:
 //                                    ()
 //                                  }).mapN(
 //                                  (a, b, c) => (a, b)))
-                              .useForever
+                                       .useForever
 //                              (
 //                                (_, _) => IO.never)
-                              .handleErrorWith:
-                                error =>
-                                   println(s"===> ${error.getMessage}")
-                                   IO.raiseError(error)
-                            runingRpcIO
+                                       .handleErrorWith:
+                                          error =>
+                                             println(s"===> ${error.getMessage}")
+                                             IO.raiseError(error)
+                                     runingRpcIO
 
-                       IO.race(shutdown.get, runingRpcIO)
+                             IO.race(shutdown.get, runingRpcIO)
 
-                  Future:
-                    grpcIO.evalOn(ctx.system.executionContext).unsafeRunSync()
-                  Behaviors.same
+                     Future:
+                          grpcIO.evalOn(ctx.system.executionContext).unsafeRunSync()
+                     Behaviors.same
 
       def apply(config: Config): Behavior[Command] = Behaviors.setup[Command]:
            (ctx: ActorContext[Command]) =>

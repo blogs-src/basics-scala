@@ -3,27 +3,17 @@ package auditing
 
 import cats.data.EitherT
 import cats.effect.*
-import org.typelevel.otel4s.Attribute
-import org.typelevel.otel4s.trace.Tracer
 
 import _root_.io.opentelemetry.sdk.OpenTelemetrySdk
-import _root_.io.opentelemetry.api.OpenTelemetry
 import _root_.io.opentelemetry.sdk.trace.SdkTracerProvider
 import _root_.io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
 import _root_.io.opentelemetry.context.propagation.ContextPropagators
-import _root_.io.opentelemetry.sdk.trace.`export`.SimpleSpanProcessor
 
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.sdk.trace.`export`.BatchSpanProcessor
-import org.typelevel.otel4s.Otel4s
 import org.typelevel.otel4s.oteljava.OtelJava
 import cats.effect.kernel.Resource
 
-import cats.~>
-import cats.arrow.FunctionK
-import cats.syntax.all.*
-
-import cats.mtl.*
 import org.typelevel.otel4s.trace.Tracer
 
 object Tracer:

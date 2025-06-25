@@ -1,7 +1,5 @@
 package demo
 
-import com.typesafe.config.ConfigFactory
-
 given timeout: Timeout = 30.seconds
 // val config = ConfigFactory.load(System.getenv("APP_CONFIG_FILE"))
 

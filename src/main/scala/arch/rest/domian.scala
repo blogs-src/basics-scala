@@ -2,7 +2,6 @@ package arch
 package rest
 
 import org.typelevel.otel4s.trace.Tracer
-import org.typelevel.otel4s.trace.Span
 
 object domain:
 

@@ -11,14 +11,6 @@ object ClusterWallet:
 
       export sharding.*
 
-import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.Effect
-import akka.persistence.typed.scaladsl.EventSourcedBehavior
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
-import akka.persistence.typed.scaladsl.Effect
-
 object TypeKeys:
 
    import FrameWorkCommands.*

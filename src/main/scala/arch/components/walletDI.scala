@@ -8,7 +8,6 @@ import izumi.distage.plugins.PluginDef
 import WalletCommands.*
 import WalletEvents.*
 import StateWallet.*
-import Domain.*
 
 import command_handlers.*
 import event_handlers.*

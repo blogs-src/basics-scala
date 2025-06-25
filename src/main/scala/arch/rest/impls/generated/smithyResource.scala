@@ -2,43 +2,21 @@ package arch
 package rest
 
 import cats.data.EitherT
-import cats.effect.*
 import smithy_rest.wallet_ops.*
-import smithy_rest.utils
-import org.http4s.*
-import smithy4s.{ Endpoint, Hints }
-import smithy4s.http4s.ServerEndpointMiddleware
 import smithy4s.http4s.SimpleRestJsonBuilder
-import smithy4s.kinds.PolyFunction
 import smithy4s.http.HttpPayloadError
 import cats.effect.kernel.Resource
 import cats.data.*
 import org.http4s.HttpRoutes
-import cats.syntax.all.*
-import org.http4s.headers.{ `Content-Type`, `User-Agent` }
 import org.typelevel.otel4s.trace.Tracer
-import org.http4s.*
-import org.http4s.client.Client
-import org.http4s.syntax.literals.*
-import org.typelevel.ci.CIString
-import org.typelevel.otel4s.Attribute
-import io.opentelemetry.api.trace.Span as JSpan
 import ErrorsBuilder.*
-import arch.security.JWTErrors
 import smithy4s.service_control.*
-import smithy4s.http4s.*
 import cats.effect.*
 import cats.implicits.*
-import org.http4s.implicits.*
-import org.http4s.*
-import com.comcast.ip4s.*
 import org.http4s.blaze.client.BlazeClientBuilder
-import org.http4s.client.*
-import smithy4s.Hints
-import org.http4s.headers.Authorization
 
 class ControlServiceImpl(validator: security.SecurityValidator[IO]) extends ControlService[IO]:
-  def reloadJWKS(): IO[Unit] = validator.updateJWKS()
+   def reloadJWKS(): IO[Unit] = validator.updateJWKS()
 
 class SmithyResource:
 
@@ -86,18 +64,17 @@ class SmithyResource:
               .transform(
                 Converter.toIO))
             .mapErrors:
-              case HttpPayloadError(_, expected, message) =>
-                val e = ErrorsBuilder.badRequestError(s"Related to $expected, comment: ${translateMessage(message)}")
-                BadRequestError(e.code, e.title, e.message)
+               case HttpPayloadError(_, expected, message) =>
+                 val e = ErrorsBuilder.badRequestError(s"Related to $expected, comment: ${translateMessage(message)}")
+                 BadRequestError(e.code, e.title, e.message)
 
-              case e: arch.Unauthorized => UnauthorizedError(e.code, e.title, e.message)
+               case e: arch.Unauthorized => UnauthorizedError(e.code, e.title, e.message)
 
-              case err: Throwable =>
-                println(err.getClass.getName)
-                err.printStackTrace()
-                val e = internalServerError(err.getMessage)
-                InternalServerError(e.code, e.title, e.message)
-
+               case err: Throwable =>
+                 println(err.getClass.getName)
+                 err.printStackTrace()
+                 val e = internalServerError(err.getMessage)
+                 InternalServerError(e.code, e.title, e.message)
             .middleware(
               Middleware(local, tracer)
                 .andThen(

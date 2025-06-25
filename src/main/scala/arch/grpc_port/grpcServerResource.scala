@@ -12,12 +12,6 @@ import io.grpc.protobuf.services.ProtoReflectionServiceV1
 import cats.effect.kernel.Resource
 import cats.~>
 import cats.arrow.FunctionK
-import cats.syntax.all.*
-
-import cats.mtl.*
-import org.typelevel.otel4s.trace.Tracer
-
-import com.wallet.demo.clustering.rpc.admin.*
 
 object monadConversions:
 

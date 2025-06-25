@@ -5,7 +5,6 @@ import scala.reflect.ClassTag
 
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl as dsl
 import akka.persistence.typed.scaladsl.Effect

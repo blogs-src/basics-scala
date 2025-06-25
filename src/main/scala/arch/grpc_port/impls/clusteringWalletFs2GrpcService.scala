@@ -1,28 +1,20 @@
 package arch
 
-import cats.data.EitherT
 import cats.effect.*
 import cats.implicits.*
-import com.google.rpc.Code
 import com.wallet.demo.clustering.rpc.admin.*
 import com.wallet.proto.messages.commands
 import cats.mtl.*
-import org.typelevel.otel4s.Attribute
 //import fs2.concurrent.Channel
-import io.scalaland.chimney.Transformer
 import io.scalaland.chimney.dsl.*
 import io.scalaland.chimney.partial.syntax.*
 
 import cats.*
 
-import akka.grpc.GrpcServiceException
-
 import io.grpc.Metadata
 
 import org.typelevel.otel4s.trace.Tracer
 import org.typelevel.otel4s.trace.Span
-
-import scala.jdk.CollectionConverters.*
 
 import io.opentelemetry.api.trace.Span as JSpan
 import logstage.LogIO
@@ -39,8 +31,6 @@ class ClusteringWalletGrpcServiceImpl2[F[_], G: ExceptionGenerator](
     extends ClusteringWalletGrpcService2[F]:
 
    import io.scalaland.chimney.partial
-   import io.scalaland.chimney.protobufs.*
-   import transformers.given
 
    private def validateRequestId(request: GetBalanceRequest): F[BalanceRequest] =
       val res = request.transformIntoPartial[BalanceRequest].asEither.asResult.asEitherErrorPathMessageStrings
