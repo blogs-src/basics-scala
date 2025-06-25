@@ -47,24 +47,23 @@ object Main extends IOApp.Simple:
       EitherT.right(IO.pure(metadata))
 
    val run = IOLocal(Option.empty[domain.RequestInfo[Result]]).flatMap:
-     local =>
+    local =>
 
-        val grpcTargetPort = 9999
-        val httpServerPort = 9001
+      val grpcTargetPort = 9999
+      val httpServerPort = 9001
+      val channel: GrpcClientToWritesideResource = GrpcClientToWritesideResource(grpcTargetPort)
+      val t =
+        for
+          ch <- channel.resource
+          client <- padmin.WalletCommandRpcServiceFs2Grpc.mkClientResource[Result, Map[String, String]](ch, mkMetadata)
+          s = new WalletServiceImpl[Result](client)
+          tracer <- auditing.Tracer.makeOtel("otel-rest-app")
+          z <- monadConversions.convertResource((new SmithyResource).all(local, tracer, s), monadConversions.ioToResult)
+        yield (z, tracer, ch, client)
 
-        val channel: GrpcClientToWritesideResource = GrpcClientToWritesideResource(grpcTargetPort)
-        val t =
-          for
-             ch <- channel.resource
-             client <- padmin.WalletCommandRpcServiceFs2Grpc.mkClientResource[Result, Map[String, String]](ch, mkMetadata)
-             s = new WalletServiceImpl[Result](client)
-             tracer <- auditing.Tracer.makeOtel("otel-rest-app")
-             z <- monadConversions.convertResource((new SmithyResource).all(local, tracer, s), monadConversions.ioToResult)
-          yield (z, tracer, ch, client)
+      val t1 = monadConversions.convertResource(t, monadConversions.resultToIO)
 
-        val t1 = monadConversions.convertResource(t, monadConversions.resultToIO)
-
-        t1.flatMap:
+      val t2 = t1.flatMap{
           (
             routes,
             _,
@@ -77,11 +76,13 @@ object Main extends IOApp.Simple:
               .withHost(host"0.0.0.0")
               .withHttpApp(routes.orNotFound)
               .build
-          .use(
-            _ =>
-              IO.never)
-          .handleErrorWith:
-            error =>
-               println(s"===> ${error.getMessage}")
-               IO.raiseError(error)
+        }
+      t2.use:
+          _ =>
+            IO.never
+      .handleErrorWith:
+          error =>
+            println(s"===> ${error.getMessage}")
+            IO.raiseError(error)
+
 

@@ -100,34 +100,3 @@ object Middleware:
                  val requestInfo = Some(domain.RequestInfo[Result](hvals2, tracer, userId))
                  OptionT.liftF(local.set(requestInfo)) *> routes(request)
             routesToApp(nroute)
-
-//          HttpApp[IO] { request =>
-//
-//            println("withRequestInfo2 <<<...............................>>>")
-//            val hnames = request.headers.headers.map(_.name.toString)
-//            val hvals = hnames.map(
-//              key => (key, request.headers.get(CIString(key)).map(_.head.value).get))
-//            //        println(hvals)
-//
-//            val nA = request.attributes.insert(Attrs.UserId, "userId")
-//            val newRequest = request
-//              .withAttributes(attributes = nA)
-//
-//            println(s"Attributes size: ${request.attributes.size}")
-//            val hvals2 = Map.from(hvals)
-//            val userId = hvals2.get("internal-user-id")
-//            val requestInfo = Some(domain.RequestInfo[Result](hvals2, tracer, userId))
-////            OptionT.liftF(local.set(requestInfo)) *> routes(newRequest)
-////            OptionT.liftF(local.set(requestInfo)) *>
-//            inputApp(request)
-//          }
-
-
-//      { request =>
-//      }
-//
-
-
-//  HttpRoutes[IO] = HttpRoutes[IO] {
-//  }
-//
