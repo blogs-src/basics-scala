@@ -1,0 +1,15 @@
+meta {
+  name: Keycloak JWKs
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base-url}}/realms/{{realm}}/protocol/openid-connect/certs
+  body: json
+  auth: inherit
+}
+
+vars:pre-request {
+  realm: trinity
+}

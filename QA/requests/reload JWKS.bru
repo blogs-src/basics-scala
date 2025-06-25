@@ -1,0 +1,16 @@
+meta {
+  name: reload JWKS
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base-url}}/reload-jwks
+  body: json
+  auth: inherit
+}
+
+headers {
+  traceparent: 00-82383569b2b84276342a70581dc625ad-d5f7d8db141d965a-01
+  tracestate: ot=th:0
+}

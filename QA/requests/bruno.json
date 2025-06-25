@@ -1,0 +1,23 @@
+{
+  "version": "1",
+  "name": "Requests for basics-scala",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ],
+  "proxy": {
+    "enabled": false,
+    "protocol": "http",
+    "hostname": "0.0.0.0",
+    "port": 8501,
+    "auth": {
+      "enabled": false,
+      "username": "",
+      "password": ""
+    },
+    "bypassProxy": ""
+  },
+  "size": 0.0021352767944335938,
+  "filesCount": 11
+}

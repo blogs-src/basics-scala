@@ -2,6 +2,8 @@ import Dependencies.V
 import Dependencies.Deps
 import Dependencies.HybridDeps
 
+import scala.collection.mutable
+
 // format: off
 
 lazy val autoImportSettings = Seq(
@@ -70,24 +72,27 @@ lazy val appSettings = Seq(
       "-Wsafe-init",
       "-deprecation",
       "-feature",
-//      "-Yretain-trees",
       "-Xmax-inlines",
       "50",
       // "-Yexplicit-nulls",
-//       "-Wunused:all",
-    )
-//   ) ++ Seq("-new-syntax", "-rewrite")
-//   ) ++ Seq("-indent", "-rewrite")
-//   ) ++ Seq("-rewrite", "-source", "3.7-migration")
+    ) ++ scalacOptionsValue
+)
+
+lazy val scalacOptionsCustom = sys.env.getOrElse("SCALAC_OPTIONS", "default")
+lazy val scalacOptionsValue = scalacOptionsCases(scalacOptionsCustom)
+
+lazy val scalacOptionsCases = Map(
+  "default" -> Seq[String](),
+  "new_syntax" -> Seq[String]("-new-syntax", "-rewrite"),
+  "indent" -> Seq[String]("-Wunused:all", "-indent", "-rewrite"),
+  "3_7_migration" -> Seq[String]("-rewrite", "-source", "3.7-migration"),
 )
 
 def mapGen(name: String) = {
-  import scala.collection.mutable.HashMap
-
-  val m = new HashMap[String, String]
-  sys.env.get("VARIABLES") match{
+  val m = new mutable.HashMap[String, String]
+  sys.env.get("VARIABLES") match {
     case Some(variables) => variables.split(",").foreach { v =>
-      val res = (v -> sys.env.get(s"${name.toUpperCase()}_$v").get)
+      val res = v -> sys.env(s"${name.toUpperCase()}_$v")
       println(s"Adding env-var: '${res._1}' with value '${res._2}'")
       m += res
     }

@@ -43,21 +43,21 @@ class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) 
 
    def updateJWKS(): IO[Unit] =
       val res2 =
-        for {
-          body <- client.expect[String](request)
+        for
+           body <- client.expect[String](request)
 //      _ <- IO.println(body)
-          _ <-
-             val res = JWKSet.parse(body)
-             println(res)
-             val keys = res.getKeys.asScala // java.util.List[JWK]
-             val kmap: Map[String, JWK] =
-               keys.map {
-                 k =>
-                   k.getKeyID -> k
-               }.toMap
-             jwkSet = Some(kmap)
-             IO(())
-        } yield ()
+           _ <-
+              val res = JWKSet.parse(body)
+              println(res)
+              val keys = res.getKeys.asScala // java.util.List[JWK]
+              val kmap: Map[String, JWK] =
+                keys.map {
+                  k =>
+                    k.getKeyID -> k
+                }.toMap
+              jwkSet = Some(kmap)
+              IO(())
+        yield ()
 
       res2.handleErrorWith:
            error =>
@@ -70,7 +70,7 @@ class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) 
             val signedJWT = SignedJWT.parse(jwtString)
             val kid = signedJWT.getHeader.getKeyID
             val sset = kmap.keys.toSet
-            if (sset.contains(kid))
+            if sset.contains(kid) then
                val publicKey: JWK = kmap(kid)
                val verifier = new com.nimbusds.jose.crypto.RSASSAVerifier(publicKey.toRSAKey.toRSAPublicKey)
                val isValid = signedJWT.verify(verifier)
@@ -85,7 +85,7 @@ class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) 
                val generalChecks = Validated.cond(isValid, id, List((JWTErrors.SignatureNotValid, "JWT signature is not valid")))
                  .combine(Validated.cond(isNotExpired, id, List((JWTErrors.JWTExpired, "JWT expired"))))
                  .combine(Validated.cond(isNotBefore, id, List((JWTErrors.JWTNotBefore, "JWT not before"))))
-               if (isValid)
+               if isValid then
                   val roles = conf.roles(signedJWT.getPayload)
                   val hasRole = rolesToCheck.subsetOf(roles)
                   generalChecks.combine(Validated.cond(hasRole,

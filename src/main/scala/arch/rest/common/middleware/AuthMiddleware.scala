@@ -45,24 +45,17 @@ object AuthMiddleware:
                        IO.pure(validator.validate(key.value, roles.toSet))
                  .getOrElse(IO.pure(defaultResponse))
 
-               isAuthorized.flatMap(
-                 auth =>
-                   auth match {
-                     case Left(list)    =>
-                       val msg = list.map(_._2).mkString(",")
-                       IO.raiseError(unauthorizedError(msg))
-                     case Right(userId) =>
+               isAuthorized.flatMap {
+                 case Left(list) =>
+                   val msg = list.map(_._2).mkString(",")
+                   IO.raiseError(unauthorizedError(msg))
+                 case Right(userId) =>
+                   val nA = request.attributes.insert(Attrs.UserId, userId)
+                   val newRequest = request
+                     .withAttributes(attributes = nA)
+                   inputApp(newRequest)
 
-                       val nA = request.attributes.insert(Attrs.UserId, userId)
-                       val newRequest = request
-                         .withAttributes(attributes = nA)
-
-//              val newRequest = request.withAttributes(attributes=nA)
-                       //              println(s"Attributes size 0: ${nA.size}")
-
-                       inputApp(newRequest)
-
-                   })
+               }
 
    def apply(validator: security.SecurityValidator[IO]): ServerEndpointMiddleware[IO] =
      new ServerEndpointMiddleware.Simple[IO]:

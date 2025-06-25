@@ -1,0 +1,35 @@
+meta {
+  name: Krakend login
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{krakend-base-url}}/v1/auth/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "user": "{{token}}",
+    "password": "pass"
+  }
+}
+
+vars:pre-request {
+  ~price: 200
+}
+
+script:pre-request {
+  
+  bru.setVar("price", 100)
+  bru.setVar("suffix", 1)
+  
+}
+
+script:post-response {
+  if(res.body.access_token) {
+      bru.setVar("token", res.body.access_token)
+  }
+}

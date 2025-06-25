@@ -1,0 +1,29 @@
+meta {
+  name: Balance 1
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base-url}}/balance
+  body: json
+  auth: bearer
+}
+
+headers {
+  traceparent: 00-82383569b2b84276342a70581dc625ad-d5f7d8db141d965a-01
+  tracestate: ot=th:0
+  : 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": {
+      "value": "b"
+    }
+  }
+}

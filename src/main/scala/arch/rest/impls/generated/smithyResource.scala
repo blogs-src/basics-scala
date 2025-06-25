@@ -28,10 +28,10 @@ class SmithyResource:
      tracer: Tracer[Result],
      s:      WalletService[Result],
    ): Resource[IO, HttpRoutes[IO]] =
-     for {
-       (r1, r3) <- serviceRoutes(local, tracer, s)
-       r2 <- controlRoutes(r3)
-     } yield r1 <+> r2
+     for
+        (r1, r3) <- serviceRoutes(local, tracer, s)
+        r2 <- controlRoutes(r3)
+     yield r1 <+> r2
 
    private def translateMessage(message: String): String =
       val i = message.indexOf(", offset:")
@@ -55,32 +55,32 @@ class SmithyResource:
 
       val conf = security.Krakend("http://localhost:9000/store/jwks-pub.json")
 
-      for {
-        restClient <- BlazeClientBuilder[IO].resource
-        validator = new security.ServiceSecurityValidator(conf, restClient)
-        resource <-
-          SimpleRestJsonBuilder.routes(
-            new WalletOpsImpl[Result](s, getRequestInfo)
-              .transform(
-                Converter.toIO))
-            .mapErrors:
-               case HttpPayloadError(_, expected, message) =>
-                 val e = ErrorsBuilder.badRequestError(s"Related to $expected, comment: ${translateMessage(message)}")
-                 BadRequestError(e.code, e.title, e.message)
+      for
+         restClient <- BlazeClientBuilder[IO].resource
+         validator = new security.ServiceSecurityValidator(conf, restClient)
+         resource <-
+           SimpleRestJsonBuilder.routes(
+             new WalletOpsImpl[Result](s, getRequestInfo)
+               .transform(
+                 Converter.toIO))
+             .mapErrors:
+                case HttpPayloadError(_, expected, message) =>
+                  val e = ErrorsBuilder.badRequestError(s"Related to $expected, comment: ${translateMessage(message)}")
+                  BadRequestError(e.code, e.title, e.message)
 
-               case e: arch.Unauthorized => UnauthorizedError(e.code, e.title, e.message)
+                case e: arch.Unauthorized => UnauthorizedError(e.code, e.title, e.message)
 
-               case err: Throwable =>
-                 println(err.getClass.getName)
-                 err.printStackTrace()
-                 val e = internalServerError(err.getMessage)
-                 InternalServerError(e.code, e.title, e.message)
-            .middleware(
-              Middleware(local, tracer)
-                .andThen(
-                  AuthMiddleware(validator)))
-            .resource
-      } yield (resource, validator)
+                case err: Throwable =>
+                  println(err.getClass.getName)
+                  err.printStackTrace()
+                  val e = internalServerError(err.getMessage)
+                  InternalServerError(e.code, e.title, e.message)
+             .middleware(
+               Middleware(local, tracer)
+                 .andThen(
+                   AuthMiddleware(validator)))
+             .resource
+      yield (resource, validator)
 
    def all(
      local:  IOLocal[Option[domain.RequestInfo[Result]]],
