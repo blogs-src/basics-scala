@@ -71,7 +71,7 @@ object WalletEventSourcing:
               given ec: ExecutionContextExecutor = ctx.system.executionContext
               val log = Logging(ctx.system.toClassic, classOf[Command])
 
-              Behaviors.receiveMessage[Command] {
+              Behaviors.receiveMessage[Command]:
                 case Start          =>
                   println("Handler started")
                   Behaviors.same
@@ -87,24 +87,21 @@ object WalletEventSourcing:
 //                  }
 
                   val res = ws.getBalance(id)
-                  res.onComplete {
+                  res.onComplete:
                     case Success(r) => println(s"The balance is: $r")
                     case Failure(t) => t.printStackTrace()
-                  }
                   Behaviors.same
                 case CreateWallet(id) =>
                   val res = ws.createWallet(id)
-                  res.onComplete {
+                  res.onComplete:
                     case Success(r) => println(s"Wallet created: $r")
                     case Failure(t) => t.printStackTrace()
-                  }
                   Behaviors.same
                 case AddCredit(id, v) =>
                   val res = ws.credit(id, Domain.Credit(v))
-                  res.onComplete {
+                  res.onComplete:
                     case Success(r) => println(r)
                     case Failure(t) => t.printStackTrace()
-                  }
                   Behaviors.same
 
                 case StopGrpcServer =>
@@ -133,7 +130,7 @@ object WalletEventSourcing:
 
                   given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
-                  val grpcIO = cats.effect.Deferred[cats.effect.IO, Boolean].flatMap {
+                  val grpcIO = cats.effect.Deferred[cats.effect.IO, Boolean].flatMap:
                     shutdown =>
                        grpcServerControl = Some(shutdown)
 
@@ -146,7 +143,7 @@ object WalletEventSourcing:
                              val error = BadRequestError(e.code, e.title, e.message)
                              GrpcServiceException(Code.INVALID_ARGUMENT, msg, Seq(error))
 
-                       val runingRpcIO = IOLocal(Option.empty[rest.domain.RequestInfo[Result]]).flatMap {
+                       val runingRpcIO = IOLocal(Option.empty[rest.domain.RequestInfo[Result]]).flatMap:
                          local =>
 
                             val httpServerPort = 9001
@@ -168,14 +165,14 @@ object WalletEventSourcing:
                                           padmin.WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
                                             new ClusteringWalletFs2GrpcServiceImpl(sImpl, transformers)),
                                           monadConversions.ioToResult)
-                              yield /*(*/res/*, z)*/
+                              yield /*(*/ res /*, z)*/
 
                             val rx = monadConversions.convertResource(group, monadConversions.resultToIO)
 
-                            val rpcResource: Resource[IO, io.grpc.Server/*, org.http4s.server.Server)*/] =
+                            val rpcResource: Resource[IO, io.grpc.Server /*, org.http4s.server.Server)*/ ] =
                               for
                                  serverDefinition <- rx
-                                 server <- grpcApi.createIO[IO](serverDefinition/*._1*/)
+                                 server <- grpcApi.createIO[IO](serverDefinition /*._1*/ )
 //                                 restServer <-
 //                                   EmberServerBuilder
 //                                     .default[IO]
@@ -186,7 +183,7 @@ object WalletEventSourcing:
                               yield server.start()
 
                             val runingRpcIO = rpcResource
-                            //.
+                              // .
 //                              evalMap(
 //                              res =>
 //                                (
@@ -199,22 +196,17 @@ object WalletEventSourcing:
                               .useForever
 //                              (
 //                                (_, _) => IO.never)
-                              .handleErrorWith {
+                              .handleErrorWith:
                                 error =>
                                    println(s"===> ${error.getMessage}")
                                    IO.raiseError(error)
-                              }
                             runingRpcIO
-                       }
 
                        IO.race(shutdown.get, runingRpcIO)
-                  }
 
-                  Future {
+                  Future:
                     grpcIO.evalOn(ctx.system.executionContext).unsafeRunSync()
-                  }
                   Behaviors.same
-              }
 
       def apply(config: Config): Behavior[Command] = Behaviors.setup[Command]:
            (ctx: ActorContext[Command]) =>

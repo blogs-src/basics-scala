@@ -56,15 +56,14 @@ class ClusteringWalletGrpcServiceImpl[F[_]: Tracer, G: ExceptionGenerator](
 //      val kys = ctx.getAll(key).asScala.toList
 //      println(kys.head)
 //      println(ctx.keys().asScala.toList)
-      val ks = ctx.keys().asScala.toList.map {
+      val ks = ctx.keys().asScala.toList.map:
         k =>
            val key = Metadata.Key.of(k, Metadata.ASCII_STRING_MARSHALLER)
            (k, ctx.getAll(key).asScala.toList.head)
-      }
 //      println("---------------------------------------------------------")
 
-      Tracer[F].joinOrRoot(ks.toMap) {
-        Tracer[F].span("Work.DoWork", Attribute("custom_tag", "aa")).use {
+      Tracer[F].joinOrRoot(ks.toMap):
+        Tracer[F].span("Work.DoWork", Attribute("custom_tag", "aa")).use:
           span =>
 
              println(s"jctx: ${JSpan.current().getSpanContext}") // get a span from a ThreadLocal
@@ -82,5 +81,3 @@ class ClusteringWalletGrpcServiceImpl[F[_]: Tracer, G: ExceptionGenerator](
                 _ <- span.addAttribute(Attribute("traceId", span.context.traceIdHex))
              yield res
 
-        }
-      }

@@ -46,7 +46,7 @@ object Main extends IOApp.Simple:
          metadata.put(key, v)
       EitherT.right(IO.pure(metadata))
 
-   val run = IOLocal(Option.empty[domain.RequestInfo[Result]]).flatMap {
+   val run = IOLocal(Option.empty[domain.RequestInfo[Result]]).flatMap:
      local =>
 
         val grpcTargetPort = 9999
@@ -64,28 +64,24 @@ object Main extends IOApp.Simple:
 
         val t1 = monadConversions.convertResource(t, monadConversions.resultToIO)
 
-        t1.flatMap {
+        t1.flatMap:
           (
             routes,
             _,
             _,
             _,
           ) =>
-              EmberServerBuilder
-                .default[IO]
-                .withPort(Port.fromInt(httpServerPort).get)
-                .withHost(host"0.0.0.0")
-                .withHttpApp(routes.orNotFound)
-                .build
-        }
+            EmberServerBuilder
+              .default[IO]
+              .withPort(Port.fromInt(httpServerPort).get)
+              .withHost(host"0.0.0.0")
+              .withHttpApp(routes.orNotFound)
+              .build
           .use(
             _ =>
-            IO.never,
-          )
-          .handleErrorWith {
+              IO.never)
+          .handleErrorWith:
             error =>
                println(s"===> ${error.getMessage}")
                IO.raiseError(error)
-          }
 
-   }
