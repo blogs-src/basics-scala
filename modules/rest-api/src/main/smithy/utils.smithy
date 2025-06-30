@@ -8,6 +8,10 @@ structure authToken{
   roles: StringList
 }
 
+@trait
+structure authSign {
+}
+
 list StringList{
     member: String
 }

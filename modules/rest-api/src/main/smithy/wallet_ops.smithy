@@ -3,6 +3,9 @@ $version: "2"
 namespace smithy_rest.wallet_ops
 
 use smithy_rest.utils#authToken
+use smithy_rest.utils#authSign
+use smithy_rest.utils#StringList
+
 use alloy#simpleRestJson
 
 
@@ -36,8 +39,50 @@ operation HealthCheck {
 }
 
 
-//case class BalanceRequest(id: RequestId) //{
-//case class RequestId(value: String)
+@simpleRestJson
+service UserService {
+    version: "1.0.0",
+    errors: [],
+    operations: [AuthLogin]
+}
+
+@http(method: "POST", uri: "/login", code: 200)
+@authSign()
+operation AuthLogin {
+    input: LoginRequest,
+    output: AccessTokenPayload,
+}
+structure LoginRequest{
+    @required
+    user: String,
+    @required
+    password: String,
+}
+structure LoginResponse{
+    @required
+    access_token: String
+}
+
+structure AccessTokenPayload{
+    @required
+    aud: StringList,
+    @required
+    iss: String,
+    @required
+    sub: String,
+    @required
+    jti: String,
+    @required
+    roles: StringList,
+    @required
+    exp: Long,
+    @required
+    iat: Long,
+    @required
+    nbf: Long,
+}
+
+
 structure BalanceRequest{
   @required
   id: RequestId,

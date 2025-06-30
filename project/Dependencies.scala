@@ -61,6 +61,8 @@ object Dependencies {
     val opentelemetry                = "1.51.0"
     val jwt_scala                    = "11.0.0"
     val jose_jwt                     = "10.3"
+
+    val smithy4s                     = "0.18.38"
   }
 
   object Deps {
@@ -168,6 +170,8 @@ object Dependencies {
 
     val jwt_scala                  = "com.github.jwt-scala" %% "jwt-core"                                 % V.jwt_scala withSources()
     val jose_jwt                   = "com.nimbusds"          % "nimbus-jose-jwt"                          % V.jose_jwt withSources()
+
+    val smithy4s_json = "com.disneystreaming.smithy4s" %% "smithy4s-json" % V.smithy4s
   }
 
 // format: on
@@ -245,6 +249,7 @@ object Dependencies {
     Deps.opentelemetry_semconv,
     Deps.jwt_scala,
     Deps.jose_jwt,
+//    Deps.smithy4s_json, // TODO: check if this is unnecesary
 //    Deps.opentelemetry_autoconf,
     // only scala 2
 //    "ch.epfl.scala" %% "scala-debug-adapter" % "4.2.5",

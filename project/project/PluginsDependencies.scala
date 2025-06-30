@@ -1,9 +1,8 @@
-import sbt.*
 
 object PluginsDependencies {
 
 // format: off
-  object V {
+  object Vp {
     val sbt_akka_grpc        = "2.4.3"
     val sbt_fs2_grpc         = "2.8.1"
     // val sbt_fs2_grpc         = "2.7.15-2-85e1b7f-20240620T140322Z-SNAPSHOT"
@@ -11,7 +10,7 @@ object PluginsDependencies {
     val sbt_scalafix         = "0.14.0"
     val scalapbCompiler      = "0.11.18"
     val sbt_protoc           = "1.0.7"
-    val smithy4s_sbt_codegen = "0.18.38"
+    val smithy4s             = "0.18.38"
     val sbt_avro             = "3.4.3"
 
     val avro_compiler        = "1.11.3"

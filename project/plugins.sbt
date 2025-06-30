@@ -1,4 +1,4 @@
-import PluginsDependencies.V
+import PluginsDependencies.Vp
 
 resolvers += Resolver.mavenLocal
 
@@ -6,35 +6,35 @@ resolvers += Resolver.mavenLocal
 //addSbtPlugin("com.lightbend.akka.grpc" % "sbt-akka-grpc" % "2.4.3")
 
 addSbtPlugin(
-  "org.typelevel" % "sbt-fs2-grpc" % V.sbt_fs2_grpc)
+  "org.typelevel" % "sbt-fs2-grpc" % Vp.sbt_fs2_grpc)
 
 addSbtPlugin(
-  "ch.epfl.scala" % "sbt-scalafix" % V.sbt_scalafix)
+  "ch.epfl.scala" % "sbt-scalafix" % Vp.sbt_scalafix)
 
 addSbtPlugin(
-  "org.scalameta" % "sbt-scalafmt" % V.sbt_scalafmt)
+  "org.scalameta" % "sbt-scalafmt" % Vp.sbt_scalafmt)
 
 addSbtPlugin(
-  "com.thesamet" % "sbt-protoc" % V.sbt_protoc)
+  "com.thesamet" % "sbt-protoc" % Vp.sbt_protoc)
 
-libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % V.scalapbCompiler
+libraryDependencies += "com.thesamet.scalapb" %% "compilerplugin" % Vp.scalapbCompiler
 
 // https://scalapb.github.io/docs/validation
 // https://scalapb.github.io/docs/validation#unboxing-required-fields
 libraryDependencies ++= Seq(
-  "com.thesamet.scalapb" %% "compilerplugin"           % V.scalapbCompiler,
+  "com.thesamet.scalapb" %% "compilerplugin"           % Vp.scalapbCompiler,
   "com.thesamet.scalapb" %% "scalapb-validate-codegen" % "0.3.6")
 
 addSbtPlugin(
-  "com.disneystreaming.smithy4s" % "smithy4s-sbt-codegen" % V.smithy4s_sbt_codegen)
+  "com.disneystreaming.smithy4s" % "smithy4s-sbt-codegen" % Vp.smithy4s)
 
 addSbtPlugin(
-  "com.github.sbt" % "sbt-avro" % V.sbt_avro)
+  "com.github.sbt" % "sbt-avro" % Vp.sbt_avro)
 
 // Java sources compiled with one version of Avro might be incompatible with a
 // different version of the Avro library. Therefore we specify the compiler
 // version here explicitly.
-libraryDependencies += "org.apache.avro" % "avro-compiler" % V.avro_compiler
+libraryDependencies += "org.apache.avro" % "avro-compiler" % Vp.avro_compiler
 
 // https://www.wartremover.org/doc/install-setup.html
 // addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.1.8")

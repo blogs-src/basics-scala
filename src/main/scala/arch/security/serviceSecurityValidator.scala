@@ -21,7 +21,7 @@ import org.http4s.client.Client
 import scala.jdk.CollectionConverters.*
 
 enum JWTErrors:
-   case NotJWKS, SignatureNotValid, JWTExpired, JWTNotBefore, RolesInvalid, KidNotPresentInJWKS, NotToken
+   case NotJWKS, SignatureNotValid, JWTExpired, JWTNotBefore, RolesInvalid, KidNotPresentInJWKS, NotToken, JWKFormatError
 
 trait ValidatorSource[A]:
    extension (a: A) def jwksUrl: String
@@ -38,18 +38,16 @@ class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) 
    given Semigroup[String] = Semigroup.instance[String](
      (a, b) => a)
 
-   //  val request = Request[IO](GET, Uri.unsafeFromString("http://localhost:8087/realms/trinity/protocol/openid-connect/certs"))
    val request = Request[IO](GET, Uri.unsafeFromString(conf.jwksUrl))
 
    def updateJWKS(): IO[Unit] =
       val res2 =
         for
            body <- client.expect[String](request)
-//      _ <- IO.println(body)
            _ <-
               val res = JWKSet.parse(body)
-              println(res)
-              val keys = res.getKeys.asScala // java.util.List[JWK]
+//              println(res)
+              val keys = res.getKeys.asScala
               val kmap: Map[String, JWK] =
                 keys.map {
                   k =>
@@ -63,47 +61,76 @@ class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) 
            error =>
               IO.println(s"===> (not JWKS data) ${error.getMessage}").void
 
-   def validate(jwtString: String, rolesToCheck: Set[String]): Either[List[(JWTErrors, String)], String] =
+   def validate3(jwtString: String, rolesToCheck: Set[String]): Either[List[(JWTErrors, String)], String] =
       val valid =
         jwkSet match
           case Some(kmap) =>
             val signedJWT = SignedJWT.parse(jwtString)
             val kid = signedJWT.getHeader.getKeyID
-            val sset = kmap.keys.toSet
-            if sset.contains(kid) then
-               val publicKey: JWK = kmap(kid)
-               val verifier = new com.nimbusds.jose.crypto.RSASSAVerifier(publicKey.toRSAKey.toRSAPublicKey)
-               val isValid = signedJWT.verify(verifier)
-               val claims = signedJWT.getJWTClaimsSet
-               val now = new Date().getTime / 1000 // current time in seconds
-               val exp = Option(claims.getExpirationTime).map(_.getTime / 1000)
-               val nbf = Option(claims.getNotBeforeTime).map(_.getTime / 1000)
-               val iat = Option(claims.getIssueTime).map(_.getTime / 1000)
-               val isNotExpired = exp.forall(_ > now)
-               val isNotBefore = nbf.forall(_ <= now)
-               val id: String = conf.id(signedJWT.getPayload)
-               val generalChecks = Validated.cond(isValid, id, List((JWTErrors.SignatureNotValid, "JWT signature is not valid")))
-                 .combine(Validated.cond(isNotExpired, id, List((JWTErrors.JWTExpired, "JWT expired"))))
-                 .combine(Validated.cond(isNotBefore, id, List((JWTErrors.JWTNotBefore, "JWT not before"))))
-               if isValid then
+            val mbK = kmap.get(kid)
+            mbK match{
+              case Some(publicKey) =>
+                val verifier = new com.nimbusds.jose.crypto.RSASSAVerifier(publicKey.toRSAKey.toRSAPublicKey)
+                val isValid = signedJWT.verify(verifier)
+                val claims = signedJWT.getJWTClaimsSet
+                val now = new Date().getTime / 1000 // current time in seconds
+                val exp = Option(claims.getExpirationTime).map(_.getTime / 1000)
+                val nbf = Option(claims.getNotBeforeTime).map(_.getTime / 1000)
+                val iat = Option(claims.getIssueTime).map(_.getTime / 1000)
+                val isNotExpired = exp.forall(_ > now)
+                val isNotBefore = nbf.forall(_ <= now)
+                val id: String = conf.id(signedJWT.getPayload)
+                val generalChecks = Validated.cond(isValid, id, List((JWTErrors.SignatureNotValid, "JWT signature is not valid")))
+                  .combine(Validated.cond(isNotExpired, id, List((JWTErrors.JWTExpired, "JWT expired"))))
+                  .combine(Validated.cond(isNotBefore, id, List((JWTErrors.JWTNotBefore, "JWT not before"))))
+                if isValid then
                   val roles = conf.roles(signedJWT.getPayload)
                   val hasRole = rolesToCheck.subsetOf(roles)
                   generalChecks.combine(Validated.cond(hasRole,
-                                                       id,
-                                                       List((
-                                                         JWTErrors.RolesInvalid,
-                                                         s"JWT roles invalid: roles '${rolesToCheck.mkString("{", ", ", "}")}' not in '${
-                                                                                                                                          roles.mkString("{", ", ", "}")
-                                                                                                                                        }'"))))
-               else
+                    id,
+                    List((
+                      JWTErrors.RolesInvalid,
+                      s"JWT roles invalid: roles '${rolesToCheck.mkString("{", ", ", "}")}' not in '${
+                        roles.mkString("{", ", ", "}")
+                      }'"))))
+                else
                   generalChecks
-            else
-               Validated.invalid(List((JWTErrors.KidNotPresentInJWKS, s"Key id '$kid' not match anyone of the present in the JWKS"))) // "left" value
+              case None =>
+                Validated.invalid(List((JWTErrors.KidNotPresentInJWKS, s"Key id '$kid' not match anyone of the present in the JWKS"))) // "left" value
+            }
           case None       => Validated.invalid(List((JWTErrors.NotJWKS, "Not JWKS"))) // "left" value
       valid.toEither
 
    def initialize(): Unit =
       import cats.effect.unsafe.implicits.global
       updateJWKS().unsafeRunSync()
+
+   def validate(jwtString: String, rolesToCheck: Set[String]): Either[List[(JWTErrors, String)], String] =
+    (for {
+      kmap <- jwkSet.toRight(List((JWTErrors.NotJWKS, "Not JWKS")))
+      signedJWT <- Either.catchNonFatal(SignedJWT.parse(jwtString))
+        .leftMap(_ => List((JWTErrors.JWKFormatError, "Invalid JWT format")))
+      kid = signedJWT.getHeader.getKeyID
+      publicKey <- kmap.get(kid)
+        .toRight(List((JWTErrors.KidNotPresentInJWKS, s"Key id '$kid' not match anyone of the present in the JWKS")))
+    } yield {
+      val verifier = new com.nimbusds.jose.crypto.RSASSAVerifier(publicKey.toRSAKey.toRSAPublicKey)
+      val isValid = signedJWT.verify(verifier)
+      val claims = signedJWT.getJWTClaimsSet
+      val now = new Date().getTime / 1000
+      val exp = Option(claims.getExpirationTime).map(_.getTime / 1000)
+      val nbf = Option(claims.getNotBeforeTime).map(_.getTime / 1000)
+      val id = conf.id(signedJWT.getPayload)
+      val generalChecks = Validated.cond(isValid, id, List((JWTErrors.SignatureNotValid, "JWT signature is not valid")))
+        .combine(Validated.cond(exp.forall(_ > now), id, List((JWTErrors.JWTExpired, "JWT expired"))))
+        .combine(Validated.cond(nbf.forall(_ <= now), id, List((JWTErrors.JWTNotBefore, "JWT not before"))))
+      if isValid then
+        val roles = conf.roles(signedJWT.getPayload)
+        val hasRole = rolesToCheck.subsetOf(roles)
+        generalChecks
+          .combine(Validated.cond(hasRole, id, List((JWTErrors.RolesInvalid, s"JWT roles invalid: roles '${rolesToCheck.mkString("{", ", ", "}")}' not in '${roles.mkString("{", ", ", "}")}'"))))
+          .toEither
+      else generalChecks.toEither
+    }).flatten
 
    initialize()

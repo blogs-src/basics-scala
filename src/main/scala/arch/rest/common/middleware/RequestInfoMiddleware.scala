@@ -12,7 +12,8 @@ import org.http4s.implicits.*
 import org.http4s.*
 import smithy4s.Hints
 
-object Middleware:
+// https://github.com/http4s/http4s/tree/series/0.23/server/shared/src/main/scala/org/http4s/server/middleware
+object RequestInfoMiddleware:
 
    def appToRoutes(app: HttpApp[IO]): HttpRoutes[IO] = Kleisli:
         req => OptionT.liftF(app(req))
@@ -32,7 +33,7 @@ object Middleware:
         ): HttpApp[IO] => HttpApp[IO] =
           inputApp =>
              val routes = appToRoutes(inputApp)
-             val nroute = HttpRoutes[IO]:
+             val nroutes = HttpRoutes[IO]:
                   request =>
                      println("withRequestInfo2 <<<...............................>>>")
                      val hnames = request.headers.headers.map(_.name.toString)
@@ -42,4 +43,4 @@ object Middleware:
                      val userId = request.attributes.lookup(Attrs.UserId)
                      val requestInfo = Some(domain.RequestInfo[Result](hvals2, tracer, userId))
                      OptionT.liftF(local.set(requestInfo)) *> routes(request)
-             routesToApp(nroute)
+             routesToApp(nroutes)

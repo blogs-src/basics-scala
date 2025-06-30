@@ -15,13 +15,44 @@ import cats.effect.*
 import cats.implicits.*
 import org.http4s.blaze.client.BlazeClientBuilder
 
+import java.util.Date
+import smithy4s.Document
+
 class ControlServiceImpl(validator: security.SecurityValidator[IO]) extends ControlService[IO]:
    def reloadJWKS(): IO[Unit] = validator.updateJWKS()
+
+class UserServiceImpl extends UserService[IO]:
+  def authLogin(user: String, password: String): IO[AccessTokenPayload] = {
+    IO.pure(
+      AccessTokenPayload(
+        aud = List("test", "otra mas"),
+        iss = "https://krakend.io",
+        sub = "user123",
+        jti = "mnb23vcsrt756yuiomnbvcx98ertyuiop",
+        roles = List("role_a", "role_b", "role_x"),
+        exp = (new Date(System.currentTimeMillis() + 3600 * 1000)).getTime,
+        iat = (new Date(System.currentTimeMillis())).getTime,
+        nbf = (new Date(System.currentTimeMillis())).getTime,
+      )
+    )
+  }
+
 
 class SmithyResource:
 
    private def controlRoutes(validator: security.SecurityValidator[IO]): Resource[IO, HttpRoutes[IO]] =
      SimpleRestJsonBuilder.routes(new ControlServiceImpl(validator)).resource
+
+   private def userRoutes(): Resource[IO, (HttpRoutes[IO], security.SecuritySigner[IO])] = {
+     val privJwksUrl = "http://localhost:9000/store/jwks-priv.json"
+     for{
+       restClient <- BlazeClientBuilder[IO].resource
+       signer = new security.ServiceSecuritySigner(privJwksUrl, restClient)
+       resource <- SimpleRestJsonBuilder.routes(new UserServiceImpl)
+           .middleware(LoginMiddleware(signer))
+           .resource
+     } yield (resource, signer)
+   }
 
    private def routes_combined(
      local:  IOLocal[Option[domain.RequestInfo[Result]]],
@@ -29,9 +60,10 @@ class SmithyResource:
      s:      WalletService[Result],
    ): Resource[IO, HttpRoutes[IO]] =
      for
-        (r1, r3) <- serviceRoutes(local, tracer, s)
-        r2 <- controlRoutes(r3)
-     yield r1 <+> r2
+        (r1, r1_a) <- serviceRoutes(local, tracer, s)
+        r2 <- controlRoutes(r1_a)
+        (r3, r3_a) <- userRoutes()
+     yield r1 <+> r2 <+> r3
 
    private def translateMessage(message: String): String =
       val i = message.indexOf(", offset:")
@@ -76,7 +108,7 @@ class SmithyResource:
                   val e = internalServerError(err.getMessage)
                   InternalServerError(e.code, e.title, e.message)
              .middleware(
-               Middleware(local, tracer)
+               RequestInfoMiddleware(local, tracer)
                  .andThen(
                    AuthMiddleware(validator)))
              .resource

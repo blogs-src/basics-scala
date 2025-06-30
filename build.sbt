@@ -177,7 +177,6 @@ lazy val root = project
   )
   .dependsOn(grpcApi)
   .dependsOn(restApi)
-  // .aggregate(grpcApi)
 
 
 val scenario1 = Seq(

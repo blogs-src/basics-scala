@@ -1,0 +1,24 @@
+meta {
+  name: login
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base-url}}/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "user": "test",
+    "password": "test"
+  }
+}
+
+script:post-response {
+  if(res.body.access_token) {
+      bru.setVar("token", res.body.access_token)
+  }
+}

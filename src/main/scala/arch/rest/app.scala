@@ -1,25 +1,11 @@
 package arch
 package rest
 
-//import smithy_rest.wallet_ops.*
-//import cats.effect.*
-//import cats.effect._
-//import cats.implicits._
-//import org.http4s.implicits.*
-//import scala.concurrent.ExecutionContext.global
-
 import org.http4s.ember.server.*
-//import org.http4s.*
 import com.comcast.ip4s.*
-//import smithy4s.http4s.SimpleRestJsonBuilder
-
-//import org.typelevel.otel4s.trace.Tracer
 
 import cats.data.EitherT
 import com.wallet.demo.clustering.rpc.admin as padmin
-//import cats.mtl.*
-//import fs2.grpc.client.ClientOptions
-//import cats.effect.std.Dispatcher
 
 import cats.*
 import cats.effect.*
