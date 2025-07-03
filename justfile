@@ -7,18 +7,13 @@ set export := true
 # default: compile
 
 docker_data_dir := env("PROJECT_DIRECTORY") + "/" + env("DATA_BASE_PATH")
-postgres_data_dir := docker_data_dir + "/.postgres/"
-cassandra_data_dir := docker_data_dir + "/.cassandra/"
 kafka_data_dir := docker_data_dir + "/.kafka/"
 prometheus_data_dir := docker_data_dir + "/.prometheus/"
 grafana_data_dir := docker_data_dir + "/.grafana/"
 
-# postgres_data_dir := justfile_directory() + "/support/.data/.postgres"
-# cassandra_data_dir := justfile_directory() + "/support/.data/.cassandra"
-# kafka_data_dir := justfile_directory() + "/support/.data/.kafka"
-# prometheus_data_dir := justfile_directory() + "/support/.data/.prometheus"
 
 run-migrations:
+    docker logs cassandra-temp -f
     liquibase update --defaults-file=support/storage/postgres/liquibase.properties
     liquibase update --defaults-file=support/storage/postgres/liquibase-test.properties
     liquibase update --defaults-file=support/storage/cassandra/liquibase.properties
@@ -62,8 +57,6 @@ infrastructure-up:
     if [[ ! -d "{{ kafka_data_dir }}" ]]; then
       mkdir -p "{{ kafka_data_dir }}"
       mkdir -p "{{ prometheus_data_dir }}"
-      mkdir -p "{{ postgres_data_dir }}"
-      mkdir -p "{{ cassandra_data_dir }}"
       mkdir -p "{{ grafana_data_dir }}"
       sudo chmod -R 777 "{{ docker_data_dir }}"
 
@@ -72,19 +65,7 @@ infrastructure-up:
 
     fi
 
-    cassandra_data_dir="{{ cassandra_data_dir }}"
-    if [ -z "$( ls -A $cassandra_data_dir )" ]; then
-       firstTime=true
-    else
-       firstTime=false
-    fi
-
     just docker-compose-up
-
-    if [ "$firstTime" == "true" ]; then
-      docker logs cassandra-temp -f
-      just run-migrations
-    fi
 
 [macos]
 [private]

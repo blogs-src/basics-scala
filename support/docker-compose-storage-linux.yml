@@ -6,8 +6,7 @@ services:
       file: support/docker-base-services/base-compose-services-storage.yml
       service: postgres
     volumes:
-      # - ./.data/.postgres:/var/lib/postgresql/data
-      - "${DATA_BASE_PATH}/.postgres:/var/lib/postgresql/data"
+      - pgdata:/var/lib/postgresql/data
       # - ./storage/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - "$PROJECT_DIRECTORY/support/storage/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
 
@@ -15,10 +14,9 @@ services:
     container_name: cassandra-db
     extends:
         file: support/docker-base-services/base-compose-services-storage.yml
-        service: cassandra 
+        service: cassandra
     volumes:
-      # - ./.data/.cassandra:/var/lib/cassandra
-      - "${DATA_BASE_PATH}/.cassandra:/var/lib/cassandra"
+      - cassandra_data:/var/lib/cassandra
     networks:
         - cassandra_network
 
@@ -40,3 +38,7 @@ services:
 
 networks:
   cassandra_network:
+
+volumes:
+  pgdata:
+  cassandra_data:
