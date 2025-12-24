@@ -4,23 +4,23 @@ object Dependencies {
 
 // format: off
   object V {
-    val scalaLTSVersion      = "3.3.6"
-    val distage              = "1.2.19"
+    val scalaLTSVersion      = "3.3.7"
+    val distage              = "1.2.22"
 
-    val scalaLatestVersion   = "3.7.1"
+    val scalaLatestVersion   = "3.7.4"
     val logstage             = distage
     val scalatest            = "3.2.18"
     val scalacheck           = "1.17.0"
-    val catsCore             = "2.10.0"
-    val zio                  = "2.0.21"
-    val zioCats              = "23.0.0.8"
-    val circeGeneric         = "0.14.6"
+//    val catsCore             = "2.13.0"
+    val zio                  = "2.1.13"
+    val zioCats              = "23.1.0.13"
+    val circe                = "0.14.15"
     // val akkaVersion          = "2.9.3"
     val akkaVersion          = "2.9.5" // (Aug 19 2024) from 2.9.6 a license key is required
     // val akkaGrpc             = "2.4.4"
     val akkaGrpc             = "2.4.3"
     val kafkaVersion         = "6.0.0"
-    val logbackVersion       = "1.5.18"
+    val logbackVersion       = "1.5.23"
     val jacksonVersion       = "2.11.4"
     val jacksonScalaVersion  = "2.18.0"
     val akkaHttpVersion      = "10.6.3"
@@ -32,37 +32,38 @@ object Dependencies {
     val akkaCassandra        = "1.2.1"
     val akkaProjection       = "1.5.5"
     val cats                 = "2.13.0"
-    val catsEffect           = "3.6.1"
-    val catsMTL              = "1.5.0"
-    val munit                = "1.1.1"
+    val catsEffect           = "3.6.3"
+    val catsMTL              = "1.6.0"
+    val munit                = "1.2.1"
     val munitCatsEffect      = "2.1.0"
-    val fs2                  = "3.12.0"
-    val iron                 = "3.0.2"
-    val grpc                 = "1.73.0"
+    val fs2                  = "3.12.2"
+    val iron                 = "3.2.2"
+    val grpc                 = "1.77.0"
     val scalapbCommonProtos  = "2.9.6-0"
     val avroCompiler         = "1.12.0"
 //    val chimney              = "1.6.0"
-    val chimney              = "1.8.1"
-    val doobie               = "1.0.0-RC9"
+    val chimney              = "1.8.2"
+    val doobie               = "1.0.0-RC11"
     val skunk                = "1.1.0-M3"
-    val postgress            = "42.7.7"
-    val commonsCompress      = "1.27.1"
+    val postgress            = "42.7.8"
+    val commonsCompress      = "1.28.0"
     // https://packages.confluent.io/maven/io/confluent/kafka-avro-serializer/
     val kafkaAvroSerializer  = "8.0.0"
-    val smithytranslateTraitsVersion = "0.5.7"
-    val http4s                       = "0.23.30"
+    val smithytranslateTraitsVersion = "0.7.5"
+    val http4s                       = "0.23.33"
     val http4s_blaze                 = "0.23.17"
     val scalapb                      = "0.11.18"
     val avroCompilerVersion          = "1.12.0"
-    val fs2Kafka                     = "3.8.0"
+    val fs2Kafka                     = "3.9.1"
 
-    val helenus                      = "1.1.0"
-    val otel4s                       = "0.12.0"
-    val opentelemetry                = "1.51.0"
-    val jwt_scala                    = "11.0.0"
-    val jose_jwt                     = "10.3"
+    val helenus                      = "1.2.0"
+  // https://typelevel.org/otel4s/instrumentation/logs.html
+    val otel4s                       = "0.14.0"
+    val opentelemetry                = "1.57.0"
+    val jwt_scala                    = "11.0.3"
+    val jose_jwt                     = "10.6"
 
-    val smithy4s                     = "0.18.38"
+    val smithy4s                     = "0.18.42"
   }
 
   object Deps {
@@ -147,6 +148,7 @@ object Dependencies {
     val chimneyJavaCollections     = "io.scalaland"       %% "chimney-java-collections"       % V.chimney withSources()
 
     val http4s_ember_server        = "org.http4s"         %% "http4s-ember-server"            % V.http4s withSources()
+    val smithytranslateTraits      =  "com.disneystreaming.smithy" % "smithytranslate-traits" % V.smithytranslateTraitsVersion withSources()
     val http4s_blaze_client        = "org.http4s"         %% "http4s-blaze-client"            % V.http4s_blaze withSources()
 
     val avro                       = "org.apache.avro"     % "avro"                           % V.avroCompilerVersion withSources()
@@ -172,6 +174,10 @@ object Dependencies {
     val jose_jwt                   = "com.nimbusds"          % "nimbus-jose-jwt"                          % V.jose_jwt withSources()
 
     val smithy4s_json = "com.disneystreaming.smithy4s" %% "smithy4s-json" % V.smithy4s
+
+    val circeCore                  = "io.circe"             %% "circe-core"                   % V.circe
+    val circeGeneric               = "io.circe"             %% "circe-generic"                % V.circe
+    val circeParser                = "io.circe"             %% "circe-parser"                 % V.circe
   }
 
 // format: on
@@ -192,6 +198,7 @@ object Dependencies {
     Deps.scalapbCommonProtos,
     Deps.http4s_ember_server,
     Deps.http4s_blaze_client,
+    Deps.smithytranslateTraits,
     Deps.chimney,
     Deps.chimneyProtobufs,
     Deps.chimneyJavaCollections,
@@ -249,6 +256,9 @@ object Dependencies {
     Deps.opentelemetry_semconv,
     Deps.jwt_scala,
     Deps.jose_jwt,
+    Deps.circeCore,
+    Deps.circeGeneric,
+    Deps.circeParser,
 //    Deps.smithy4s_json, // TODO: check if this is unnecesary
 //    Deps.opentelemetry_autoconf,
     // only scala 2

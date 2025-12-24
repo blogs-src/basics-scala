@@ -70,7 +70,9 @@ lazy val appSettings = Seq(
     Seq(
       "-explain",
       "-Wsafe-init",
-      "-deprecation",
+      "-deprecation",     // show deprecation warnings
+//      "-unchecked",       // additional warnings
+//      "-Xfatal-warnings", // treat warnings as errors
       "-feature",
       "-Xmax-inlines",
       "50",
@@ -81,12 +83,16 @@ lazy val appSettings = Seq(
 lazy val scalacOptionsCustom = sys.env.getOrElse("SCALAC_OPTIONS", "default")
 lazy val scalacOptionsValue = scalacOptionsCases(scalacOptionsCustom)
 
+// format: off
 lazy val scalacOptionsCases = Map(
-  "default" -> Seq[String](),
-  "new_syntax" -> Seq[String]("-new-syntax", "-rewrite"),
-  "indent" -> Seq[String]("-Wunused:all", "-indent", "-rewrite"),
-  "3_7_migration" -> Seq[String]("-rewrite", "-source", "3.7-migration"),
+  // https://docs.scala-lang.org/scala3/guides/migration/tooling-syntax-rewriting.html
+  "default"            -> Seq[String](),
+  "new_syntax"         -> Seq[String]("-new-syntax",  "-rewrite"),
+  "new_syntax_updated" -> Seq[String]("-new-syntax",  "-rewrite", "-source", "future-migration"),
+  "indent"             -> Seq[String]("-Wunused:all", "-indent",  "-rewrite"),
+  "3_7_migration"      -> Seq[String]("-rewrite",     "-source",  "3.7-migration"),
 )
+// format: on
 
 def mapGen(name: String) = {
   val m = new mutable.HashMap[String, String]
@@ -128,7 +134,7 @@ lazy val grpcApi = project
     //https://repo1.maven.org/maven2/com/google/protobuf/protoc/
     //https://repo1.maven.org/maven2/com/google/protobuf/protoc/4.31.1/protoc-4.31.1-linux-x86_64.exe
     //  100.0% [##########] 9.7 MiB (16.2 MiB / s)
-    PB.protocVersion := "4.31.1",
+    PB.protocVersion := "4.33.2",
     // fs2GrpcOutputPath := (Compile / baseDirectory).value / "src/main/scala/fs2-grpc",
     // scalapbProtobufDirectory := (Compile / baseDirectory).value / "src/main/scala/scalapb",
   )

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+headrs1='-H "userid: aa"'
+
+# sbt "set bloopExportJarClassifiers := Some(Set(\"source\"))" bloopInstall
+
+#cat cli/values/GetBalance.json | grpcurl -plaintext -H "userid: aa" -d @ localhost:8090 com.wallet.demo.clustering.rpc.admin.WalletCommandRpcService.GetBalance
+#cat -vv cli/values/GetBalance.json | grpcurl -H "traceparent: 00-82383569b2b84276342a70581dc625ad-d5f7d8db141d965a-01" -H "tracestate: ot=th:0" -plaintext -d @ localhost:8090 com.wallet.demo.clustering.rpc.admin.WalletCommandRpcService.GetBalance
+cat -vv cli/values/GetBalance.json | grpcurl -plaintext -d @ localhost:9999 com.wallet.demo.clustering.rpc.admin.WalletCommandRpcService.GetBalance
+#echo $headrs1
+
+# pattern and language argument support short form

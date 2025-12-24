@@ -19,7 +19,9 @@ import org.typelevel.otel4s.trace.Tracer
 object Tracer:
 
    def makeOtel(appName: String): Resource[Result, Tracer[Result]] =
-      val jaegerEndpoint = "http://localhost:4317"
+//      val jaegerEndpoint = "http://localhost:4317"
+//      val jaegerEndpoint = "http://jaeger1.dev.me:4317"
+      val jaegerEndpoint = "http://jaeger1.dev.me:4317"
       import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter
       import java.util.concurrent.TimeUnit
 

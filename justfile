@@ -40,14 +40,14 @@ docker-compose-up:
       -f support/docker-compose-observability.yml \
       up -d
 
+#      -f support/docker-compose-messaging.yml \
+#      -f support/docker-compose-observability.yml \
 [linux]
 [private]
 docker-compose-up:
     docker compose \
       --project-directory $PROJECT_DIRECTORY \
       -f support/docker-compose-storage-linux.yml \
-      -f support/docker-compose-messaging.yml \
-      -f support/docker-compose-observability.yml \
       up -d
 
 infrastructure-up:

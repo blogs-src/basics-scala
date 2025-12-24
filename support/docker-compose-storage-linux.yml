@@ -12,11 +12,14 @@ services:
 
   cassandra-db:
     container_name: cassandra-db
+#    command: ["-Dcassandra.auto_snapshot=false"]
     extends:
         file: support/docker-base-services/base-compose-services-storage.yml
         service: cassandra
     volumes:
       - cassandra_data:/var/lib/cassandra
+      - ./dump:/dump
+      - ./db/cassandra:/configs
     networks:
         - cassandra_network
 
