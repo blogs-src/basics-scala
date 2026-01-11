@@ -20,19 +20,22 @@ import org.http4s.client.Client
 
 import scala.jdk.CollectionConverters.*
 
-enum JWTErrors:
+enum JWTErrors {
    case NotJWKS, SignatureNotValid, JWTExpired, JWTNotBefore, RolesInvalid, KidNotPresentInJWKS, NotToken, JWKFormatError
+}
 
-trait ValidatorSource[A]:
+trait ValidatorSource[A] {
    extension (a: A) def jwksUrl: String
    extension (a: A) def id(payload: Payload): String
    extension (a: A) def roles(payload: Payload): Set[String]
+}
 
-trait SecurityValidator[F[_]]:
+trait SecurityValidator[F[_]] {
    def updateJWKS(): F[Unit]
    def validate(jwtString: String, rolesToCheck: Set[String]): Either[List[(JWTErrors, String)], String]
+}
 
-class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) extends SecurityValidator[IO]:
+class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) extends SecurityValidator[IO] {
    var jwkSet: Option[Map[String, JWK]] = None
 
    given Semigroup[String] = Semigroup.instance[String](
@@ -40,11 +43,11 @@ class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) 
 
    val request = Request[IO](GET, Uri.unsafeFromString(conf.jwksUrl))
 
-   def updateJWKS(): IO[Unit] =
+   def updateJWKS(): IO[Unit] = {
       val res2 =
-        for
+        for {
            body <- client.expect[String](request)
-           _ <-
+           _ <- {
               val res = JWKSet.parse(body)
 //              println(res)
               val keys = res.getKeys.asScala
@@ -55,15 +58,20 @@ class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) 
                 }.toMap
               jwkSet = Some(kmap)
               IO(())
+           }
+        }
         yield ()
 
-      res2.handleErrorWith:
+      res2.handleErrorWith {
            error =>
               IO.println(s"===> (not JWKS data) ${error.getMessage}").void
+      }
+   }
 
-   def initialize(): Unit =
+   def initialize(): Unit = {
       import cats.effect.unsafe.implicits.global
       updateJWKS().unsafeRunSync()
+   }
 
    def validate(jwtString: String, rolesToCheck: Set[String]): Either[List[(JWTErrors, String)], String] =
     (for {
@@ -84,13 +92,15 @@ class ServiceSecurityValidator[A: ValidatorSource](conf: A, client: Client[IO]) 
       val generalChecks = Validated.cond(isValid, id, List((JWTErrors.SignatureNotValid, "JWT signature is not valid")))
         .combine(Validated.cond(exp.forall(_ > now), id, List((JWTErrors.JWTExpired, "JWT expired"))))
         .combine(Validated.cond(nbf.forall(_ <= now), id, List((JWTErrors.JWTNotBefore, "JWT not before"))))
-      if isValid then
+      if isValid then {
         val roles = conf.roles(signedJWT.getPayload)
         val hasRole = rolesToCheck.subsetOf(roles)
         generalChecks
           .combine(Validated.cond(hasRole, id, List((JWTErrors.RolesInvalid, s"JWT roles invalid: roles '${rolesToCheck.mkString("{", ", ", "}")}' not in '${roles.mkString("{", ", ", "}")}'"))))
           .toEither
+      }
       else generalChecks.toEither
     }).flatten
 
    initialize()
+}

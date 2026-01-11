@@ -24,7 +24,7 @@ type Result[A] = EitherT[IO, ServiceError, A]
 
 // format: on
 
-object ErrorsBuilder:
+object ErrorsBuilder {
 
    def serviceUnavailableError(message: String): ServiceUnavailable = ServiceUnavailable("ECOD-503", "SERVICE-UNAVAILABLE", message)
 
@@ -39,3 +39,4 @@ object ErrorsBuilder:
    def unauthorizedError(message: String): Unauthorized = Unauthorized("ECOD-401", "UNAUTHORIZED", message)
 
    def forbiddenError(message: String): Forbidden = Forbidden("ECOD-403", "FORBIDDEN", message)
+}

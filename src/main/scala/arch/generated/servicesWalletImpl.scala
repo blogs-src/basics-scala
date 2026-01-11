@@ -3,16 +3,16 @@ package arch
 import arch.ClusterWallet.WalletSharding
 import arch.FrameWorkCommands.CmdInst
 
-object WalletServicesImpl:
+object WalletServicesImpl {
 
-   class WalletServiceImpl(entitySharding: WalletSharding, timeout: Timeout) extends WalletServices.Service:
+   class WalletServiceImpl(entitySharding: WalletSharding, timeout: Timeout) extends WalletServices.Service {
 //      import WalletCommands.*
 
       def createWallet(
         id:             String,
       )(
         using metadata: Map[String, String] = Map.empty,
-      ): Future[OkResponse | ResultError] =
+      ): Future[OkResponse | ResultError] = {
          // val command: ActorRef[ProtoSerializable | ResultError] => CmdInst = FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd, List(id), _)
          // val command: ActorRef[ProtoSerializable | ResultError] => CmdInst = (arg: ActorRef[ProtoSerializable | ResultError]) => FrameWorkCommands.CmdInst(CommandsADT.CreateWalletCmd, List(id), arg)
          def command(arg: ActorRef[ProtoSerializable | ResultError]): CmdInst = FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.CreateWalletCmd,
@@ -23,6 +23,7 @@ object WalletServicesImpl:
            .ask(command)(
              using timeout)
            .mapTo[OkResponse | ResultError]
+      }
 
       def credit(
         id:             String,
@@ -48,7 +49,7 @@ object WalletServicesImpl:
         id:             String,
       )(
         using metadata: Map[String, String] = Map.empty,
-      ): Future[Domain.Balance | ResultError] =
+      ): Future[Domain.Balance | ResultError] = {
          println(f"Asking the balance: ${id}")
          println(f"metadata: ${metadata}")
          entitySharding
@@ -57,3 +58,6 @@ object WalletServicesImpl:
              FrameWorkCommands.CmdInst(WalletCommands.CommandsADT.GetBalanceCmd, metadata, _))(
              using timeout)
            .mapTo[Domain.Balance | ResultError]
+      }
+   }
+}

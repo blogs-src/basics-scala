@@ -28,17 +28,19 @@ class ClusteringWalletGrpcServiceImpl2[F[_], G: ExceptionGenerator](
   FR:                 Raise[F, ServiceError],
   M:                  Monad[F],
   MT:                 MonadThrow[F])
-    extends ClusteringWalletGrpcService2[F]:
+    extends ClusteringWalletGrpcService2[F] {
 
    import io.scalaland.chimney.partial
 
-   private def validateRequestId(request: GetBalanceRequest): F[BalanceRequest] =
+   private def validateRequestId(request: GetBalanceRequest): F[BalanceRequest] = {
       val res = request.transformIntoPartial[BalanceRequest].asEither.asResult.asEitherErrorPathMessageStrings
-      res match
+      res match {
         case Right(r) => r.pure[F]
         case Left(e)  =>
           val (key, value) = e.toList.head
           FR.raise(ErrorsBuilder.badRequestError(s"$key: $value"))
+      }
+   }
 
    def getBalance(
      request:    GetBalanceRequest,
@@ -47,7 +49,7 @@ class ClusteringWalletGrpcServiceImpl2[F[_], G: ExceptionGenerator](
      using span: Span[F],
      log:        LogIO[F],
      tracer:     Tracer[F],
-   ): F[commands.Balance] =
+   ): F[commands.Balance] = {
       commands.Balance(100).pure[F]
       // MT.raiseError(ErrorsBuilder.notFoundError("Not found"))
       // FR.raise(ErrorsBuilder.badRequestError("bad request"))
@@ -64,7 +66,7 @@ class ClusteringWalletGrpcServiceImpl2[F[_], G: ExceptionGenerator](
       println(s"traceId: ${span.context.traceIdHex}")
       println(s"spanId: ${span.context.spanIdHex}")
 
-      for
+      for {
          r <- validateRequestId(request)
          // res <- service.getBalance(r.id.get.value.get)
          //        _ <- F.pure{println(s"yeeeee ${Try{r.id.get.value.get}}")}
@@ -72,4 +74,7 @@ class ClusteringWalletGrpcServiceImpl2[F[_], G: ExceptionGenerator](
            service.getBalance(r.id.value)(
              using Map("traceId" -> span.context.traceIdHex))
          _ <- log.info("Validation done...")
+      }
       yield commands.Balance(res.value)
+   }
+}

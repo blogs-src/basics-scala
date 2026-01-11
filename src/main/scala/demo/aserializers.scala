@@ -1,6 +1,6 @@
 package infrastructure
 
-object Serializers:
+object Serializers {
 
    import com.fasterxml.jackson.core.JsonGenerator
    import com.fasterxml.jackson.core.JsonParser
@@ -20,7 +20,7 @@ object Serializers:
    def register(
      sys: TypedActorSystem[
        ?],
-   ): ObjectMapper =
+   ): ObjectMapper = {
       val mapper: ObjectMapper = JacksonObjectMapperProvider(sys).getOrCreate("jackson-cbor", None)
       val mapperJson: ObjectMapper = JacksonObjectMapperProvider(sys).getOrCreate("jackson-json", None)
       val module: SimpleModule = new SimpleModule()
@@ -45,17 +45,18 @@ object Serializers:
 
       mapper.registerModule(module)
       mapperJson.registerModule(module)
+   }
 
-   class TransportErrorSerializer extends StdSerializer[TransportError](classOf[TransportError]):
+   class TransportErrorSerializer extends StdSerializer[TransportError](classOf[TransportError]) {
       import TransportError.*
 
       override def serialize(
         value:    TransportError,
         gen:      JsonGenerator,
         provider: SerializerProvider,
-      ): Unit =
+      ): Unit = {
          val strValue =
-           value match
+           value match {
              case NotFound            => "NF"
              case BadRequest          => "BR"
              case InternalServerError => "IS"
@@ -63,13 +64,16 @@ object Serializers:
              case Forbidden           => "FB"
              case Maintenance         => "MT"
              case Unknown             => "UN"
+           }
          gen.writeString(strValue)
+      }
+   }
 
-   class TransportErrorDeserializer extends StdDeserializer[TransportError](classOf[TransportError]):
+   class TransportErrorDeserializer extends StdDeserializer[TransportError](classOf[TransportError]) {
       import TransportError.*
 
       override def deserialize(p: JsonParser, ctxt: DeserializationContext): TransportError =
-        p.getText match
+        p.getText match {
           case "NF" => NotFound
           case "BR" => BadRequest
           case "IS" => InternalServerError
@@ -77,37 +81,45 @@ object Serializers:
           case "FB" => Forbidden
           case "MT" => Maintenance
           case "UN" => Unknown
+        }
+   }
 
-   class LogbackInfoStatusSerializer extends StdSerializer[ch.qos.logback.core.status.InfoStatus](classOf[ch.qos.logback.core.status.InfoStatus]):
+   class LogbackInfoStatusSerializer extends StdSerializer[ch.qos.logback.core.status.InfoStatus](classOf[ch.qos.logback.core.status.InfoStatus]) {
 
       override def serialize(
         value:    ch.qos.logback.core.status.InfoStatus,
         gen:      JsonGenerator,
         provider: SerializerProvider,
-      ): Unit =
+      ): Unit = {
          val strValue = ""
          gen.writeString(strValue)
+      }
+   }
 
-   class LogbackInfoStatusDeserializer extends StdDeserializer[ch.qos.logback.core.status.InfoStatus](classOf[ch.qos.logback.core.status.InfoStatus]):
+   class LogbackInfoStatusDeserializer extends StdDeserializer[ch.qos.logback.core.status.InfoStatus](classOf[ch.qos.logback.core.status.InfoStatus]) {
 
       override def deserialize(p: JsonParser, ctxt: DeserializationContext): ch.qos.logback.core.status.InfoStatus =
         new ch.qos.logback.core.status.InfoStatus("", null)
+   }
 
-   class LogbackLoggerContextSerializer extends StdSerializer[ch.qos.logback.classic.LoggerContext](classOf[ch.qos.logback.classic.LoggerContext]):
+   class LogbackLoggerContextSerializer extends StdSerializer[ch.qos.logback.classic.LoggerContext](classOf[ch.qos.logback.classic.LoggerContext]) {
 
       override def serialize(
         value:    ch.qos.logback.classic.LoggerContext,
         gen:      JsonGenerator,
         provider: SerializerProvider,
-      ): Unit =
+      ): Unit = {
          val strValue = ""
          gen.writeString(strValue)
+      }
+   }
 
    class LogbackLoggerContextDeserializer
-       extends StdDeserializer[ch.qos.logback.classic.LoggerContext](classOf[ch.qos.logback.classic.LoggerContext]):
+       extends StdDeserializer[ch.qos.logback.classic.LoggerContext](classOf[ch.qos.logback.classic.LoggerContext]) {
 
       override def deserialize(p: JsonParser, ctxt: DeserializationContext): ch.qos.logback.classic.LoggerContext =
         new ch.qos.logback.classic.LoggerContext()
+   }
 
    // java.util.concurrent.ConcurrentHashMap
    // class Serializer extends StdSerializer[](classOf[]):
@@ -121,19 +133,23 @@ object Serializers:
    //     override def deserialize(p: JsonParser, ctxt: DeserializationContext):  =
    //         ???
 
-   class AkkaDoneSerializer extends StdSerializer[akka.Done](classOf[akka.Done]):
+   class AkkaDoneSerializer extends StdSerializer[akka.Done](classOf[akka.Done]) {
 
       override def serialize(
         value:    akka.Done,
         gen:      JsonGenerator,
         provider: SerializerProvider,
-      ): Unit =
+      ): Unit = {
          val strValue = "Done"
          gen.writeString(strValue)
+      }
+   }
 
-   class AkkaDoneDeserializer extends StdDeserializer[akka.Done](classOf[akka.Done]):
+   class AkkaDoneDeserializer extends StdDeserializer[akka.Done](classOf[akka.Done]) {
 
       override def deserialize(p: JsonParser, ctxt: DeserializationContext): akka.Done = akka.Done
+   }
+}
 
    // class ErrorOr_A_Serializer extends StdSerializer[ErrorOr[CborSerializable]](classOf[ErrorOr[CborSerializable]]):
 

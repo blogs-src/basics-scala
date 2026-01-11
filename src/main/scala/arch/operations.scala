@@ -16,7 +16,7 @@ import cats.mtl.*
 //import org.http4s.*
 import com.wallet.demo.clustering.rpc.admin as padmin
 
-object WalletEventSourcing:
+object WalletEventSourcing {
 
    import akka.management.scaladsl.AkkaManagement
    import akka.actor.typed.ActorRef
@@ -32,7 +32,7 @@ object WalletEventSourcing:
 
    import akka.event.Logging
 
-   object Root:
+   object Root {
       trait Command extends CborSerializable
       object Start  extends Command
 
@@ -55,12 +55,12 @@ object WalletEventSourcing:
         config:  Config,
         ws:      Service,
         grpcApi: GrpcServerResource,
-      ): Behavior[Command] = Behaviors.setup[Command]:
+      ): Behavior[Command] = Behaviors.setup[Command] {
            (ctx: ActorContext[Command]) =>
               given ec: ExecutionContextExecutor = ctx.system.executionContext
               val log = Logging(ctx.system.toClassic, classOf[Command])
 
-              Behaviors.receiveMessage[Command]:
+              Behaviors.receiveMessage[Command] {
                    case Start          =>
                      println("Handler started")
                      Behaviors.same
@@ -76,21 +76,24 @@ object WalletEventSourcing:
 //                  }
 
                      val res = ws.getBalance(id)
-                     res.onComplete:
+                     res.onComplete {
                           case Success(r) => println(s"The balance is: $r")
                           case Failure(t) => t.printStackTrace()
+                     }
                      Behaviors.same
                    case CreateWallet(id) =>
                      val res = ws.createWallet(id)
-                     res.onComplete:
+                     res.onComplete {
                           case Success(r) => println(s"Wallet created: $r")
                           case Failure(t) => t.printStackTrace()
+                     }
                      Behaviors.same
                    case AddCredit(id, v) =>
                      val res = ws.credit(id, Domain.Credit(v))
-                     res.onComplete:
+                     res.onComplete {
                           case Success(r) => println(r)
                           case Failure(t) => t.printStackTrace()
+                     }
                      Behaviors.same
 
                    case StopGrpcServer =>
@@ -118,26 +121,28 @@ object WalletEventSourcing:
 
                      given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
-                     val grpcIO = cats.effect.Deferred[cats.effect.IO, Boolean].flatMap:
+                     val grpcIO = cats.effect.Deferred[cats.effect.IO, Boolean].flatMap {
                           shutdown =>
                              grpcServerControl = Some(shutdown)
 
                              import akka.grpc.GrpcServiceException
                              import com.wallet.demo.clustering.rpc.admin.BadRequestError
 
-                             given generator: ExceptionGenerator[GrpcServiceException] with
-                                def generateException(msg: String): Throwable =
+                             given generator: ExceptionGenerator[GrpcServiceException] with {
+                                def generateException(msg: String): Throwable = {
                                    val e = ErrorsBuilder.badRequestError(msg)
                                    val error = BadRequestError(e.code, e.title, e.message)
                                    GrpcServiceException(Code.INVALID_ARGUMENT, msg, Seq(error))
+                                }
+                             }
 
-                             val runingRpcIO = IOLocal(Option.empty[rest.domain.RequestInfo[Result]]).flatMap:
+                             val runingRpcIO = IOLocal(Option.empty[rest.domain.RequestInfo[Result]]).flatMap {
                                   local =>
 
                                      val httpServerPort = 9001
                                      val transformers = new MyTransformers
                                      val group =
-                                       for
+                                       for {
                                           tracer <- auditing.Tracer.makeOtel("otel-akka-app")
                                           xtxt = WalletServiceIOImpl[Result](ws)
                                           sImpl2 =
@@ -153,14 +158,16 @@ object WalletEventSourcing:
                                                    padmin.WalletCommandRpcServiceFs2Grpc.bindServiceResource[cats.effect.IO](
                                                      new ClusteringWalletFs2GrpcServiceImpl(sImpl, transformers)),
                                                    monadConversions.ioToResult)
+                                       }
                                        yield /*(*/ res /*, z)*/
 
                                      val rx = monadConversions.convertResource(group, monadConversions.resultToIO)
 
                                      val rpcResource: Resource[IO, io.grpc.Server /*, org.http4s.server.Server)*/ ] =
-                                       for
+                                       for {
                                           serverDefinition <- rx
                                           server <- grpcApi.createIO[IO](serverDefinition /*._1*/ )
+                                       }
 //                                 restServer <-
 //                                   EmberServerBuilder
 //                                     .default[IO]
@@ -184,19 +191,25 @@ object WalletEventSourcing:
                                        .useForever
 //                              (
 //                                (_, _) => IO.never)
-                                       .handleErrorWith:
+                                       .handleErrorWith {
                                           error =>
                                              println(s"===> ${error.getMessage}")
                                              IO.raiseError(error)
+                                     }
                                      runingRpcIO
+                             }
 
                              IO.race(shutdown.get, runingRpcIO)
+                     }
 
-                     Future:
+                     Future {
                           grpcIO.evalOn(ctx.system.executionContext).unsafeRunSync()
+                     }
                      Behaviors.same
+              }
+      }
 
-      def apply(config: Config): Behavior[Command] = Behaviors.setup[Command]:
+      def apply(config: Config): Behavior[Command] = Behaviors.setup[Command] {
            (ctx: ActorContext[Command]) =>
               ctx.log.info("Starting Wallet Operations")
               given typedActorSystem: ActorSystem[Nothing] = ctx.system
@@ -208,12 +221,14 @@ object WalletEventSourcing:
               val cluster = Cluster(typedActorSystem)
               ctx.log.info("Started [" + ctx.system + "], cluster.selfAddress = " + cluster.selfMember.address + ")")
 
-              if config.getBoolean("application.local.config.first") then
+              if config.getBoolean("application.local.config.first") then {
                  cluster.manager ! Join(cluster.selfMember.address)
                  val management = AkkaManagement(typedActorSystem).start()
-                 management.onComplete:
+                 management.onComplete {
                       case Failure(exception) => println(s"Akka Management failed to start: $exception")
                       case Success(value)     => println(s"Akka Management started at: $value")
+                 }
+              }
 
               // val subscriber = ctx.spawnAnonymous(ClusterStateChanges())
               // cluster.subscriptions ! Subscribe(subscriber, classOf[MemberEvent])
@@ -234,8 +249,11 @@ object WalletEventSourcing:
               val grpcApi: GrpcServerResource = GrpcServerResource()
 //                , summon[ExecutionContextExecutor]
               ctx.delegate(interactive(config, w, grpcApi), Root.Start)
+      }
+   }
+}
 
-object WalletOperations:
+object WalletOperations {
 
    import WalletEventSourcing.*
    import com.typesafe.config.ConfigFactory
@@ -247,27 +265,32 @@ object WalletOperations:
    var sys2: Option[ActorSystem[Root.Command]] = None
    var sys3: Option[ActorSystem[Root.Command]] = None
 
-   def g = sys1.foreach:
+   def g = sys1.foreach {
         sys =>
            sys ! Root.GetBalance("a")
+   }
 
-   def grpc = sys1.foreach:
+   def grpc = sys1.foreach {
         sys =>
            sys ! Root.StartGrpcServer
+   }
 
-   def getBalance(id: String) = sys1.foreach:
+   def getBalance(id: String) = sys1.foreach {
         sys =>
            sys ! Root.GetBalance(id)
+   }
 
-   def createWallet(id: String) = sys1.foreach:
+   def createWallet(id: String) = sys1.foreach {
         sys =>
            sys ! Root.CreateWallet(id)
+   }
 
-   def addCredit(id: String, a: Int) = sys1.foreach:
+   def addCredit(id: String, a: Int) = sys1.foreach {
         sys =>
            sys ! Root.AddCredit(id, a)
+   }
 
-   def start1 =
+   def start1 = {
       // akka.loglevel = "DEBUG"
       val conf: Config = ConfigFactory.parseString(
         """
@@ -279,8 +302,9 @@ object WalletOperations:
       val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf), actorSystemName, conf)
       sys ! Root.StartGrpcServer
       sys1 = Some(sys)
+   }
 
-   def start2 =
+   def start2 = {
       val conf = ConfigFactory.parseString(
         s"""
             application.local.config.first = false
@@ -294,8 +318,9 @@ object WalletOperations:
 
       val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf), actorSystemName, conf)
       sys2 = Some(sys)
+   }
 
-   def start3 =
+   def start3 = {
       // "akka://${actorSystemName}@0.0.0.0:2552"
       val conf = ConfigFactory.parseString(
         s"""
@@ -310,8 +335,9 @@ object WalletOperations:
             confFile))
       val sys: ActorSystem[Root.Command] = ActorSystem(Root(conf), actorSystemName, conf)
       sys3 = Some(sys)
+   }
 
-   def s =
+   def s = {
       sys1.foreach(
         aSys =>
            aSys ! Root.StopGrpcServer
@@ -337,9 +363,12 @@ object WalletOperations:
       sys1 = None
       sys2 = None
       sys3 = None
+   }
 
-   def init =
+   def init = {
       start1
       Thread.sleep(3000)
       start2
       start3
+   }
+}

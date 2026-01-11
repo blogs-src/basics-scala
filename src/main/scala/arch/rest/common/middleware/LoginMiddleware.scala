@@ -32,7 +32,7 @@ import scala.jdk.CollectionConverters.*
 val responseDec = Json.payloadCodecs.decoders.fromSchema(AccessTokenPayload.schema)
 val responseEnc = Json.payloadCodecs.encoders.fromSchema(LoginResponse.schema)
 
-object LoginMiddleware:
+object LoginMiddleware {
 
   private def middleware(
                           sg: security.ServiceSecuritySigner,
@@ -84,7 +84,7 @@ object LoginMiddleware:
   def apply(
            sg: security.ServiceSecuritySigner,
            ): ServerEndpointMiddleware[IO] =
-    new ServerEndpointMiddleware.Simple[IO]:
+    new ServerEndpointMiddleware.Simple[IO] {
       private def mid(
                        sg: security.ServiceSecuritySigner,
                        signer: utils.AuthSign,
@@ -94,7 +94,10 @@ object LoginMiddleware:
                             serviceHints: Hints,
                             endpointHints: Hints,
                           ): HttpApp[IO] => HttpApp[IO] =
-            endpointHints.get[utils.AuthSign] match
+            endpointHints.get[utils.AuthSign] match {
               case Some(signer) => mid(sg, signer)
               case None =>
                 identity
+            }
+    }
+}

@@ -12,11 +12,11 @@ import io.scalaland.chimney.partial
 import Domain.*
 //import infra.*
 
-object ChimneyTransformers:
+object ChimneyTransformers {
 
    transparent inline given TransformerConfiguration[?] = TransformerConfiguration.default.enableDefaultValues
 
-   given fromProtoTo: Transformer[commands.CommandsADT, WalletCommands.CommandsADT] with
+   given fromProtoTo: Transformer[commands.CommandsADT, WalletCommands.CommandsADT] with {
 
       def transform(src: commands.CommandsADT): WalletCommands.CommandsADT =
         src
@@ -26,12 +26,14 @@ object ChimneyTransformers:
           .withSealedSubtypeHandled[commands.CommandsADT.NonEmpty](_.transformInto[WalletCommands.CommandsADT])
           .transform
           .asOption.get
+   }
+}
 
 import ChimneyTransformers.given
 
 import akka.actor.typed.scaladsl.adapter.*
 
-class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer:
+class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer {
 
    private val actorRefResolver = ActorRefResolver(system.toTyped)
 
@@ -55,7 +57,7 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer:
      // Put the code that serializes the object here
      // #...
 
-     obj match
+     obj match {
        case _: akka.Done  => commands.Done().toByteArray
        case _: OkResponse => commands.Done().toByteArray
        case d: Balance    => commands.Balance(d.value).toByteArray
@@ -85,6 +87,7 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer:
            "WalletCommands.CommandsADT",
            // id_
          ).toByteArray
+     }
 
      // Array[Byte]()
 
@@ -98,7 +101,7 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer:
 
 //    println(s"Converting from binary")
 
-     clazz match
+     clazz match {
        case Some(c)
            if c == classOf[akka.Done] =>
          Done
@@ -126,7 +129,7 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer:
 //        println(s"Deserializando: ${cmdInst.typeUrl}")
 //        println(s"value: ${cmdInst}")
          val payload =
-           if cmdInst.typeUrl == "WalletCommands.CommandsADT" then
+           if cmdInst.typeUrl == "WalletCommands.CommandsADT" then {
 
 //             println("aqui....")
 
@@ -137,11 +140,13 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer:
               res
               // cmdInst.payload.transformInto[WalletCommands2.CommandsADT]
               // null
-           else
+           }
+           else {
               println(s"Unknown type: ${
                                          cmdInst.typeUrl
                                        } =========================================================================================================")
               null
+           }
 
          val who = actorRefResolver.resolveActorRef(cmdInst.replyTo)
 //        println(s"who: ${who}")
@@ -152,6 +157,8 @@ class MyOwnSerializer(system: ExtendedActorSystem) extends Serializer:
        case x =>
          println(s"${x} null =========================================================================================================")
          null
+     }
+}
 
      // null
 

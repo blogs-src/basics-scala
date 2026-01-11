@@ -16,9 +16,9 @@ import cats.effect.kernel.Resource
 
 import org.typelevel.otel4s.trace.Tracer
 
-object Tracer:
+object Tracer {
 
-   def makeOtel(appName: String): Resource[Result, Tracer[Result]] =
+   def makeOtel(appName: String): Resource[Result, Tracer[Result]] = {
 //      val jaegerEndpoint = "http://localhost:4317"
 //      val jaegerEndpoint = "http://jaeger1.dev.me:4317"
       val jaegerEndpoint = "http://jaeger1.dev.me:4317"
@@ -46,3 +46,5 @@ object Tracer:
       val z: Result[OpenTelemetrySdk] = EitherT.right(IO.pure(sdk))
       OtelJava.resource(z).evalMap(_.tracerProvider.get("Example"))
       //    OtelJava.autoConfigured[IO]().evalMap(_.tracerProvider.get("Example"))
+   }
+}

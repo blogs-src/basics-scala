@@ -24,14 +24,16 @@ import org.http4s.client.Client
 
 import scala.jdk.CollectionConverters.*
 
-enum SignerError:
+enum SignerError {
    case NotJWKS, KidNotPresentInJWKS
+}
 
-trait SecuritySigner[F[_]]:
+trait SecuritySigner[F[_]] {
   def updateJWKS(): F[Unit]
   def generateToken(kid: String, claims: JWTClaimsSet): Either[List[(SignerError, String)], String]
+}
 
-class ServiceSecuritySigner(jwksUrl: String, client: Client[IO]) extends SecuritySigner[IO]:
+class ServiceSecuritySigner(jwksUrl: String, client: Client[IO]) extends SecuritySigner[IO] {
    var jwkSet: Option[Map[String, RSAKey]] = None
 
    given Semigroup[String] = Semigroup.instance[String](
@@ -39,12 +41,12 @@ class ServiceSecuritySigner(jwksUrl: String, client: Client[IO]) extends Securit
 
    val request = Request[IO](GET, Uri.unsafeFromString(jwksUrl))
 
-   def updateJWKS(): IO[Unit] =
+   def updateJWKS(): IO[Unit] = {
       val res2 =
-        for
+        for {
            body <- client.expect[String](request)
 //      _ <- IO.println(body)
-           _ <-
+           _ <- {
               val res = JWKSet.parse(body)
               println(res)
               val keys = res.getKeys.asScala
@@ -55,11 +57,15 @@ class ServiceSecuritySigner(jwksUrl: String, client: Client[IO]) extends Securit
                 }.toMap
               jwkSet = Some(kmap)
               IO(())
+           }
+        }
         yield ()
 
-      res2.handleErrorWith:
+      res2.handleErrorWith {
            error =>
               IO.println(s"===> (not JWKS data) ${error.getMessage}").void
+      }
+   }
 
 
    def generateToken(kid: String, claims: JWTClaimsSet): Either[List[(SignerError, String)], String] =
@@ -76,8 +82,10 @@ class ServiceSecuritySigner(jwksUrl: String, client: Client[IO]) extends Securit
       signedJWT.serialize()
     }
 
-   def initialize(): Unit =
+   def initialize(): Unit = {
       import cats.effect.unsafe.implicits.global
       updateJWKS().unsafeRunSync()
+   }
 
    initialize()
+}

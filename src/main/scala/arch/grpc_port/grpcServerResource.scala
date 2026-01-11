@@ -13,7 +13,7 @@ import cats.effect.kernel.Resource
 import cats.~>
 import cats.arrow.FunctionK
 
-object monadConversions:
+object monadConversions {
 
    //  def ioToResult[T](io: IO[T]): Result[T] = ???
    def convertResource[F[_]: MonadCancelThrow, G[_]: MonadCancelThrow, A](resource: Resource[F, A], nt: F ~> G): Resource[G, A] = resource.mapK(nt)
@@ -21,23 +21,27 @@ object monadConversions:
    //  val optionToList: Option ~> List = [A] => (a: Option[A]) => a.toList
 
    val optionToList: Option ~> List =
-     new FunctionK[Option, List]:
+     new FunctionK[Option, List] {
         def apply[A](fa: Option[A]): List[A] = ???
+     }
 
    val ioToResult: IO ~> Result =
-     new FunctionK[IO, Result]:
+     new FunctionK[IO, Result] {
         def apply[A](fa: IO[A]): Result[A] = EitherT.right(fa)
+     }
 
    val resultToIO: Result ~> IO =
-     new FunctionK[Result, IO]:
+     new FunctionK[Result, IO] {
         def apply[A](fa: Result[A]): IO[A] = fa.foldF(
           error => IO.raiseError(error),
           value =>
             IO {
               value
             })
+     }
+}
 
-class GrpcServerResource:
+class GrpcServerResource {
 
    //    def run[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] =
    def createIO[F[_]: Async](service: ServerServiceDefinition): Resource[F, Server] =
@@ -50,3 +54,4 @@ class GrpcServerResource:
        .addService(service)
        .addService(ProtoReflectionServiceV1.newInstance())
        .resource[F]
+}

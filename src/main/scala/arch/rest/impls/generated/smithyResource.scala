@@ -18,10 +18,11 @@ import org.http4s.blaze.client.BlazeClientBuilder
 import java.util.Date
 import smithy4s.Document
 
-class ControlServiceImpl(validator: security.SecurityValidator[IO]) extends ControlService[IO]:
+class ControlServiceImpl(validator: security.SecurityValidator[IO]) extends ControlService[IO] {
    def reloadJWKS(): IO[Unit] = validator.updateJWKS()
+}
 
-class UserServiceImpl extends UserService[IO]:
+class UserServiceImpl extends UserService[IO] {
   def authLogin(user: String, password: String): IO[AccessTokenPayload] = {
     IO.pure(
       AccessTokenPayload(
@@ -36,9 +37,10 @@ class UserServiceImpl extends UserService[IO]:
       )
     )
   }
+}
 
 
-class SmithyResource:
+class SmithyResource {
 
    private def controlRoutes(validator: security.SecurityValidator[IO]): Resource[IO, HttpRoutes[IO]] =
      SimpleRestJsonBuilder.routes(new ControlServiceImpl(validator)).resource
@@ -59,24 +61,26 @@ class SmithyResource:
      tracer: Tracer[Result],
      s:      WalletService[Result],
    ): Resource[IO, HttpRoutes[IO]] =
-     for
+     for {
         (r1, r1_a) <- serviceRoutes(local, tracer, s)
         r2 <- controlRoutes(r1_a)
         (r3, r3_a) <- userRoutes()
+     }
      yield r1 <+> r2 <+> r3
 
-   private def translateMessage(message: String): String =
+   private def translateMessage(message: String): String = {
       val i = message.indexOf(", offset:")
       if i == -1 then
          message
       else
          message.substring(0, i)
+   }
 
    private def serviceRoutes(
      local:  IOLocal[Option[domain.RequestInfo[Result]]],
      tracer: Tracer[Result],
      s:      WalletService[Result],
-   ): Resource[IO, (HttpRoutes[IO], security.SecurityValidator[IO])] =
+   ): Resource[IO, (HttpRoutes[IO], security.SecurityValidator[IO])] = {
 
       val getRequestInfo: Result[domain.RequestInfo[Result]] = EitherT.right(local.get.flatMap {
         case Some(value) => IO.pure(value)
@@ -87,7 +91,7 @@ class SmithyResource:
 
       val conf = security.Krakend("http://localhost:9000/store/jwks-pub.json")
 
-      for
+      for {
          restClient <- BlazeClientBuilder[IO].resource
          validator = new security.ServiceSecurityValidator(conf, restClient)
          resource <-
@@ -95,7 +99,7 @@ class SmithyResource:
              new WalletOpsImpl[Result](s, getRequestInfo)
                .transform(
                  Converter.toIO))
-             .mapErrors:
+             .mapErrors {
                 case HttpPayloadError(_, expected, message) =>
                   val e = ErrorsBuilder.badRequestError(s"Related to $expected, comment: ${translateMessage(message)}")
                   BadRequestError(e.code, e.title, e.message)
@@ -107,15 +111,19 @@ class SmithyResource:
                   err.printStackTrace()
                   val e = internalServerError(err.getMessage)
                   InternalServerError(e.code, e.title, e.message)
+           }
              .middleware(
                RequestInfoMiddleware(local, tracer)
                  .andThen(
                    AuthMiddleware(validator)))
              .resource
+      }
       yield (resource, validator)
+   }
 
    def all(
      local:  IOLocal[Option[domain.RequestInfo[Result]]],
      tracer: Tracer[Result],
      s:      WalletService[Result],
    ): Resource[IO, HttpRoutes[IO]] = routes_combined(local, tracer, s)
+}

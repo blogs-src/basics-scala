@@ -30,7 +30,7 @@ class WalletServiceImpl[F[_]](
   FR:      Raise[F, ServiceError],
   M:       Monad[F],
   MT:      MonadThrow[F])
-    extends WalletService[F]:
+    extends WalletService[F] {
 
    def getBalance(
      id:         wops.RequestId,
@@ -38,13 +38,16 @@ class WalletServiceImpl[F[_]](
      using span: Span[F],
      log:        LogIO[F],
      tracer:     Tracer[F],
-   ): F[wops.Balance] = Tracer[F].span("send-request").surround:
+   ): F[wops.Balance] = Tracer[F].span("send-request").surround {
         val r = id.transformInto[padmin.RequestId]
-        for
+        for {
            traceHeaders <- Tracer[F].propagate(Map.empty[String, String])
            _ <- log.info("Sending getBalance to GRPC server")
            x <- client.getBalance(padmin.GetBalanceRequest(Some(r)), traceHeaders)
+        }
         yield x.transformInto[wops.Balance]
+   }
+}
 
 class WalletServiceImpl2[F[_]](
   client:  WalletServiceIO[F],
@@ -53,7 +56,7 @@ class WalletServiceImpl2[F[_]](
   FR:      Raise[F, ServiceError],
   M:       Monad[F],
   MT:      MonadThrow[F])
-    extends WalletService[F]:
+    extends WalletService[F] {
 
    def getBalance(
      id:         wops.RequestId,
@@ -61,12 +64,15 @@ class WalletServiceImpl2[F[_]](
      using span: Span[F],
      log:        LogIO[F],
      tracer:     Tracer[F],
-   ): F[wops.Balance] = Tracer[F].span("send-request").surround:
+   ): F[wops.Balance] = Tracer[F].span("send-request").surround {
         val r = id.transformInto[padmin.RequestId]
-        for
+        for {
            traceHeaders <- Tracer[F].propagate(Map.empty[String, String])
            _ <- log.info("Sending getBalance to GRPC server")
            x <-
              client.getBalance(id.value)(
                using traceHeaders)
+        }
         yield x.transformInto[wops.Balance]
+   }
+}

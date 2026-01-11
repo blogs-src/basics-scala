@@ -90,6 +90,7 @@ lazy val scalacOptionsCases = Map(
   "new_syntax"         -> Seq[String]("-new-syntax",  "-rewrite"),
   "new_syntax_updated" -> Seq[String]("-new-syntax",  "-rewrite", "-source", "future-migration"),
   "indent"             -> Seq[String]("-Wunused:all", "-indent",  "-rewrite"),
+  "no-indent"          -> Seq[String]("-no-indent",  "-rewrite"),
   "3_7_migration"      -> Seq[String]("-rewrite",     "-source",  "3.7-migration"),
 )
 // format: on

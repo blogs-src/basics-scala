@@ -10,19 +10,22 @@ import org.typelevel.otel4s.trace.Span
 
 import logstage.LogIO
 
-trait ExceptionGenerator[F]:
+trait ExceptionGenerator[F] {
    def generateException(msg: String): Throwable
+}
 
-object ExceptionGenerator:
+object ExceptionGenerator {
 
    def apply[F](
      using obj: ExceptionGenerator[F],
    ): ExceptionGenerator[F] = obj
+}
 
-trait ClusteringWalletGrpcService[F[_]]:
+trait ClusteringWalletGrpcService[F[_]] {
    def getBalance(request: GetBalanceRequest, ctx: Metadata): F[commands.Balance]
+}
 
-trait ClusteringWalletGrpcService2[F[_]]:
+trait ClusteringWalletGrpcService2[F[_]] {
 
    def getBalance(
      request: GetBalanceRequest,
@@ -32,11 +35,13 @@ trait ClusteringWalletGrpcService2[F[_]]:
      log: LogIO[F],
      tracer: Tracer[F],
    ): F[commands.Balance]
+}
 
-trait WalletServiceIO[F[_]]:
+trait WalletServiceIO[F[_]] {
 
    def getBalance(
      id: String,
    )(
      using metadata: Map[String, String] = Map.empty,
    ): F[Domain.Balance]
+}

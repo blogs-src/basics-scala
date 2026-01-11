@@ -15,23 +15,24 @@ import scala.collection.mutable.ListBuffer
 
 import cats.effect.*
 
-object Logger:
+object Logger {
 
    class FileSinkBrokenImpl[F2 <: LogFile](
      override val renderingPolicy: RenderingPolicy,
      override val fileService:     FileService[F2],
      override val rotation:        FileRotation,
-     override val config: FileSinkConfig) extends FileSink[F2](renderingPolicy, fileService, rotation, config):
+     override val config: FileSinkConfig) extends FileSink[F2](renderingPolicy, fileService, rotation, config) {
 
       val recoveredMessages: ListBuffer[String] = ListBuffer.empty[String]
 
       override def recoverOnFail(e: String): Unit = recoveredMessages += e
+   }
 
    def getLogger[F[_]](
      path:    String,
    )(
      using F: Async[F],
-   ) =
+   ) = {
       val textSink = ConsoleSink.text(colored = true)
       val fileService: FileService[RealFile] = new FileServiceImpl(path)
       //    val lf: LogFile = fileService.createFileWithName("log2.log")
@@ -44,3 +45,5 @@ object Logger:
       val sinks = List(jsonSink, textSink, fs)
       val logger: IzLogger = IzLogger(Trace, sinks)
       LogIO.fromLogger[F](logger)
+   }
+}

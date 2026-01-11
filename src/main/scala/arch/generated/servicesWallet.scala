@@ -1,6 +1,6 @@
 package arch
 
-object WalletServices:
+object WalletServices {
 
    import Domain.*
 
@@ -9,7 +9,7 @@ object WalletServices:
    // esto NO ES el EntityService (eh???)
    // @protoService
    // modules/grpc-api/src/main/protobuf/service-clustering.proto
-   trait Service:
+   trait Service {
 
       def createWallet(
         id: String,
@@ -36,3 +36,5 @@ object WalletServices:
       )(
         using metadata: Map[String, String] = Map.empty,
       ): Future[Balance | ResultError]
+   }
+}

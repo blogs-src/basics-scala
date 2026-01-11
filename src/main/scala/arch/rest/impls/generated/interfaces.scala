@@ -13,7 +13,7 @@ import org.typelevel.otel4s.trace.Tracer
 
 //import cats.FlatMap
 
-trait WalletService[F[_]]:
+trait WalletService[F[_]] {
 
    def getBalance(
      id: wops.RequestId,
@@ -22,3 +22,4 @@ trait WalletService[F[_]]:
      log: LogIO[F],
      tracer: Tracer[F],
    ): F[wops.Balance]
+}
