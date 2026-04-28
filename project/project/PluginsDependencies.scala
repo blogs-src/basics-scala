@@ -9,7 +9,7 @@ object PluginsDependencies {
     val sbt_scalafmt         = "2.5.6"
     val sbt_scalafix         = "0.14.5"
     val sbt_protoc           = "1.0.7"
-    val smithy4s             = "0.18.45"
+    val smithy4s             = "0.19.1"
     val sbt_avro             = "4.0.1"
 
     val scalapbCompiler      = "0.11.18"

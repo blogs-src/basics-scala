@@ -128,7 +128,7 @@ object WalletEventSourcing {
                              import akka.grpc.GrpcServiceException
                              import com.wallet.demo.clustering.rpc.admin.BadRequestError
 
-                             given generator: ExceptionGenerator[GrpcServiceException] with {
+                             given generator: ExceptionGenerator[GrpcServiceException] {
                                 def generateException(msg: String): Throwable = {
                                    val e = ErrorsBuilder.badRequestError(msg)
                                    val error = BadRequestError(e.code, e.title, e.message)
@@ -267,7 +267,7 @@ object WalletOperations {
 
    def g = sys1.foreach {
         sys =>
-           sys ! Root.GetBalance("a")
+           sys ! Root.GetBalance("b")
    }
 
    def grpc = sys1.foreach {

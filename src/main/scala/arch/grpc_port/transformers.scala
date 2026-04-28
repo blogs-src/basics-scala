@@ -24,14 +24,14 @@ class MyTransformers[G: ExceptionGenerator]:
        //      .disablePartialUnwrapsOption
        .enableInheritedAccessors // .enablePartialUnwrapsOption
 
-   implicit def eitherToResultTransformers[A: ClassTag]: Transformer[IO[Either[Throwable, A]], Result[A]] =
+   given eitherToResultTransformers: [A: ClassTag] => Transformer[IO[Either[Throwable, A]], Result[A]] =
      new Transformer[IO[Either[Throwable, A]], Result[A]]:
         def transform(result: IO[Either[Throwable, A]]): Result[A] = EitherT(result.map {
           case Right(value) => Right(value)
           case Left(error)  => Left(ErrorsBuilder.internalServerError(error.getMessage))
         })
 
-   implicit def othersTransformers[A: ClassTag]: Transformer[Result[A], IO[A]] =
+   given othersTransformers: [A: ClassTag] => Transformer[Result[A], IO[A]] =
      new Transformer[Result[A], IO[A]]:
         def transform(result: Result[A]): IO[A] =
 

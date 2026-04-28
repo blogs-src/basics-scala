@@ -14,7 +14,7 @@ class Krakend(val jwks_url: String)
 
 object KeycloakConfs {
 
-   given ValidatorSource[Keycloak] with {
+   given ValidatorSource[Keycloak] {
       extension (self: Keycloak) def jwksUrl: String = self.jwksUrl
 
       extension (self: Keycloak) {
@@ -35,7 +35,7 @@ object KeycloakConfs {
 
 object KrakendConfs {
 
-   given ValidatorSource[Krakend] with {
+   given ValidatorSource[Krakend] {
       extension (self: Krakend) def jwksUrl: String = self.jwks_url
 
       extension (self: Krakend) {

@@ -76,6 +76,8 @@ lazy val appSettings = Seq(
       "-feature",
       "-Xmax-inlines",
       "50",
+      "-source",
+      "future",
       // "-Yexplicit-nulls",
     ) ++ scalacOptionsValue
 )
@@ -135,7 +137,7 @@ lazy val grpcApi = project
     //https://repo1.maven.org/maven2/com/google/protobuf/protoc/
     //https://repo1.maven.org/maven2/com/google/protobuf/protoc/4.31.1/protoc-4.31.1-linux-x86_64.exe
     //  100.0% [##########] 9.7 MiB (16.2 MiB / s)
-    PB.protocVersion := "4.33.2",
+    PB.protocVersion := "4.34.1",
     // fs2GrpcOutputPath := (Compile / baseDirectory).value / "src/main/scala/fs2-grpc",
     // scalapbProtobufDirectory := (Compile / baseDirectory).value / "src/main/scala/scalapb",
   )
@@ -178,7 +180,53 @@ lazy val root = project
         case (key, value) => s"""-D$key="$value""""
       }
     },
-    libraryDependencies ++= HybridDeps,
+    libraryDependencies ++= HybridDeps ++ List(
+      "dev.optics" %% "monocle-core"  % "3.3.0" withSources(),
+      "dev.optics" %% "monocle-macro" % "3.3.0" withSources(),
+      "dev.optics" %% "monocle-unsafe" % "3.3.0" withSources(),
+      "dev.optics" %% "monocle-state" % "3.3.0" withSources(),
+      "dev.optics" %% "monocle-refined" % "3.3.0" withSources(),
+      "dev.optics" %% "monocle-law" % "3.3.0" withSources(),
+      "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.18" withSources(),
+      "org.parboiled" %% "parboiled" % "2.5.1" withSources(),
+      "org.typelevel" %% "squants" % "1.8.3" withSources(),
+      "com.monovore" %% "decline" % "2.6.2" withSources(),
+      "com.monovore" %% "decline-effect" % "2.6.2" withSources(),
+      "com.monovore" %% "decline-refined" % "2.6.2" withSources(),
+      "com.softwaremill.ox" %% "core" % "1.0.4" withSources(),
+
+      "org.tpolecat" %% "doobie-postgres" % "1.0.0-RC12" withSources(),
+      "org.tpolecat" %% "doobie-postgres-circe" % "1.0.0-RC12" withSources(),
+      "net.postgis" % "postgis-jdbc" % "2025.1.1" withSources(),
+
+      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-core" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-server" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-sttp-client" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-apispec-docs" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % "1.13.17" % Test withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-tests" % "1.13.17" % Test withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-cats" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-cats-effect" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-sttp-client4" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-sttp-stub-server" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-enumeratum" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-files" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-iron" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-jsoniter-scala" % "1.13.17" % Test withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-prometheus-metrics" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-client" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-client" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-redoc-bundle" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-refined" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-json-json4s" % "1.13.17" withSources(),
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % "1.13.17" withSources(),
+    ),
     Compile / run / javaOptions += "-Dcats.effect.trackFiberContext=true",
     Compile / run / javaOptions += "-Dotel.java.global-autoconfigure.enabled=false",
   )

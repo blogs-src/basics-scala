@@ -16,7 +16,7 @@ object ChimneyTransformers {
 
    transparent inline given TransformerConfiguration[?] = TransformerConfiguration.default.enableDefaultValues
 
-   given fromProtoTo: Transformer[commands.CommandsADT, WalletCommands.CommandsADT] with {
+   given fromProtoTo: Transformer[commands.CommandsADT, WalletCommands.CommandsADT] {
 
       def transform(src: commands.CommandsADT): WalletCommands.CommandsADT =
         src

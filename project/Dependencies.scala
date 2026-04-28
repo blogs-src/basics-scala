@@ -5,14 +5,17 @@ object Dependencies {
 // format: off
   object V {
     val scalaLTSVersion      = "3.3.7"
-    val distage              = "1.2.22"
+    val distage              = "1.2.25"
 
-    val scalaLatestVersion   = "3.7.4"
+//    val scalaLatestVersion   = "3.8.3" // not working
+    val scalaLatestVersion   = "3.8.2" // working
+//  val scalaLatestVersion   = "3.8.1" // working
+//    val scalaLatestVersion   = "3.7.4" // working
     val logstage             = distage
     val scalatest            = "3.2.18"
     val scalacheck           = "1.17.0"
 //    val catsCore             = "2.13.0"
-    val zio                  = "2.1.13"
+    val zio                  = "2.1.25"
     val zioCats              = "23.1.0.13"
     val circe                = "0.14.15"
     // val akkaVersion          = "2.9.3"
@@ -32,25 +35,25 @@ object Dependencies {
     val akkaCassandra        = "1.2.1"
     val akkaProjection       = "1.5.5"
     val cats                 = "2.13.0"
-    val catsEffect           = "3.6.3"
+    val catsEffect           = "3.7.0"
     val catsMTL              = "1.6.0"
-    val munit                = "1.2.1"
-    val munitCatsEffect      = "2.1.0"
-    val fs2                  = "3.12.2"
-    val iron                 = "3.2.2"
-    val grpc                 = "1.77.0"
+    val munit                = "1.3.0"
+    val munitCatsEffect      = "2.2.0"
+    val fs2                  = "3.13.0"
+    val iron                 = "3.3.0"
+    val grpc                 = "1.80.0"
     val scalapbCommonProtos  = "2.9.6-0"
     val avroCompiler         = "1.12.0"
 //    val chimney              = "1.6.0"
-    val chimney              = "1.8.2"
-    val doobie               = "1.0.0-RC11"
+    val chimney              = "1.9.0"
+    val doobie               = "1.0.0-RC12"
     val skunk                = "1.1.0-M3"
-    val postgress            = "42.7.8"
+    val postgress            = "42.7.10"
     val commonsCompress      = "1.28.0"
     // https://packages.confluent.io/maven/io/confluent/kafka-avro-serializer/
     val kafkaAvroSerializer  = "8.0.0"
-    val smithytranslateTraitsVersion = "0.7.5"
-    val http4s                       = "0.23.33"
+    val smithytranslateTraitsVersion = "0.7.7"
+    val http4s                       = "0.23.34"
     val http4s_blaze                 = "0.23.17"
     val scalapb                      = "0.11.18"
     val avroCompilerVersion          = "1.12.0"
@@ -58,12 +61,12 @@ object Dependencies {
 
     val helenus                      = "1.2.0"
   // https://typelevel.org/otel4s/instrumentation/logs.html
-    val otel4s                       = "0.14.0"
-    val opentelemetry                = "1.57.0"
-    val jwt_scala                    = "11.0.3"
-    val jose_jwt                     = "10.6"
+    val otel4s                       = "0.16.0"
+    val opentelemetry                = "1.61.0"
+    val jwt_scala                    = "11.0.4"
+    val jose_jwt                     = "10.9"
 
-    val smithy4s                     = "0.18.42"
+    val smithy4s                     = "0.19.1"
   }
 
   object Deps {
