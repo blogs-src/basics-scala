@@ -40,23 +40,23 @@ object Dependencies {
     val munit                = "1.3.0"
     val munitCatsEffect      = "2.2.0"
     val fs2                  = "3.13.0"
-    val iron                 = "3.3.0"
-    val grpc                 = "1.80.0"
+    val iron                 = "3.3.1"
+    val grpc                 = "1.81.0"
     val scalapbCommonProtos  = "2.9.6-0"
     val avroCompiler         = "1.12.0"
 //    val chimney              = "1.6.0"
-    val chimney              = "1.9.0"
+    val chimney              = "1.10.0"
     val doobie               = "1.0.0-RC12"
-    val skunk                = "1.1.0-M3"
-    val postgress            = "42.7.10"
+    val skunk                = "1.0.0"
+    val postgress            = "42.7.11"
     val commonsCompress      = "1.28.0"
     // https://packages.confluent.io/maven/io/confluent/kafka-avro-serializer/
     val kafkaAvroSerializer  = "8.0.0"
     val smithytranslateTraitsVersion = "0.7.7"
     val http4s                       = "0.23.34"
     val http4s_blaze                 = "0.23.17"
-    val scalapb                      = "0.11.18"
-    val avroCompilerVersion          = "1.12.0"
+    val scalapb                      = "0.11.20"
+    val avroCompilerVersion          = "1.12.1"
     val fs2Kafka                     = "3.9.1"
 
     val helenus                      = "1.2.0"
@@ -66,7 +66,7 @@ object Dependencies {
     val jwt_scala                    = "11.0.4"
     val jose_jwt                     = "10.9"
 
-    val smithy4s                     = "0.19.1"
+    val smithy4s                     = "0.19.4"
   }
 
   object Deps {
@@ -88,7 +88,7 @@ object Dependencies {
     val skunkCore                  = "org.tpolecat"  %% "skunk-core"            % V.skunk withSources()
 
     val logbackClassic             = "ch.qos.logback"  % "logback-classic"                   % V.logbackVersion withSources()
-    val requests                   = "com.lihaoyi"    %% "requests"                          % "0.9.0" withSources()
+    val requests                   = "com.lihaoyi"    %% "requests"                          % "0.9.3" withSources()
     val json4sNative               = "org.json4s"     %% "json4s-native"                     % "4.0.7" withSources()
 
     val distageCore                = "io.7mind.izumi" %% "distage-core"                      % V.distage withSources()
@@ -171,7 +171,7 @@ object Dependencies {
     val otel4s_otelj_ctx_storage   = "org.typelevel"      %% "otel4s-oteljava-context-storage"            % V.otel4s withSources()
     val opentelemetry_expr_otlp    = "io.opentelemetry"    % "opentelemetry-exporter-otlp"                % V.opentelemetry withSources() // % Runtime
     val opentelemetry_autoconf     = "io.opentelemetry"    % "opentelemetry-sdk-extension-autoconfigure"  % V.opentelemetry withSources() // % Runtime
-    val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.34.0" withSources() // % Runtime
+    val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.41.0" withSources() // % Runtime
 
     val jwt_scala                  = "com.github.jwt-scala" %% "jwt-core"                                 % V.jwt_scala withSources()
     val jose_jwt                   = "com.nimbusds"          % "nimbus-jose-jwt"                          % V.jose_jwt withSources()
@@ -266,6 +266,11 @@ object Dependencies {
 //    Deps.opentelemetry_autoconf,
     // only scala 2
 //    "ch.epfl.scala" %% "scala-debug-adapter" % "4.2.5",
+    Deps.skunkRefined,
+    Deps.skunkPostgis,
+    Deps.skunkDocs,
+    Deps.skunkCirce,
+    Deps.skunkCore,
   )
 
 }

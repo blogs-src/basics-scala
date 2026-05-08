@@ -142,6 +142,8 @@ lazy val grpcApi = project
     // scalapbProtobufDirectory := (Compile / baseDirectory).value / "src/main/scala/scalapb",
   )
 
+lazy val tapirVersion = "1.13.18"
+
 lazy val restApi = project
   .in(file("modules/rest-api"))
   .enablePlugins(Smithy4sCodegenPlugin)
@@ -155,6 +157,7 @@ lazy val restApi = project
     // Compile / smithy4sOutputDir := (Compile / baseDirectory).value / "src/main/scala/smithy",
   )
 
+//"org.tpolecat"  %% "skunk-core"            % "1.0.0",
 lazy val root = project
   .in(file("."))
   //.enablePlugins(JavaAgent)
@@ -199,33 +202,38 @@ lazy val root = project
       "org.tpolecat" %% "doobie-postgres-circe" % "1.0.0-RC12" withSources(),
       "net.postgis" % "postgis-jdbc" % "2025.1.1" withSources(),
 
-      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-core" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-server" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-sttp-client" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-apispec-docs" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % "1.13.17" % Test withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-tests" % "1.13.17" % Test withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-cats" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-cats-effect" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-sttp-client4" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-sttp-stub-server" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-enumeratum" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-files" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-iron" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-jsoniter-scala" % "1.13.17" % Test withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-prometheus-metrics" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-client" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-http4s-client" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-redoc-bundle" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-refined" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-json-json4s" % "1.13.17" withSources(),
-      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % "1.13.17" withSources(),
+//          "io.getkyo" %% "kyo-core" % "3.0.7",
+      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-sttp-client" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-apispec-docs" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion % Test,
+      "com.softwaremill.sttp.tapir" %% "tapir-tests" % tapirVersion % Test,
+      "com.softwaremill.sttp.tapir" %% "tapir-cats" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-cats-effect" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-sttp-client4" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-sttp-stub-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-enumeratum" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-files" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-iron" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-jsoniter-scala" % tapirVersion % Test,
+      "com.softwaremill.sttp.tapir" %% "tapir-prometheus-metrics" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-client" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-client" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-redoc-bundle" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-refined" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-json-json4s" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % tapirVersion,
+
+//      "org.apache.avro" % "avro-tools" % "1.12.1",
+//      "org.business4s" %% "workflows4s-core" % "0.6.0" withSources(),
+
     ),
     Compile / run / javaOptions += "-Dcats.effect.trackFiberContext=true",
     Compile / run / javaOptions += "-Dotel.java.global-autoconfigure.enabled=false",
