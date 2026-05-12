@@ -234,6 +234,8 @@ lazy val root = project
 //      "org.apache.avro" % "avro-tools" % "1.12.1",
 //      "org.business4s" %% "workflows4s-core" % "0.6.0" withSources(),
 
+      "com.typesafe" % "config" % "1.4.8",
+
     ),
     Compile / run / javaOptions += "-Dcats.effect.trackFiberContext=true",
     Compile / run / javaOptions += "-Dotel.java.global-autoconfigure.enabled=false",

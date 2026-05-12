@@ -117,11 +117,13 @@ object Dependencies {
     val akkaHttp                   = "com.typesafe.akka"             %% "akka-http"                         % V.akkaHttpVersion withSources()
     val akkaClusterTyped           = "com.typesafe.akka"             %% "akka-cluster-typed"                % V.akkaVersion withSources()
     val akkaClusterSharding        = "com.typesafe.akka"             %% "akka-cluster-sharding-typed"       % V.akkaVersion withSources()
+    val akkaClusterTools           = "com.typesafe.akka"             %% "akka-cluster-tools"                % V.akkaVersion withSources()
     val akkaClusterBootstrap       = "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % V.akkaManagement withSources()
     val akkaClusterHttp            = "com.lightbend.akka.management" %% "akka-management-cluster-http"      % V.akkaManagement withSources()
     val akkaPersistence            = "com.typesafe.akka"             %% "akka-persistence-typed"            % V.akkaVersion withSources()
     val akkaPersistenceCassandra   = "com.typesafe.akka"             %% "akka-persistence-cassandra"        % V.akkaCassandra withSources()
     val akkaPersistenceR2dbc       = "com.lightbend.akka"            %% "akka-persistence-r2dbc"            % V.akkaPersistenceR2dbc withSources()
+    val akkaPersistenceQuery       = "com.typesafe.akka"             %% "akka-persistence-query"            % V.akkaVersion withSources()
     val akkaProjectionR2dbc        = "com.lightbend.akka"            %% "akka-projection-r2dbc"             % V.akkaProjection withSources()
     val akkaProjectionCore         = "com.lightbend.akka"            %% "akka-projection-core"              % V.akkaProjection withSources()
     val akkaProjectionEventsourced = "com.lightbend.akka"            %% "akka-projection-eventsourced"      % V.akkaProjection withSources()
@@ -215,11 +217,13 @@ object Dependencies {
     Deps.akkaHttp,
     Deps.akkaClusterTyped,
     Deps.akkaClusterSharding,
+    Deps.akkaClusterTools,
     Deps.akkaClusterBootstrap,
     Deps.akkaClusterHttp,
     Deps.akkaPersistence,
     Deps.akkaPersistenceCassandra,
     Deps.akkaPersistenceR2dbc,
+    Deps.akkaPersistenceQuery,
     Deps.akkaProjectionR2dbc,
     Deps.akkaProjectionCore,
     Deps.akkaProjectionEventsourced,
