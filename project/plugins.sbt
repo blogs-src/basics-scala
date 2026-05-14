@@ -4,6 +4,7 @@ resolvers += Resolver.mavenLocal
 
 //resolvers += "Akka library repository".at("https://repo.akka.io/maven")
 //addSbtPlugin("com.lightbend.akka.grpc" % "sbt-akka-grpc" % "2.4.3")
+//addSbtPlugin("com.lightbend.akka.grpc" % "sbt-akka-grpc" % "2.5.10")
 
 addSbtPlugin(
   "org.typelevel" % "sbt-fs2-grpc" % Vp.sbt_fs2_grpc)
@@ -52,3 +53,11 @@ addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "2.0.19")
 
 addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.11.7")
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.3.1")
+
+// checksum error
+addSbtPlugin("org.typelevel" % "laika-sbt" % "1.3.2")
+
+//      "org.typelevel" %% "laika-core" % "1.3.2",
+//      "org.typelevel" %% "laika-io" % "1.3.2",
+//      "org.typelevel" %% "laika-pdf" % "1.3.2",
+

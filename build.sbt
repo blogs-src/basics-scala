@@ -38,6 +38,8 @@ lazy val commonSettings = Seq(
   semanticdbEnabled := true, // enable SemanticDB
   ThisBuild / evictionErrorLevel := Level.Info,
   dependencyOverrides ++= Seq(
+    "com.fasterxml.jackson.core"     % "jackson-databind"                  % "2.19.0",
+    "com.fasterxml.jackson.core"     % "jackson-core"                  % "2.19.0",
   ),
   scalacOptions ++=
     Seq(
@@ -48,7 +50,7 @@ lazy val commonSettings = Seq(
 //  ThisBuild / resolvers += "Akka library repository".at("https://repo.akka.io/maven"),
 //  ThisBuild / resolvers += "Confluent Maven Repository".at("https://packages.confluent.io/maven/"),
 
-  ThisBuild / resolvers += "local-reposilite".at("http://localhost:8080/releases"),
+//  ThisBuild / resolvers += "local-reposilite".at("http://localhost:8080/releases"),
 
 //  ThisBuild / resolvers += "default".at("http://localhost:8080/releases"),
 //  ThisBuild / resolvers += "public".at("http://localhost:8080/releases"),
@@ -142,7 +144,7 @@ lazy val grpcApi = project
     // scalapbProtobufDirectory := (Compile / baseDirectory).value / "src/main/scala/scalapb",
   )
 
-lazy val tapirVersion = "1.13.18"
+lazy val tapirVersion = "1.13.19"
 
 lazy val restApi = project
   .in(file("modules/rest-api"))
@@ -190,7 +192,7 @@ lazy val root = project
       "dev.optics" %% "monocle-state" % "3.3.0" withSources(),
       "dev.optics" %% "monocle-refined" % "3.3.0" withSources(),
       "dev.optics" %% "monocle-law" % "3.3.0" withSources(),
-      "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.18" withSources(),
+      "com.softwaremill.magnolia1_3" %% "magnolia" % "1.3.20" withSources(),
       "org.parboiled" %% "parboiled" % "2.5.1" withSources(),
       "org.typelevel" %% "squants" % "1.8.3" withSources(),
       "com.monovore" %% "decline" % "2.6.2" withSources(),
@@ -234,7 +236,46 @@ lazy val root = project
 //      "org.apache.avro" % "avro-tools" % "1.12.1",
 //      "org.business4s" %% "workflows4s-core" % "0.6.0" withSources(),
 
-      "com.typesafe" % "config" % "1.4.8",
+
+      "org.typelevel" %% "laika-core" % "1.3.2",
+      "org.typelevel" %% "laika-io" % "1.3.2",
+      "org.typelevel" %% "laika-pdf" % "1.3.2",
+
+      "org.typelevel" %% "squants" % "1.8.3",
+      "org.typelevel" %% "cats-tagless-core" % "0.16.5",
+
+
+//      "com.typesafe" % "config" % "1.4.8",
+
+//      "com.github.pureconfig" %% "pureconfig-core" % "0.17.10",
+//      "com.github.pureconfig" %% "pureconfig-generic-scala3" % "0.17.10",
+//      "com.github.pureconfig" %% "pureconfig-cats-effect" % "0.17.10",
+//      "com.github.pureconfig" %% "pureconfig-cats" % "0.17.10",
+//      "com.github.pureconfig" %% "pureconfig-generic-base" % "0.17.10",
+//      "com.github.pureconfig" %% "pureconfig-http4s" % "0.17.10",
+//      "com.github.pureconfig" %% "pureconfig-squants" % "0.17.10",
+//      "com.github.pureconfig" %% "pureconfig-yaml" % "0.17.10",
+
+      "com.beachape" %% "enumeratum" % "1.9.7",
+
+      "is.cir" %% "ciris" % "3.14.1",
+      "is.cir" %% "ciris-circe" % "3.14.1",
+      "is.cir" %% "ciris-circe-yaml" % "3.14.1",
+      "is.cir" %% "ciris-enumeratum" % "3.14.1",
+      "is.cir" %% "ciris-http4s" % "3.14.1",
+      "is.cir" %% "ciris-refined" % "3.14.1",
+      "is.cir" %% "ciris-squants" % "3.14.1",
+      "lt.dvim.ciris-hocon" %% "ciris-hocon" % "1.3.0",
+
+      "com.github.cb372" %% "cats-retry" % "4.0.0",
+      "com.github.cb372" %% "cats-retry-mtl" % "4.0.0",
+
+      "dev.profunktor" %% "http4s-jwt-auth" % "2.0.15",
+      "dev.profunktor" %% "redis4cats-effects" % "2.0.3",
+      "dev.profunktor" %% "redis4cats-log4cats" % "2.0.3",
+      "org.typelevel" %% "weaver-cats" % "0.12.0" % Test,
+      "org.typelevel" %% "weaver-discipline" % "0.12.0" % Test,
+      "org.typelevel" %% "weaver-scalacheck" % "0.12.0" % Test,
 
     ),
     Compile / run / javaOptions += "-Dcats.effect.trackFiberContext=true",

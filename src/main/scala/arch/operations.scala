@@ -225,7 +225,9 @@ object WalletEventSourcing {
                  cluster.manager ! Join(cluster.selfMember.address)
                  val management = AkkaManagement(typedActorSystem).start()
                  management.onComplete {
-                      case Failure(exception) => println(s"Akka Management failed to start: $exception")
+                      case Failure(exception) =>
+                        println(s"Akka Management failed to start: $exception")
+                        exception.printStackTrace()
                       case Success(value)     => println(s"Akka Management started at: $value")
                  }
               }

@@ -7,33 +7,45 @@ object Dependencies {
     val scalaLTSVersion      = "3.3.7"
     val distage              = "1.2.25"
 
-//    val scalaLatestVersion   = "3.8.3" // not working
-    val scalaLatestVersion   = "3.8.2" // working
+    val scalaLatestVersion   = "3.8.3" // not working
+//    val scalaLatestVersion   = "3.8.2" // working
 //  val scalaLatestVersion   = "3.8.1" // working
 //    val scalaLatestVersion   = "3.7.4" // working
     val logstage             = distage
     val scalatest            = "3.2.18"
-    val scalacheck           = "1.17.0"
+    val scalacheck           = "1.19.0"
 //    val catsCore             = "2.13.0"
     val zio                  = "2.1.25"
     val zioCats              = "23.1.0.13"
     val circe                = "0.14.15"
-    // val akkaVersion          = "2.9.3"
-    val akkaVersion          = "2.9.5" // (Aug 19 2024) from 2.9.6 a license key is required
-    // val akkaGrpc             = "2.4.4"
-    val akkaGrpc             = "2.4.3"
     val kafkaVersion         = "6.0.0"
-    val logbackVersion       = "1.5.23"
+//    val logbackVersion       = "1.5.23"
+    val logbackVersion       = "1.5.32"
+
+
     val jacksonVersion       = "2.11.4"
-    val jacksonScalaVersion  = "2.18.0"
+//    val jacksonVersion       = "3.1.3"
+    val jacksonScalaVersion  = "2.19.0"
+//    val jacksonScalaVersion  = "3.1.3"
+
+// val akkaVersion          = "2.9.3"
+
+    val akkaVersion          = "2.9.5" // (Aug 19 2024) from 2.9.6 a license key is required
+    val akkaGrpc             = "2.4.3"
     val akkaHttpVersion      = "10.6.3"
     val akkaManagement       = "1.5.3"
-
     val akkaPersistenceR2dbc = "1.2.5"
-    // val akkaPersistenceR2dbc = "1.2.4"
-
     val akkaCassandra        = "1.2.1"
     val akkaProjection       = "1.5.5"
+
+//  val akkaVersion          = "2.10.17"
+//  val akkaGrpc             = "2.5.10"
+//  val akkaHttpVersion      = "10.7.4"
+//  val akkaManagement       = "1.6.5"
+//  val akkaPersistenceR2dbc = "1.3.14"
+//  val akkaCassandra        = "1.3.5"
+//  val akkaProjection       = "1.6.23"
+
     val cats                 = "2.13.0"
     val catsEffect           = "3.7.0"
     val catsMTL              = "1.6.0"
@@ -41,9 +53,9 @@ object Dependencies {
     val munitCatsEffect      = "2.2.0"
     val fs2                  = "3.13.0"
     val iron                 = "3.3.1"
-    val grpc                 = "1.81.0"
+    val grpc                 = "1.80.0"
     val scalapbCommonProtos  = "2.9.6-0"
-    val avroCompiler         = "1.12.0"
+    val avroCompiler         = "1.12.1"
 //    val chimney              = "1.6.0"
     val chimney              = "1.10.0"
     val doobie               = "1.0.0-RC12"
@@ -51,18 +63,19 @@ object Dependencies {
     val postgress            = "42.7.11"
     val commonsCompress      = "1.28.0"
     // https://packages.confluent.io/maven/io/confluent/kafka-avro-serializer/
-    val kafkaAvroSerializer  = "8.0.0"
+//    val kafkaAvroSerializer  = "8.0.0"
+    val kafkaAvroSerializer  = "8.2.0"
     val smithytranslateTraitsVersion = "0.7.7"
     val http4s                       = "0.23.34"
     val http4s_blaze                 = "0.23.17"
     val scalapb                      = "0.11.20"
     val avroCompilerVersion          = "1.12.1"
-    val fs2Kafka                     = "3.9.1"
+    val fs2Kafka                     = "4.0.0"
 
     val helenus                      = "1.2.0"
   // https://typelevel.org/otel4s/instrumentation/logs.html
-    val otel4s                       = "0.16.0"
-    val opentelemetry                = "1.61.0"
+    val otel4s                       = "1.0.0"
+    val opentelemetry                = "1.62.0"
     val jwt_scala                    = "11.0.4"
     val jose_jwt                     = "10.9"
 
@@ -112,9 +125,12 @@ object Dependencies {
     val akkaStream                 = "com.typesafe.akka"             %% "akka-stream"                       % V.akkaVersion withSources()
     val akkaStreamKafka            = "com.typesafe.akka"             %% "akka-stream-kafka"                 % V.kafkaVersion withSources()
     val jacksonDatabind            = "com.fasterxml.jackson.core"     % "jackson-databind"                  % V.jacksonVersion withSources()
+//    val jacksonDatabind            = "tools.jackson.core"            % "jackson-databind"                  % V.jacksonVersion withSources()
     val jacksonScalaModule         = "com.fasterxml.jackson.module"  %% "jackson-module-scala"              % V.jacksonScalaVersion withSources()
+//    val jacksonScalaModule         = "tools.jackson.module"          %% "jackson-module-scala"              % V.jacksonScalaVersion withSources()
     val akkaSerializationJackson   = "com.typesafe.akka"             %% "akka-serialization-jackson"        % V.akkaVersion withSources()
     val akkaHttp                   = "com.typesafe.akka"             %% "akka-http"                         % V.akkaHttpVersion withSources()
+    val akkaHttpSprayJson          = "com.typesafe.akka"             %% "akka-http-spray-json"              % V.akkaHttpVersion withSources()
     val akkaClusterTyped           = "com.typesafe.akka"             %% "akka-cluster-typed"                % V.akkaVersion withSources()
     val akkaClusterSharding        = "com.typesafe.akka"             %% "akka-cluster-sharding-typed"       % V.akkaVersion withSources()
     val akkaClusterTools           = "com.typesafe.akka"             %% "akka-cluster-tools"                % V.akkaVersion withSources()
@@ -158,7 +174,8 @@ object Dependencies {
 
     val avro                       = "org.apache.avro"     % "avro"                           % V.avroCompilerVersion withSources()
 
-    val fs2Kafka                   = "com.github.fd4s"    %% "fs2-kafka"                      % V.fs2Kafka withSources()
+//    val fs2Kafka                   = "com.github.fd4s"    %% "fs2-kafka"                      % V.fs2Kafka withSources()
+    val fs2Kafka                   = "org.typelevel"      %% "fs2-kafka"                      % V.fs2Kafka withSources()
     val munit                      = "org.scalameta"      %% "munit"                          % V.munit % Test withSources()
     val catsMunit                  = "org.typelevel"      %% "munit-cats-effect"              % V.munitCatsEffect % Test withSources()
 
@@ -173,7 +190,7 @@ object Dependencies {
     val otel4s_otelj_ctx_storage   = "org.typelevel"      %% "otel4s-oteljava-context-storage"            % V.otel4s withSources()
     val opentelemetry_expr_otlp    = "io.opentelemetry"    % "opentelemetry-exporter-otlp"                % V.opentelemetry withSources() // % Runtime
     val opentelemetry_autoconf     = "io.opentelemetry"    % "opentelemetry-sdk-extension-autoconfigure"  % V.opentelemetry withSources() // % Runtime
-    val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.41.0" withSources() // % Runtime
+    val opentelemetry_semconv      = "io.opentelemetry.semconv" % "opentelemetry-semconv"                 % "1.41.1" withSources() // % Runtime
 
     val jwt_scala                  = "com.github.jwt-scala" %% "jwt-core"                                 % V.jwt_scala withSources()
     val jose_jwt                   = "com.nimbusds"          % "nimbus-jose-jwt"                          % V.jose_jwt withSources()
@@ -215,6 +232,7 @@ object Dependencies {
     Deps.jacksonScalaModule,
     Deps.akkaSerializationJackson,
     Deps.akkaHttp,
+    Deps.akkaHttpSprayJson,
     Deps.akkaClusterTyped,
     Deps.akkaClusterSharding,
     Deps.akkaClusterTools,
